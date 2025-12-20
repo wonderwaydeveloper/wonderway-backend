@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\NotificationSent;
 use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Support\Facades\Log;
@@ -11,15 +12,17 @@ class NotificationService
     private $emailService;
     private $pushService;
 
-    public function __construct(EmailService $emailService, PushNotificationService $pushService)
-    {
+    public function __construct(
+        EmailService $emailService = null,
+        PushNotificationService $pushService = null
+    ) {
         $this->emailService = $emailService;
         $this->pushService = $pushService;
     }
 
     public function notifyLike($post, $user)
     {
-        $this->createNotification($post->user, 'like', [
+        $notification = $this->createNotification($post->user, 'like', [
             'user_id' => $user->id,
             'user_name' => $user->name,
             'post_id' => $post->id,
@@ -31,7 +34,7 @@ class NotificationService
 
     public function notifyComment($post, $user)
     {
-        $this->createNotification($post->user, 'comment', [
+        $notification = $this->createNotification($post->user, 'comment', [
             'user_id' => $user->id,
             'user_name' => $user->name,
             'post_id' => $post->id,
@@ -43,7 +46,7 @@ class NotificationService
 
     public function notifyFollow($follower, $followee)
     {
-        $this->createNotification($followee, 'follow', [
+        $notification = $this->createNotification($followee, 'follow', [
             'user_id' => $follower->id,
             'user_name' => $follower->name,
         ]);
@@ -54,7 +57,7 @@ class NotificationService
 
     public function notifyMention($post, $mentionedUser, $mentioningUser)
     {
-        $this->createNotification($mentionedUser, 'mention', [
+        $notification = $this->createNotification($mentionedUser, 'mention', [
             'user_id' => $mentioningUser->id,
             'user_name' => $mentioningUser->name,
             'post_id' => $post->id,
@@ -66,7 +69,7 @@ class NotificationService
 
     public function notifyRepost($post, $user)
     {
-        $this->createNotification($post->user, 'repost', [
+        $notification = $this->createNotification($post->user, 'repost', [
             'user_id' => $user->id,
             'user_name' => $user->name,
             'post_id' => $post->id,
@@ -79,19 +82,31 @@ class NotificationService
     private function createNotification($user, $type, $data)
     {
         try {
-            Notification::create([
+            $notification = Notification::create([
                 'user_id' => $user->id,
                 'type' => $type,
+                'title' => $this->getNotificationTitle($type),
+                'message' => $this->getNotificationMessage($type),
                 'data' => $data,
                 'read_at' => null,
             ]);
+
+            // Broadcast real-time notification
+            broadcast(new NotificationSent($notification));
+
+            return $notification;
         } catch (\Exception $e) {
             Log::error('Notification creation failed', ['error' => $e->getMessage()]);
+            return null;
         }
     }
 
     private function sendPushNotification($user, $type, $userName)
     {
+        if (!$this->pushService) {
+            return;
+        }
+        
         try {
             // Check user preferences
             if (!$this->shouldSendPushNotification($user, $type)) {
@@ -117,6 +132,10 @@ class NotificationService
 
     private function sendEmailNotification($user, $type, $userName)
     {
+        if (!$this->emailService) {
+            return;
+        }
+        
         try {
             // Check user preferences
             if (!$this->shouldSendEmailNotification($user, $type)) {

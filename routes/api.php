@@ -111,6 +111,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/conversations', [App\Http\Controllers\Api\MessageController::class, 'conversations']);
         Route::get('/users/{user}', [App\Http\Controllers\Api\MessageController::class, 'messages']);
         Route::post('/users/{user}', [App\Http\Controllers\Api\MessageController::class, 'send'])->middleware('throttle:60,1');
+        Route::post('/users/{user}/typing', [App\Http\Controllers\Api\MessageController::class, 'typing']);
         Route::post('/{message}/read', [App\Http\Controllers\Api\MessageController::class, 'markAsRead']);
         Route::get('/unread-count', [App\Http\Controllers\Api\MessageController::class, 'unreadCount']);
     });
@@ -148,6 +149,14 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/parents', [App\Http\Controllers\Api\ParentalControlController::class, 'getParents']);
         Route::get('/child/{child}/activity', [App\Http\Controllers\Api\ParentalControlController::class, 'childActivity']);
         Route::post('/child/{child}/block-content', [App\Http\Controllers\Api\ParentalControlController::class, 'blockContent']);
+    });
+
+    // Performance & Monitoring
+    Route::prefix('performance')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\Api\PerformanceController::class, 'dashboard']);
+        Route::get('/timeline/optimized', [App\Http\Controllers\Api\PerformanceController::class, 'optimizeTimeline']);
+        Route::post('/cache/warmup', [App\Http\Controllers\Api\PerformanceController::class, 'warmupCache']);
+        Route::delete('/cache/clear', [App\Http\Controllers\Api\PerformanceController::class, 'clearCache']);
     });
 
     // Monitoring routes (add admin middleware in production)
@@ -201,5 +210,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/my-mentions', [App\Http\Controllers\Api\MentionController::class, 'getUserMentions']);
         Route::get('/{type}/{id}', [App\Http\Controllers\Api\MentionController::class, 'getMentions'])
             ->where('type', 'post|comment');
+    });
+
+    // Real-time Features
+    Route::prefix('realtime')->group(function () {
+        Route::post('/status', [App\Http\Controllers\Api\OnlineStatusController::class, 'updateStatus']);
+        Route::get('/online-users', [App\Http\Controllers\Api\OnlineStatusController::class, 'getOnlineUsers']);
+        Route::get('/timeline', [App\Http\Controllers\Api\TimelineController::class, 'liveTimeline']);
+        Route::get('/posts/{post}', [App\Http\Controllers\Api\TimelineController::class, 'getPostUpdates']);
     });
 });

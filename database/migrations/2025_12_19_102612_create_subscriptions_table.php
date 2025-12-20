@@ -19,6 +19,7 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->timestamp('starts_at');
             $table->timestamp('ends_at');
+            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
             
             $table->index(['user_id', 'status']);

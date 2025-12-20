@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\PostInteraction;
+use App\Events\PostPublished;
 use App\Http\Controllers\Controller;
 use App\Models\Post;
 use Illuminate\Http\Request;
@@ -128,6 +130,11 @@ class PostController extends Controller
             dispatch(new \App\Jobs\ProcessPostJob($post))->onQueue('high');
         }
         
+        // Broadcast new post if published
+        if (!$isDraft) {
+            broadcast(new PostPublished($post->load('user:id,name,username,avatar')));
+        }
+        
         $post->load('user:id,name,username,avatar', 'hashtags');
 
         return response()->json($post, 201);
@@ -172,6 +179,9 @@ class PostController extends Controller
             event(new \App\Events\PostLiked($post, $user));
         }
 
+        // Broadcast real-time interaction
+        broadcast(new PostInteraction($post, 'like', $user, ['liked' => $liked]));
+
         return response()->json(['liked' => $liked, 'likes_count' => $post->likes_count]);
     }
 
@@ -179,29 +189,14 @@ class PostController extends Controller
     {
         $user = auth()->user();
         
-        // Cache timeline for 5 minutes
-        $cacheKey = "timeline:user:{$user->id}:page:" . request('page', 1);
-        
-        $posts = cache()->remember($cacheKey, 300, function () use ($user) {
-            $followingIds = $user->following()->pluck('users.id')->toArray();
-            $followingIds[] = $user->id;
+        // Use optimized database service
+        $dbService = app(\App\Services\DatabaseOptimizationService::class);
+        $posts = $dbService->optimizeTimeline($user->id, 20);
 
-            return Post::published()
-                ->with([
-                    'user:id,name,username,avatar',
-                    'hashtags:id,name,slug',
-                    'poll.options',
-                    'likes' => function($query) use ($user) {
-                        $query->where('user_id', $user->id)->select('id', 'likeable_id', 'user_id');
-                    }
-                ])
-                ->withCount('likes', 'comments')
-                ->whereIn('user_id', $followingIds)
-                ->latest('published_at')
-                ->paginate(20);
-        });
-
-        return response()->json($posts);
+        return response()->json([
+            'data' => $posts,
+            'optimized' => true
+        ]);
     }
 
     public function drafts()

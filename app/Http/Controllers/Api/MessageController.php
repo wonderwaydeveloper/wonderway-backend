@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\MessageSent;
+use App\Events\UserTyping;
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\Message;
@@ -99,7 +101,31 @@ class MessageController extends Controller
 
         $message->load('sender:id,name,username,avatar');
 
+        // Broadcast real-time message
+        broadcast(new MessageSent($message));
+
         return response()->json($message, 201);
+    }
+
+    public function typing(Request $request, User $user)
+    {
+        $request->validate([
+            'is_typing' => 'required|boolean',
+        ]);
+
+        $currentUser = $request->user();
+        $conversation = Conversation::between($currentUser->id, $user->id);
+
+        if ($conversation) {
+            broadcast(new UserTyping(
+                $conversation->id,
+                $currentUser->id,
+                $currentUser->name,
+                $request->is_typing
+            ));
+        }
+
+        return response()->json(['status' => 'sent']);
     }
 
     public function markAsRead(Message $message)

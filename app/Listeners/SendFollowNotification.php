@@ -3,18 +3,16 @@
 namespace App\Listeners;
 
 use App\Events\UserFollowed;
-use App\Jobs\SendNotificationJob;
+use App\Services\NotificationService;
 
 class SendFollowNotification
 {
+    public function __construct(
+        private NotificationService $notificationService
+    ) {}
+
     public function handle(UserFollowed $event): void
     {
-        SendNotificationJob::dispatch(
-            $event->followedUser->id,
-            $event->follower->id,
-            'follow',
-            $event->follower->id,
-            get_class($event->follower)
-        );
+        $this->notificationService->notifyFollow($event->follower, $event->followedUser);
     }
 }

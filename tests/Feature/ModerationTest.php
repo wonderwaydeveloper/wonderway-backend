@@ -67,7 +67,7 @@ class ModerationTest extends TestCase
             ->postJson('/api/moderation/report', [
                 'reportable_type' => 'user',
                 'reportable_id' => $reportedUser->id,
-                'reason' => 'fake_news'
+                'reason' => 'harassment'
             ]);
 
         $response->assertStatus(200);
@@ -76,7 +76,7 @@ class ModerationTest extends TestCase
             'reporter_id' => $reporter->id,
             'reportable_type' => 'user',
             'reportable_id' => $reportedUser->id,
-            'reason' => 'fake_news'
+            'reason' => 'harassment'
         ]);
     }
 

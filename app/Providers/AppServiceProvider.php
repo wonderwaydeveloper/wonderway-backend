@@ -2,9 +2,11 @@
 
 namespace App\Providers;
 
+use App\Events\CommentCreated;
 use App\Events\PostLiked;
 use App\Events\PostReposted;
 use App\Events\UserFollowed;
+use App\Listeners\SendCommentNotification;
 use App\Listeners\SendFollowNotification;
 use App\Listeners\SendLikeNotification;
 use App\Listeners\SendRepostNotification;
@@ -18,7 +20,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(\App\Services\NotificationService::class, function ($app) {
+            // In testing, use null services to avoid dependencies
+            if ($app->environment('testing')) {
+                return new \App\Services\NotificationService(null, null);
+            }
+            
+            return new \App\Services\NotificationService(
+                $app->make(\App\Services\EmailService::class),
+                $app->make(\App\Services\PushNotificationService::class)
+            );
+        });
     }
 
     /**
@@ -29,6 +41,7 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(PostLiked::class, SendLikeNotification::class);
         Event::listen(UserFollowed::class, SendFollowNotification::class);
         Event::listen(PostReposted::class, SendRepostNotification::class);
+        Event::listen(CommentCreated::class, SendCommentNotification::class);
 
         \App\Models\Post::observe(\App\Observers\PostObserver::class);
     }

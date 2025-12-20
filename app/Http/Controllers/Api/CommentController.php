@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\CommentCreated;
+use App\Events\PostInteraction;
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Post;
@@ -34,23 +36,20 @@ class CommentController extends Controller
         // Process mentions in comment
         $mentionedUsers = $comment->processMentions($comment->content);
         
-        // Send mention notifications
-        foreach ($mentionedUsers as $mentionedUser) {
-            $mentionedUser->notify(new \App\Notifications\MentionNotification(auth()->user(), $comment));
-        }
+        // Fire comment created event
+        event(new CommentCreated($comment, $request->user()));
+
+        // Broadcast real-time interaction
+        broadcast(new PostInteraction($post, 'comment', $request->user(), [
+            'comment' => [
+                'id' => $comment->id,
+                'content' => $comment->content,
+                'user' => $comment->user->only(['id', 'name', 'username', 'avatar'])
+            ]
+        ]));
 
         $post->increment('comments_count');
         $comment->load('user:id,name,username,avatar');
-
-        if ($post->user_id !== $request->user()->id) {
-            \App\Models\Notification::create([
-                'user_id' => $post->user_id,
-                'from_user_id' => $request->user()->id,
-                'type' => 'comment',
-                'notifiable_id' => $comment->id,
-                'notifiable_type' => 'App\\Models\\Comment',
-            ]);
-        }
 
         return response()->json($comment, 201);
     }

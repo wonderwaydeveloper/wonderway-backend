@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('stories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->text('content')->nullable();
             $table->string('media_type')->default('image');
             $table->string('media_url');
             $table->text('caption')->nullable();

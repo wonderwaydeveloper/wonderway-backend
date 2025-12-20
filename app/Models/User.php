@@ -40,6 +40,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'two_factor_enabled',
         'two_factor_secret',
         'two_factor_backup_codes',
+        'is_online',
+        'last_seen_at',
     ];
 
     /**
@@ -71,6 +73,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_private' => 'boolean',
             'two_factor_enabled' => 'boolean',
             'notification_preferences' => 'array',
+            'is_online' => 'boolean',
+            'last_seen_at' => 'datetime',
         ];
     }
 

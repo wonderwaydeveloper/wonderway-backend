@@ -29,7 +29,7 @@ class FollowController extends Controller
             $currentUser->following()->attach($user->id);
             $following = true;
 
-            event(new \App\Events\UserFollowed($user, $currentUser));
+            event(new \App\Events\UserFollowed($currentUser, $user));
         }
 
         return response()->json([

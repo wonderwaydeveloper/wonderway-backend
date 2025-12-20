@@ -16,6 +16,10 @@ return new class extends Migration
             $table->string('video')->nullable();
             $table->string('gif_url')->nullable();
             $table->boolean('is_draft')->default(false);
+            $table->boolean('is_flagged')->default(false);
+            $table->boolean('is_hidden')->default(false);
+            $table->boolean('is_deleted')->default(false);
+            $table->timestamp('flagged_at')->nullable();
             $table->boolean('is_thread')->default(false);
             $table->string('reply_settings')->default('everyone');
             $table->unsignedInteger('likes_count')->default(0);
@@ -24,7 +28,11 @@ return new class extends Migration
             $table->unsignedInteger('views_count')->default(0);
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
+            
             $table->index(['user_id', 'published_at']);
+            $table->index(['created_at', 'published_at']);
+            $table->index(['likes_count', 'comments_count']);
+            $table->index(['is_flagged', 'is_hidden', 'is_deleted']);
         });
     }
 

@@ -14,6 +14,8 @@ return new class extends Migration
             $table->string('username')->unique();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
+            $table->string('subscription_plan')->default('basic');
+            $table->boolean('is_premium')->default(false);
             $table->string('password');
             $table->string('phone')->nullable()->unique();
             $table->timestamp('phone_verified_at')->nullable();
@@ -21,10 +23,13 @@ return new class extends Migration
             $table->text('bio')->nullable();
             $table->string('avatar')->nullable();
             $table->string('cover')->nullable();
+            $table->boolean('is_online')->default(false);
+            $table->timestamp('last_seen_at')->nullable();
             $table->boolean('is_private')->default(false);
             $table->boolean('is_child')->default(false);
             $table->boolean('two_factor_enabled')->default(false);
             $table->string('two_factor_secret')->nullable();
+            $table->text('two_factor_backup_codes')->nullable();
             $table->json('backup_codes')->nullable();
             $table->unsignedInteger('followers_count')->default(0);
             $table->unsignedInteger('following_count')->default(0);
@@ -35,10 +40,18 @@ return new class extends Migration
             $table->string('facebook_id')->nullable();
             $table->timestamp('last_active_at')->nullable();
             $table->rememberToken();
+            $table->json('notification_preferences')->nullable();
+            $table->boolean('is_flagged')->default(false);
+            $table->boolean('is_suspended')->default(false);
+            $table->boolean('is_banned')->default(false);
+            $table->timestamp('suspended_until')->nullable();
+            $table->timestamp('banned_at')->nullable();
             $table->timestamps();
             $table->index('email');
             $table->index('username');
             $table->index('phone');
+            $table->index(['is_online', 'last_seen_at']);
+            $table->index(['is_flagged', 'is_suspended', 'is_banned']);
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

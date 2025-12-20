@@ -18,6 +18,10 @@ return new class extends Migration
             $table->enum('reason', ['spam', 'harassment', 'hate_speech', 'violence', 'nudity', 'other']);
             $table->text('description')->nullable();
             $table->enum('status', ['pending', 'reviewed', 'resolved', 'rejected'])->default('pending');
+            $table->unsignedBigInteger('reviewed_by')->nullable();
+            $table->timestamp('reviewed_at')->nullable();
+            $table->string('action_taken')->nullable();
+            $table->text('admin_notes')->nullable();
             $table->timestamps();
         });
     }

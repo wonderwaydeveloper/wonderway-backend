@@ -15,7 +15,10 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->string('token');
-            $table->enum('platform', ['ios', 'android', 'web']);
+            $table->enum('device_type', ['ios', 'android', 'web']);
+            $table->string('device_name')->nullable();
+            $table->boolean('active')->default(true);
+            $table->timestamp('last_used_at')->nullable();
             $table->timestamps();
             
             $table->unique(['user_id', 'token']);

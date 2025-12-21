@@ -44,5 +44,8 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(CommentCreated::class, SendCommentNotification::class);
 
         \App\Models\Post::observe(\App\Observers\PostObserver::class);
+        
+        // Register Policies
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\Moment::class, \App\Policies\MomentPolicy::class);
     }
 }

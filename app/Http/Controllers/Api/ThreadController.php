@@ -8,6 +8,9 @@ use Illuminate\Http\Request;
 
 class ThreadController extends Controller
 {
+    /**
+     * Create a new thread
+     */
     public function create(Request $request)
     {
         $request->validate([
@@ -39,35 +42,114 @@ class ThreadController extends Controller
 
             $post = Post::create($data);
             $post->syncHashtags();
+            $mentionedUsers = $post->processMentions($post->content);
+            
+            foreach ($mentionedUsers as $mentionedUser) {
+                $mentionedUser->notify(new \App\Notifications\MentionNotification($user, $post));
+            }
 
             if (!$firstPost) {
                 $firstPost = $post;
             }
         }
 
-        $firstPost->load(['threadPosts.user:id,name,username,avatar', 'user:id,name,username,avatar']);
+        // Broadcast thread creation
+        broadcast(new \App\Events\PostPublished($firstPost->load('user:id,name,username,avatar')));
 
-        return response()->json($firstPost, 201);
-    }
-
-    public function show(Post $post)
-    {
-        if ($post->thread_id) {
-            $post = Post::find($post->thread_id);
-        }
-
-        $post->load([
+        $firstPost->load([
             'threadPosts.user:id,name,username,avatar',
             'threadPosts.hashtags',
             'user:id,name,username,avatar',
             'hashtags'
-        ])
-        ->loadCount('likes', 'comments');
+        ]);
 
-        $post->threadPosts->each(function ($threadPost) {
-            $threadPost->loadCount('likes', 'comments');
+        return response()->json($firstPost, 201);
+    }
+
+    /**
+     * Show thread with all posts
+     */
+    public function show(Post $post)
+    {
+        $threadRoot = $post->getThreadRoot();
+
+        $threadRoot->load([
+            'threadPosts.user:id,name,username,avatar',
+            'threadPosts.hashtags',
+            'threadPosts.quotedPost.user:id,name,username,avatar',
+            'user:id,name,username,avatar',
+            'hashtags',
+            'quotedPost.user:id,name,username,avatar'
+        ])->loadCount('likes', 'comments', 'quotes');
+
+        $threadRoot->threadPosts->each(function ($threadPost) {
+            $threadPost->loadCount('likes', 'comments', 'quotes');
         });
 
-        return response()->json($post);
+        return response()->json([
+            'thread_root' => $threadRoot,
+            'thread_posts' => $threadRoot->threadPosts,
+            'total_posts' => $threadRoot->threadPosts->count() + 1
+        ]);
+    }
+
+    /**
+     * Add post to existing thread
+     */
+    public function addToThread(Request $request, Post $post)
+    {
+        $request->validate([
+            'content' => 'required|string|max:280',
+            'image' => 'nullable|image|max:2048',
+        ]);
+
+        $threadRoot = $post->getThreadRoot();
+        $lastPosition = $threadRoot->threadPosts()->max('thread_position') ?? 0;
+
+        $data = [
+            'user_id' => $request->user()->id,
+            'content' => $request->content,
+            'thread_id' => $threadRoot->id,
+            'thread_position' => $lastPosition + 1,
+            'is_draft' => false,
+            'published_at' => now(),
+        ];
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('posts', 'public');
+        }
+
+        $newPost = Post::create($data);
+        $newPost->syncHashtags();
+        $mentionedUsers = $newPost->processMentions($newPost->content);
+        
+        foreach ($mentionedUsers as $mentionedUser) {
+            $mentionedUser->notify(new \App\Notifications\MentionNotification($request->user(), $newPost));
+        }
+
+        broadcast(new \App\Events\PostPublished($newPost->load('user:id,name,username,avatar')));
+
+        $newPost->load('user:id,name,username,avatar', 'hashtags');
+
+        return response()->json($newPost, 201);
+    }
+
+    /**
+     * Get thread statistics
+     */
+    public function stats(Post $post)
+    {
+        $threadRoot = $post->getThreadRoot();
+        
+        $stats = [
+            'total_posts' => $threadRoot->threadPosts()->count() + 1,
+            'total_likes' => $threadRoot->likes()->count() + $threadRoot->threadPosts()->withCount('likes')->get()->sum('likes_count'),
+            'total_comments' => $threadRoot->comments()->count() + $threadRoot->threadPosts()->withCount('comments')->get()->sum('comments_count'),
+            'participants' => $threadRoot->threadPosts()->distinct('user_id')->count('user_id') + 1,
+            'created_at' => $threadRoot->created_at,
+            'last_updated' => $threadRoot->threadPosts()->latest()->first()?->created_at ?? $threadRoot->created_at
+        ];
+
+        return response()->json($stats);
     }
 }

@@ -46,12 +46,15 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('posts', PostController::class)->except(['update'])->middleware('throttle:10,1');
     Route::post('/posts/{post}/like', [PostController::class, 'like'])->middleware('throttle:60,1');
+    Route::post('/posts/{post}/quote', [PostController::class, 'quote'])->middleware('throttle:10,1');
     Route::get('/timeline', [PostController::class, 'timeline']);
     Route::get('/drafts', [PostController::class, 'drafts']);
     Route::post('/posts/{post}/publish', [PostController::class, 'publish']);
 
     Route::post('/threads', [App\Http\Controllers\Api\ThreadController::class, 'create']);
     Route::get('/threads/{post}', [App\Http\Controllers\Api\ThreadController::class, 'show']);
+    Route::post('/threads/{post}/add', [App\Http\Controllers\Api\ThreadController::class, 'addToThread']);
+    Route::get('/threads/{post}/stats', [App\Http\Controllers\Api\ThreadController::class, 'stats']);
 
     Route::post('/scheduled-posts', [App\Http\Controllers\Api\ScheduledPostController::class, 'store']);
     Route::get('/scheduled-posts', [App\Http\Controllers\Api\ScheduledPostController::class, 'index']);
@@ -64,6 +67,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/posts/{post}/bookmark', [App\Http\Controllers\Api\BookmarkController::class, 'toggle']);
 
     Route::post('/posts/{post}/repost', [App\Http\Controllers\Api\RepostController::class, 'repost']);
+    Route::get('/posts/{post}/quotes', [PostController::class, 'quotes']);
     Route::get('/my-reposts', [App\Http\Controllers\Api\RepostController::class, 'myReposts']);
 
     Route::get('/stories', [App\Http\Controllers\Api\StoryController::class, 'index']);
@@ -91,7 +95,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/profile/privacy', [ProfileController::class, 'updatePrivacy']);
     Route::get('/search/users', [App\Http\Controllers\Api\SearchController::class, 'users']);
     Route::get('/search/posts', [App\Http\Controllers\Api\SearchController::class, 'posts']);
+    Route::get('/search/hashtags', [App\Http\Controllers\Api\SearchController::class, 'hashtags']);
     Route::get('/search/all', [App\Http\Controllers\Api\SearchController::class, 'all']);
+    Route::get('/search/advanced', [App\Http\Controllers\Api\SearchController::class, 'advanced']);
+    Route::get('/search/suggestions', [App\Http\Controllers\Api\SearchController::class, 'suggestions']);
     Route::get('/suggestions/users', [App\Http\Controllers\Api\SuggestionController::class, 'users']);
 
     Route::post('/devices/register', [App\Http\Controllers\Api\DeviceController::class, 'register']);
@@ -124,7 +131,46 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/hashtags/trending', [App\Http\Controllers\Api\HashtagController::class, 'trending']);
     Route::get('/hashtags/search', [App\Http\Controllers\Api\HashtagController::class, 'search']);
+    Route::get('/hashtags/suggestions', [App\Http\Controllers\Api\HashtagController::class, 'suggestions']);
     Route::get('/hashtags/{hashtag:slug}', [App\Http\Controllers\Api\HashtagController::class, 'show']);
+
+    // Advanced Trending Routes
+    Route::prefix('trending')->group(function () {
+        Route::get('/hashtags', [App\Http\Controllers\Api\TrendingController::class, 'hashtags']);
+        Route::get('/posts', [App\Http\Controllers\Api\TrendingController::class, 'posts']);
+        Route::get('/users', [App\Http\Controllers\Api\TrendingController::class, 'users']);
+        Route::get('/personalized', [App\Http\Controllers\Api\TrendingController::class, 'personalized']);
+        Route::get('/velocity/{type}/{id}', [App\Http\Controllers\Api\TrendingController::class, 'velocity']);
+        Route::get('/all', [App\Http\Controllers\Api\TrendingController::class, 'all']);
+        Route::get('/stats', [App\Http\Controllers\Api\TrendingController::class, 'stats']);
+        Route::post('/refresh', [App\Http\Controllers\Api\TrendingController::class, 'refresh']);
+    });
+
+    // Spaces (Audio Rooms) Routes
+    Route::prefix('spaces')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\SpaceController::class, 'index']);
+        Route::post('/', [App\Http\Controllers\Api\SpaceController::class, 'store']);
+        Route::get('/{space}', [App\Http\Controllers\Api\SpaceController::class, 'show']);
+        Route::post('/{space}/join', [App\Http\Controllers\Api\SpaceController::class, 'join']);
+        Route::post('/{space}/leave', [App\Http\Controllers\Api\SpaceController::class, 'leave']);
+        Route::put('/{space}/participants/{participant}/role', [App\Http\Controllers\Api\SpaceController::class, 'updateRole']);
+        Route::post('/{space}/end', [App\Http\Controllers\Api\SpaceController::class, 'end']);
+    });
+
+    // Lists Routes
+    Route::prefix('lists')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\ListController::class, 'index']);
+        Route::post('/', [App\Http\Controllers\Api\ListController::class, 'store']);
+        Route::get('/discover', [App\Http\Controllers\Api\ListController::class, 'discover']);
+        Route::get('/{list}', [App\Http\Controllers\Api\ListController::class, 'show']);
+        Route::put('/{list}', [App\Http\Controllers\Api\ListController::class, 'update']);
+        Route::delete('/{list}', [App\Http\Controllers\Api\ListController::class, 'destroy']);
+        Route::post('/{list}/members', [App\Http\Controllers\Api\ListController::class, 'addMember']);
+        Route::delete('/{list}/members/{user}', [App\Http\Controllers\Api\ListController::class, 'removeMember']);
+        Route::post('/{list}/subscribe', [App\Http\Controllers\Api\ListController::class, 'subscribe']);
+        Route::post('/{list}/unsubscribe', [App\Http\Controllers\Api\ListController::class, 'unsubscribe']);
+        Route::get('/{list}/posts', [App\Http\Controllers\Api\ListController::class, 'posts']);
+    });
 
     // Poll routes
     Route::post('/polls', [App\Http\Controllers\Api\PollController::class, 'store']);
@@ -218,5 +264,29 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/online-users', [App\Http\Controllers\Api\OnlineStatusController::class, 'getOnlineUsers']);
         Route::get('/timeline', [App\Http\Controllers\Api\TimelineController::class, 'liveTimeline']);
         Route::get('/posts/{post}', [App\Http\Controllers\Api\TimelineController::class, 'getPostUpdates']);
+    });
+
+    // Moments Routes
+    Route::prefix('moments')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\MomentController::class, 'index']);
+        Route::post('/', [App\Http\Controllers\Api\MomentController::class, 'store']);
+        Route::get('/featured', [App\Http\Controllers\Api\MomentController::class, 'featured']);
+        Route::get('/my-moments', [App\Http\Controllers\Api\MomentController::class, 'myMoments']);
+        Route::get('/{moment}', [App\Http\Controllers\Api\MomentController::class, 'show']);
+        Route::put('/{moment}', [App\Http\Controllers\Api\MomentController::class, 'update']);
+        Route::delete('/{moment}', [App\Http\Controllers\Api\MomentController::class, 'destroy']);
+        Route::post('/{moment}/posts', [App\Http\Controllers\Api\MomentController::class, 'addPost']);
+        Route::delete('/{moment}/posts/{post}', [App\Http\Controllers\Api\MomentController::class, 'removePost']);
+    });
+
+    // A/B Testing Routes (Admin only in production)
+    Route::prefix('ab-tests')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\ABTestController::class, 'index']);
+        Route::post('/', [App\Http\Controllers\Api\ABTestController::class, 'store']);
+        Route::get('/{id}', [App\Http\Controllers\Api\ABTestController::class, 'show']);
+        Route::post('/{id}/start', [App\Http\Controllers\Api\ABTestController::class, 'start']);
+        Route::post('/{id}/stop', [App\Http\Controllers\Api\ABTestController::class, 'stop']);
+        Route::post('/assign', [App\Http\Controllers\Api\ABTestController::class, 'assign']);
+        Route::post('/track', [App\Http\Controllers\Api\ABTestController::class, 'track']);
     });
 });

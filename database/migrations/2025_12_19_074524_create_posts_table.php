@@ -26,6 +26,9 @@ return new class extends Migration
             $table->unsignedInteger('comments_count')->default(0);
             $table->unsignedInteger('reposts_count')->default(0);
             $table->unsignedInteger('views_count')->default(0);
+            $table->foreignId('quoted_post_id')->nullable()->constrained('posts')->onDelete('cascade');
+            $table->foreignId('thread_id')->nullable()->constrained('posts')->onDelete('cascade');
+            $table->integer('thread_position')->nullable();
             $table->timestamp('published_at')->nullable();
             $table->timestamps();
             
@@ -33,6 +36,8 @@ return new class extends Migration
             $table->index(['created_at', 'published_at']);
             $table->index(['likes_count', 'comments_count']);
             $table->index(['is_flagged', 'is_hidden', 'is_deleted']);
+            $table->index('quoted_post_id');
+            $table->index(['thread_id', 'thread_position']);
         });
     }
 

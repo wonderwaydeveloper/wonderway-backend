@@ -31,9 +31,12 @@ class PostController extends Controller
                 ->with([
                     'user:id,name,username,avatar',
                     'hashtags:id,name,slug',
-                    'poll.options'
+                    'poll.options',
+                    'quotedPost.user:id,name,username,avatar',
+                    'threadPosts.user:id,name,username,avatar'
                 ])
-                ->withCount('likes', 'comments')
+                ->withCount('likes', 'comments', 'quotes')
+                ->whereNull('thread_id') // Only show main posts, not thread replies
                 ->latest('published_at')
                 ->paginate(config('pagination.posts', 20));
         });
@@ -72,12 +75,14 @@ class PostController extends Controller
             'image' => 'nullable|image|mimes:jpeg,jpg,png,gif,webp|max:2048',
             'gif_url' => 'nullable|url',
             'reply_settings' => 'nullable|in:everyone,following,mentioned,none',
+            'quoted_post_id' => 'nullable|exists:posts,id',
         ]);
 
         $data = [
             'user_id' => $request->user()->id,
             'content' => $request->content,
             'reply_settings' => $request->input('reply_settings', 'everyone'),
+            'quoted_post_id' => $request->quoted_post_id,
         ];
 
         if ($request->hasFile('image')) {
@@ -142,8 +147,23 @@ class PostController extends Controller
 
     public function show(Post $post)
     {
-        $post->load(['user:id,name,username,avatar', 'comments.user:id,name,username,avatar', 'hashtags'])
-            ->loadCount('likes', 'comments');
+        $post->load([
+            'user:id,name,username,avatar',
+            'comments.user:id,name,username,avatar',
+            'hashtags',
+            'quotedPost.user:id,name,username,avatar',
+            'threadPosts.user:id,name,username,avatar'
+        ])->loadCount('likes', 'comments', 'quotes');
+
+        // If this is a thread post, also load thread info
+        if ($post->isThread()) {
+            $post->thread_info = [
+                'is_thread' => true,
+                'is_main_thread' => $post->isMainThread(),
+                'thread_root_id' => $post->getThreadRoot()->id,
+                'total_posts' => $post->isMainThread() ? $post->threadPosts()->count() + 1 : $post->getThreadRoot()->threadPosts()->count() + 1
+            ];
+        }
 
         return response()->json($post);
     }
@@ -220,5 +240,44 @@ class PostController extends Controller
         ]);
 
         return response()->json(['message' => 'پست منتشر شد', 'post' => $post]);
+    }
+
+    public function quote(Request $request, Post $post)
+    {
+        $request->validate([
+            'content' => 'required|string|max:280',
+        ]);
+
+        $quotePost = Post::create([
+            'user_id' => $request->user()->id,
+            'content' => $request->content,
+            'quoted_post_id' => $post->id,
+            'is_draft' => false,
+            'published_at' => now(),
+        ]);
+
+        $quotePost->syncHashtags();
+        $mentionedUsers = $quotePost->processMentions($quotePost->content);
+        
+        foreach ($mentionedUsers as $mentionedUser) {
+            $mentionedUser->notify(new \App\Notifications\MentionNotification(auth()->user(), $quotePost));
+        }
+
+        broadcast(new PostPublished($quotePost->load('user:id,name,username,avatar', 'quotedPost.user:id,name,username,avatar')));
+
+        $quotePost->load('user:id,name,username,avatar', 'quotedPost.user:id,name,username,avatar', 'hashtags');
+
+        return response()->json($quotePost, 201);
+    }
+
+    public function quotes(Post $post)
+    {
+        $quotes = $post->quotes()
+            ->with('user:id,name,username,avatar')
+            ->withCount('likes', 'comments')
+            ->latest()
+            ->paginate(20);
+
+        return response()->json($quotes);
     }
 }

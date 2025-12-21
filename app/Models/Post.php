@@ -25,6 +25,7 @@ class Post extends Model
         'reply_settings',
         'thread_id',
         'thread_position',
+        'quoted_post_id',
     ];
 
     protected $casts = [
@@ -108,16 +109,58 @@ class Post extends Model
         return $this->poll()->exists();
     }
 
+    public function quotedPost()
+    {
+        return $this->belongsTo(Post::class, 'quoted_post_id');
+    }
+
+    public function quotes()
+    {
+        return $this->hasMany(Post::class, 'quoted_post_id');
+    }
+
+    public function isQuote(): bool
+    {
+        return !is_null($this->quoted_post_id);
+    }
+
+    public function isThread(): bool
+    {
+        return !is_null($this->thread_id) || $this->threadPosts()->exists();
+    }
+
+    public function isMainThread(): bool
+    {
+        return is_null($this->thread_id) && $this->threadPosts()->exists();
+    }
+
+    public function getThreadRoot()
+    {
+        return $this->thread_id ? Post::find($this->thread_id) : $this;
+    }
+
+    public function getFullThread()
+    {
+        $root = $this->getThreadRoot();
+        return $root->load('threadPosts');
+    }
+
     public function toSearchableArray()
     {
         return [
             'id' => $this->id,
             'content' => $this->content,
+            'user_id' => $this->user_id,
             'user_name' => $this->user->name,
             'user_username' => $this->user->username,
             'hashtags' => $this->hashtags->pluck('name')->toArray(),
             'created_at' => $this->created_at->timestamp,
             'is_draft' => $this->is_draft,
+            'likes_count' => $this->likes_count,
+            'comments_count' => $this->comments_count,
+            'has_media' => !empty($this->image) || !empty($this->gif_url),
+            'thread_id' => $this->thread_id,
+            'quoted_post_id' => $this->quoted_post_id,
         ];
     }
 

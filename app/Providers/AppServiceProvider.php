@@ -47,5 +47,6 @@ class AppServiceProvider extends ServiceProvider
         
         // Register Policies
         \Illuminate\Support\Facades\Gate::policy(\App\Models\Moment::class, \App\Policies\MomentPolicy::class);
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\LiveStream::class, \App\Policies\LiveStreamPolicy::class);
     }
 }

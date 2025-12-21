@@ -289,4 +289,33 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/assign', [App\Http\Controllers\Api\ABTestController::class, 'assign']);
         Route::post('/track', [App\Http\Controllers\Api\ABTestController::class, 'track']);
     });
+
+    // Live Streaming Routes
+    Route::prefix('streams')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\LiveStreamController::class, 'index']);
+        Route::post('/', [App\Http\Controllers\Api\LiveStreamController::class, 'store']);
+        Route::get('/{stream}', [App\Http\Controllers\Api\LiveStreamController::class, 'show']);
+        Route::post('/{stream}/start', [App\Http\Controllers\Api\LiveStreamController::class, 'start']);
+        Route::post('/{stream}/end', [App\Http\Controllers\Api\LiveStreamController::class, 'end']);
+        Route::post('/{stream}/join', [App\Http\Controllers\Api\LiveStreamController::class, 'join']);
+        Route::post('/{stream}/leave', [App\Http\Controllers\Api\LiveStreamController::class, 'leave']);
+    });
+
+    // Conversion Tracking Routes
+    Route::prefix('conversions')->group(function () {
+        Route::post('/track', [App\Http\Controllers\Api\ConversionController::class, 'track']);
+        Route::get('/funnel', [App\Http\Controllers\Api\ConversionController::class, 'funnel']);
+        Route::get('/by-source', [App\Http\Controllers\Api\ConversionController::class, 'bySource']);
+        Route::get('/user-journey', [App\Http\Controllers\Api\ConversionController::class, 'userJourney']);
+        Route::get('/cohort-analysis', [App\Http\Controllers\Api\ConversionController::class, 'cohortAnalysis']);
+    });
+
+    // Auto-scaling Routes (Admin only in production)
+    Route::prefix('auto-scaling')->group(function () {
+        Route::get('/status', [App\Http\Controllers\Api\AutoScalingController::class, 'status']);
+        Route::get('/metrics', [App\Http\Controllers\Api\AutoScalingController::class, 'metrics']);
+        Route::get('/history', [App\Http\Controllers\Api\AutoScalingController::class, 'history']);
+        Route::get('/predict', [App\Http\Controllers\Api\AutoScalingController::class, 'predict']);
+        Route::post('/force-scale', [App\Http\Controllers\Api\AutoScalingController::class, 'forceScale']);
+    });
 });

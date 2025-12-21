@@ -280,4 +280,38 @@ class PostController extends Controller
 
         return response()->json($quotes);
     }
+
+    public function update(\App\Http\Requests\UpdatePostRequest $request, Post $post)
+    {
+        try {
+            $post->editPost(
+                $request->validated()['content'],
+                $request->validated()['edit_reason'] ?? null
+            );
+
+            $post->syncHashtags();
+            $post->load('user:id,name,username,avatar', 'hashtags', 'edits');
+
+            return response()->json([
+                'message' => 'Post updated successfully',
+                'post' => $post
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function editHistory(Post $post)
+    {
+        $this->authorize('view', $post);
+        
+        $edits = $post->edits()->with('post:id,content')->get();
+        
+        return response()->json([
+            'current_content' => $post->content,
+            'edit_history' => $edits
+        ]);
+    }
 }

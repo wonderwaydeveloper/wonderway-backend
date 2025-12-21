@@ -220,4 +220,9 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(ConversionMetric::class);
     }
+
+    public function creatorFunds()
+    {
+        return $this->hasMany(\App\Monetization\Models\CreatorFund::class, 'creator_id');
+    }
 }

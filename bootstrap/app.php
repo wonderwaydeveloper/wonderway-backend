@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\AdvancedRateLimit::class,
             \App\Http\Middleware\AdvancedInputValidation::class,
             \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\PerformanceMonitoring::class,
         ]);
         
         $middleware->alias([

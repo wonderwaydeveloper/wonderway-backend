@@ -1,88 +1,231 @@
 version: '3.8'
 
 services:
+  # Laravel Application
   app:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: wonderway_app
+    container_name: wonderway-app
     restart: unless-stopped
-    working_dir: /app
-    environment:
-      - DB_HOST=db
-      - REDIS_HOST=redis
-      - MEILISEARCH_HOST=meilisearch
+    working_dir: /var/www/html
     volumes:
-      - ./:/app
-    ports:
-      - "8000:8000"
+      - ./:/var/www/html
+      - ./docker/php.ini:/usr/local/etc/php/php.ini
+    networks:
+      - wonderway-network
     depends_on:
-      - db
+      - mysql
       - redis
-      - meilisearch
-    networks:
-      - wonderway
-
-  db:
-    image: mysql:8.0
-    container_name: wonderway_db
-    restart: unless-stopped
     environment:
-      MYSQL_DATABASE: wonderway
-      MYSQL_ROOT_PASSWORD: root_password
-      MYSQL_PASSWORD: db_password
-      MYSQL_USER: wonderway_user
-    volumes:
-      - dbdata:/var/lib/mysql
-    ports:
-      - "3306:3306"
-    networks:
-      - wonderway
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_HOST=mysql
+      - DB_DATABASE=wonderway
+      - DB_USERNAME=wonderway
+      - DB_PASSWORD=secure_password
+      - REDIS_HOST=redis
+      - CACHE_DRIVER=redis
+      - SESSION_DRIVER=redis
+      - QUEUE_CONNECTION=redis
 
-  redis:
-    image: redis:7-alpine
-    container_name: wonderway_redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redisdata:/data
-    networks:
-      - wonderway
-
-  meilisearch:
-    image: getmeili/meilisearch:latest
-    container_name: wonderway_meilisearch
-    restart: unless-stopped
-    environment:
-      MEILI_MASTER_KEY: meilisearch_key
-    ports:
-      - "7700:7700"
-    volumes:
-      - meilisearchdata:/meili_data
-    networks:
-      - wonderway
-
+  # Nginx Web Server
   nginx:
     image: nginx:alpine
-    container_name: wonderway_nginx
+    container_name: wonderway-nginx
     restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./:/app
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./:/var/www/html
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/ssl:/etc/nginx/ssl
+    networks:
+      - wonderway-network
     depends_on:
       - app
-    networks:
-      - wonderway
 
-volumes:
-  dbdata:
-  redisdata:
-  meilisearchdata:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: wonderway-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: wonderway
+      MYSQL_USER: wonderway
+      MYSQL_PASSWORD: secure_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql.cnf:/etc/mysql/conf.d/mysql.cnf
+    networks:
+      - wonderway-network
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Redis Cache & Sessions
+  redis:
+    image: redis:7-alpine
+    container_name: wonderway-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+      - ./docker/redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - wonderway-network
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+  # Queue Worker
+  queue:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wonderway-queue
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - wonderway-network
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      - APP_ENV=production
+      - DB_HOST=mysql
+      - REDIS_HOST=redis
+    command: php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+
+  # Scheduler
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wonderway-scheduler
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - wonderway-network
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      - APP_ENV=production
+      - DB_HOST=mysql
+      - REDIS_HOST=redis
+    command: >
+      sh -c "while true; do
+        php artisan schedule:run --verbose --no-interaction &
+        sleep 60
+      done"
+
+  # WebSocket Server (Laravel Reverb)
+  websocket:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wonderway-websocket
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+    networks:
+      - wonderway-network
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      - APP_ENV=production
+      - DB_HOST=mysql
+      - REDIS_HOST=redis
+    command: php artisan reverb:start --host=0.0.0.0 --port=8080
+
+  # RTMP Streaming Server
+  streaming:
+    image: tiangolo/nginx-rtmp
+    container_name: wonderway-streaming
+    restart: unless-stopped
+    ports:
+      - "1935:1935"  # RTMP
+      - "8081:80"     # HLS
+    volumes:
+      - ./docker/nginx-rtmp.conf:/etc/nginx/nginx.conf
+      - streaming_data:/var/recordings
+    networks:
+      - wonderway-network
+
+  # Elasticsearch (for search)
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: wonderway-elasticsearch
+    restart: unless-stopped
+    ports:
+      - "9200:9200"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - wonderway-network
+
+  # Monitoring with Prometheus
+  prometheus:
+    image: prom/prometheus
+    container_name: wonderway-prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - wonderway-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+
+  # Grafana Dashboard
+  grafana:
+    image: grafana/grafana
+    container_name: wonderway-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin123
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./docker/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./docker/grafana/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - wonderway-network
 
 networks:
-  wonderway:
+  wonderway-network:
     driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local
+  redis_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  streaming_data:
+    driver: local

@@ -62,6 +62,9 @@ class Space extends Model
 
     public function canJoin($userId)
     {
+        // Check if space is live
+        if (!$this->isLive()) return false;
+        
         // Always allow joining public spaces
         if ($this->privacy === 'public') return true;
         

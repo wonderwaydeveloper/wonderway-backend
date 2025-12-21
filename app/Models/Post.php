@@ -26,6 +26,8 @@ class Post extends Model
         'thread_id',
         'thread_position',
         'quoted_post_id',
+        'last_edited_at',
+        'is_edited',
     ];
 
     protected $casts = [
@@ -33,6 +35,8 @@ class Post extends Model
         'comments_count' => 'integer',
         'is_draft' => 'boolean',
         'published_at' => 'datetime',
+        'last_edited_at' => 'datetime',
+        'is_edited' => 'boolean',
     ];
 
     public function user()
@@ -167,5 +171,35 @@ class Post extends Model
     public function shouldBeSearchable()
     {
         return !$this->is_draft;
+    }
+
+    public function edits()
+    {
+        return $this->hasMany(PostEdit::class)->orderBy('edited_at', 'desc');
+    }
+
+    public function canBeEdited(): bool
+    {
+        return $this->created_at->diffInMinutes(now()) <= 30;
+    }
+
+    public function editPost(string $newContent, ?string $reason = null): void
+    {
+        if (!$this->canBeEdited()) {
+            throw new \Exception('Post cannot be edited after 30 minutes');
+        }
+
+        $this->edits()->create([
+            'original_content' => $this->content,
+            'new_content' => $newContent,
+            'edit_reason' => $reason,
+            'edited_at' => now(),
+        ]);
+
+        $this->update([
+            'content' => $newContent,
+            'is_edited' => true,
+            'last_edited_at' => now(),
+        ]);
     }
 }

@@ -13,6 +13,16 @@ Route::middleware(['spam.detection'])->group(function () {
     Route::get('/posts', [PostController::class, 'index']);
 });
 
+// Health Check endpoint
+Route::get('/health', function () {
+    return response()->json([
+        'status' => 'healthy',
+        'timestamp' => now()->toISOString(),
+        'version' => '3.0.0',
+        'environment' => app()->environment()
+    ]);
+});
+
 // Test route for security testing
 Route::post('/test', function () {
     return response()->json(['message' => 'Test endpoint']);
@@ -59,7 +69,9 @@ Route::middleware(['auth:sanctum', 'spam.detection'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::get('/me', [AuthController::class, 'me']);
 
-    Route::apiResource('posts', PostController::class)->except(['update'])->middleware(['advanced.rate.limit:posts,10,1']);
+    Route::apiResource('posts', PostController::class)->middleware(['advanced.rate.limit:posts,10,1']);
+    Route::put('/posts/{post}', [PostController::class, 'update'])->middleware(['advanced.rate.limit:posts,5,1']);
+    Route::get('/posts/{post}/edit-history', [PostController::class, 'editHistory']);
     Route::post('/posts/{post}/like', [PostController::class, 'like'])->middleware(['advanced.rate.limit:likes,60,1']);
     Route::post('/posts/{post}/quote', [PostController::class, 'quote'])->middleware(['advanced.rate.limit:posts,10,1']);
     Route::get('/timeline', [PostController::class, 'timeline']);
@@ -220,6 +232,15 @@ Route::middleware(['auth:sanctum', 'spam.detection'])->group(function () {
         Route::delete('/cache/clear', [App\Http\Controllers\Api\PerformanceController::class, 'clearCache']);
     });
 
+    // Performance Dashboard Routes
+    Route::prefix('performance-dashboard')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\Api\PerformanceDashboardController::class, 'dashboard']);
+        Route::get('/metrics', [App\Http\Controllers\Api\PerformanceDashboardController::class, 'metrics']);
+        Route::get('/api-stats', [App\Http\Controllers\Api\PerformanceDashboardController::class, 'apiStats']);
+        Route::get('/real-time', [App\Http\Controllers\Api\PerformanceDashboardController::class, 'realTimeMetrics']);
+        Route::get('/health', [App\Http\Controllers\Api\PerformanceDashboardController::class, 'systemHealth']);
+    });
+
     // Monitoring routes (add admin middleware in production)
     Route::prefix('monitoring')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\Api\MonitoringController::class, 'dashboard']);
@@ -333,6 +354,35 @@ Route::middleware(['auth:sanctum', 'spam.detection'])->group(function () {
         Route::get('/predict', [App\Http\Controllers\Api\AutoScalingController::class, 'predict']);
         Route::post('/force-scale', [App\Http\Controllers\Api\AutoScalingController::class, 'forceScale']);
     });
+    // Monetization Routes
+    Route::prefix('monetization')->group(function () {
+        // Advertisement Routes
+        Route::prefix('ads')->group(function () {
+            Route::post('/', [App\Monetization\Controllers\AdvertisementController::class, 'create']);
+            Route::get('/targeted', [App\Monetization\Controllers\AdvertisementController::class, 'getTargetedAds']);
+            Route::post('/{adId}/click', [App\Monetization\Controllers\AdvertisementController::class, 'recordClick']);
+            Route::get('/analytics', [App\Monetization\Controllers\AdvertisementController::class, 'getAnalytics']);
+            Route::post('/{adId}/pause', [App\Monetization\Controllers\AdvertisementController::class, 'pause']);
+            Route::post('/{adId}/resume', [App\Monetization\Controllers\AdvertisementController::class, 'resume']);
+        });
+
+        // Creator Fund Routes
+        Route::prefix('creator-fund')->group(function () {
+            Route::get('/analytics', [App\Monetization\Controllers\CreatorFundController::class, 'getAnalytics']);
+            Route::post('/calculate-earnings', [App\Monetization\Controllers\CreatorFundController::class, 'calculateEarnings']);
+            Route::get('/earnings-history', [App\Monetization\Controllers\CreatorFundController::class, 'getEarningsHistory']);
+            Route::post('/request-payout', [App\Monetization\Controllers\CreatorFundController::class, 'requestPayout']);
+        });
+
+        // Premium Subscription Routes
+        Route::prefix('premium')->group(function () {
+            Route::get('/plans', [App\Monetization\Controllers\PremiumController::class, 'getPlans']);
+            Route::post('/subscribe', [App\Monetization\Controllers\PremiumController::class, 'subscribe']);
+            Route::post('/cancel', [App\Monetization\Controllers\PremiumController::class, 'cancel']);
+            Route::get('/status', [App\Monetization\Controllers\PremiumController::class, 'getStatus']);
+        });
+    });
+
     // Include streaming routes with security middleware
     require __DIR__.'/streaming.php';
 });

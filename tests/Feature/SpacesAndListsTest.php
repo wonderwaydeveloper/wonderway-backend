@@ -43,10 +43,8 @@ class SpacesAndListsTest extends TestCase
         $host = User::factory()->create();
         $user = User::factory()->create();
         
-        $space = Space::factory()->create([
-            'host_id' => $host->id,
-            'privacy' => 'public',
-            'status' => 'live'
+        $space = Space::factory()->live()->public()->create([
+            'host_id' => $host->id
         ]);
 
         $response = $this->actingAs($user, 'sanctum')

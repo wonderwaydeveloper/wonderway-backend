@@ -138,8 +138,8 @@ class SpamDetectionService
         $score = 0;
         $reasons = [];
 
-        // New user check
-        if ($user->created_at->diffInDays(now()) < 1) {
+        // New user check - handle null created_at
+        if ($user->created_at && $user->created_at->diffInDays(now()) < 1) {
             $score += 20;
             $reasons[] = "Very new user account";
         }
@@ -153,7 +153,7 @@ class SpamDetectionService
         }
 
         // Check if user is already flagged
-        if ($user->is_flagged) {
+        if (isset($user->is_flagged) && $user->is_flagged) {
             $score += 30;
             $reasons[] = "User is flagged";
         }

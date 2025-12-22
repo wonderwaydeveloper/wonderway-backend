@@ -41,7 +41,7 @@ class Post extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class)->select(['id', 'name', 'username', 'avatar']);
     }
 
     public function comments()
@@ -62,6 +62,41 @@ class Post extends Model
     public function hashtags()
     {
         return $this->belongsToMany(Hashtag::class)->withTimestamps();
+    }
+
+    // Query Scopes
+    public function scopeWithUser($query)
+    {
+        return $query->with(['user:id,name,username,avatar']);
+    }
+
+    public function scopeWithCounts($query)
+    {
+        return $query->withCount(['likes', 'comments', 'quotes']);
+    }
+
+    public function scopeWithBasicRelations($query)
+    {
+        return $query->with([
+            'user:id,name,username,avatar',
+            'quotedPost:id,content,user_id',
+            'quotedPost.user:id,name,username'
+        ]);
+    }
+
+    public function scopeForTimeline($query)
+    {
+        return $query->published()
+            ->withBasicRelations()
+            ->withCounts()
+            ->latest();
+    }
+
+    public function scopeByHashtag($query, $hashtag)
+    {
+        return $query->whereHas('hashtags', function ($q) use ($hashtag) {
+            $q->where('name', $hashtag);
+        });
     }
 
     public function syncHashtags()

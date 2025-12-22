@@ -96,18 +96,42 @@ class User extends Authenticatable implements MustVerifyEmail
     public function followers()
     {
         return $this->belongsToMany(User::class, 'follows', 'following_id', 'follower_id')
-            ->withTimestamps();
+            ->withTimestamps()
+            ->select(['users.id', 'name', 'username', 'avatar']);
     }
 
     public function following()
     {
         return $this->belongsToMany(User::class, 'follows', 'follower_id', 'following_id')
-            ->withTimestamps();
+            ->withTimestamps()
+            ->select(['users.id', 'name', 'username', 'avatar']);
     }
 
     public function isFollowing($userId)
     {
         return $this->following()->where('following_id', $userId)->exists();
+    }
+
+    // Query Scopes
+    public function scopeActive($query)
+    {
+        return $query->whereNotNull('email_verified_at');
+    }
+
+    public function scopeWithCounts($query)
+    {
+        return $query->withCount(['posts', 'followers', 'following']);
+    }
+
+    public function scopePopular($query)
+    {
+        return $query->withCount('followers')
+            ->orderBy('followers_count', 'desc');
+    }
+
+    public function scopeRecent($query)
+    {
+        return $query->orderBy('created_at', 'desc');
     }
 
     public function parentalControl()

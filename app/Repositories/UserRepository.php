@@ -85,6 +85,7 @@ class UserRepository implements UserRepositoryInterface
                 $q->where('name', 'like', "%{$query}%")
                   ->orWhere('username', 'like', "%{$query}%");
             })
+            ->active()
             ->select(['id', 'name', 'username', 'avatar', 'bio', 'is_private'])
             ->limit($limit)
             ->get();

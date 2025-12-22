@@ -70,17 +70,12 @@ class PostRepository implements PostRepositoryInterface
         return Cache::remember($cacheKey, 300, function () use ($userId, $limit) {
             $followingIds = $this->getFollowingIds($userId);
             
-            return Post::with([
-                'user:id,name,username,avatar',
-                'hashtags:id,name,slug'
-            ])
-            ->select(['id', 'user_id', 'content', 'created_at', 'likes_count', 'comments_count', 'image', 'gif_url'])
-            ->whereIn('user_id', $followingIds)
-            ->whereNull('thread_id')
-            ->published()
-            ->latest('published_at')
-            ->limit($limit)
-            ->get();
+            return Post::forTimeline()
+                ->select(['id', 'user_id', 'content', 'created_at', 'likes_count', 'comments_count', 'image', 'gif_url', 'quoted_post_id'])
+                ->whereIn('user_id', $followingIds)
+                ->whereNull('thread_id')
+                ->limit($limit)
+                ->get();
         });
     }
     

@@ -3,17 +3,17 @@
 namespace App\Monetization\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Monetization\Services\AdvertisementService;
 use App\Monetization\Models\Advertisement;
-use App\Models\User;
-use Illuminate\Http\Request;
+use App\Monetization\Services\AdvertisementService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class AdvertisementController extends Controller
 {
     public function __construct(
         private AdvertisementService $advertisementService
-    ) {}
+    ) {
+    }
 
     public function create(Request $request): JsonResponse
     {
@@ -32,12 +32,12 @@ class AdvertisementController extends Controller
 
         $ad = $this->advertisementService->createAdvertisement([
             'advertiser_id' => auth()->id(),
-            ...$validated
+            ...$validated,
         ]);
 
         return response()->json([
             'message' => 'Advertisement created successfully',
-            'data' => $ad
+            'data' => $ad,
         ], 201);
     }
 
@@ -62,15 +62,15 @@ class AdvertisementController extends Controller
                     'media_url' => $ad->media_url,
                     'advertiser' => $ad->advertiser->name,
                 ];
-            })
+            }),
         ]);
     }
 
     public function recordClick(Request $request, int $adId): JsonResponse
     {
         $ad = Advertisement::find($adId);
-        
-        if (!$ad) {
+
+        if (! $ad) {
             return response()->json(['message' => 'Advertisement not found'], 404);
         }
 
@@ -91,7 +91,7 @@ class AdvertisementController extends Controller
         $success = $this->advertisementService->pauseAdvertisement($adId);
 
         return response()->json([
-            'message' => $success ? 'Advertisement paused' : 'Failed to pause advertisement'
+            'message' => $success ? 'Advertisement paused' : 'Failed to pause advertisement',
         ]);
     }
 
@@ -100,7 +100,7 @@ class AdvertisementController extends Controller
         $success = $this->advertisementService->resumeAdvertisement($adId);
 
         return response()->json([
-            'message' => $success ? 'Advertisement resumed' : 'Failed to resume advertisement'
+            'message' => $success ? 'Advertisement resumed' : 'Failed to resume advertisement',
         ]);
     }
 }

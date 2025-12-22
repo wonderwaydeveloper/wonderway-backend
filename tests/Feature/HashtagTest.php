@@ -22,7 +22,7 @@ class HashtagTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                '*' => ['id', 'name', 'slug', 'posts_count']
+                '*' => ['id', 'name', 'slug', 'posts_count'],
             ]);
     }
 
@@ -40,9 +40,9 @@ class HashtagTest extends TestCase
                 'hashtag' => ['id', 'name', 'slug'],
                 'posts' => [
                     'data' => [
-                        '*' => ['id', 'content']
-                    ]
-                ]
+                        '*' => ['id', 'content'],
+                    ],
+                ],
             ]);
     }
 
@@ -56,33 +56,33 @@ class HashtagTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                '*' => ['id', 'name', 'slug']
+                '*' => ['id', 'name', 'slug'],
             ]);
     }
 
     public function test_trending_hashtags_are_ordered_by_posts_count(): void
     {
         $user = User::factory()->create();
-        
+
         // Create hashtags with posts in last 24 hours to meet trending criteria
         $hashtag1 = Hashtag::factory()->create(['name' => 'less', 'posts_count' => 10]);
         $hashtag2 = Hashtag::factory()->create(['name' => 'more', 'posts_count' => 100]);
-        
+
         // Create recent posts for trending algorithm
         for ($i = 0; $i < 6; $i++) {
             $post = Post::factory()->create([
                 'user_id' => $user->id,
                 'published_at' => now()->subHours(rand(1, 23)),
-                'likes_count' => rand(5, 20)
+                'likes_count' => rand(5, 20),
             ]);
             $hashtag2->posts()->attach($post->id);
         }
-        
+
         for ($i = 0; $i < 3; $i++) {
             $post = Post::factory()->create([
                 'user_id' => $user->id,
                 'published_at' => now()->subHours(rand(1, 23)),
-                'likes_count' => rand(1, 5)
+                'likes_count' => rand(1, 5),
             ]);
             $hashtag1->posts()->attach($post->id);
         }
@@ -92,9 +92,9 @@ class HashtagTest extends TestCase
 
         $response->assertStatus(200);
         $data = $response->json();
-        
+
         // Check if we have trending data and verify order
-        if (!empty($data) && count($data) >= 2) {
+        if (! empty($data) && count($data) >= 2) {
             // The hashtag with more engagement should be first
             $this->assertTrue(true); // Test passes if we get trending data
         } else {

@@ -3,16 +3,16 @@
 namespace App\Services;
 
 use App\Models\ConversionMetric;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class ConversionTrackingService
 {
     public function track($eventType, $userId = null, $eventData = [], $conversionValue = 0)
     {
         $conversionType = $this->determineConversionType($eventType);
-        
+
         ConversionMetric::create([
             'user_id' => $userId,
             'event_type' => $eventType,
@@ -32,7 +32,7 @@ class ConversionTrackingService
     public function getConversionFunnel($dateRange = 7)
     {
         $startDate = Carbon::now()->subDays($dateRange);
-        
+
         return Cache::remember("conversion_funnel_{$dateRange}", 3600, function () use ($startDate) {
             return [
                 'visitors' => $this->getUniqueVisitors($startDate),
@@ -47,7 +47,7 @@ class ConversionTrackingService
     public function getConversionsBySource($dateRange = 30)
     {
         $startDate = Carbon::now()->subDays($dateRange);
-        
+
         return ConversionMetric::select('source', DB::raw('COUNT(*) as conversions'), DB::raw('SUM(conversion_value) as total_value'))
             ->where('created_at', '>=', $startDate)
             ->groupBy('source')
@@ -73,19 +73,19 @@ class ConversionTrackingService
     public function getCohortAnalysis($period = 'weekly')
     {
         $cacheKey = "cohort_analysis_{$period}";
-        
+
         return Cache::remember($cacheKey, 7200, function () use ($period) {
             // Simplified cohort analysis
             $cohorts = [];
             $startDate = Carbon::now()->subMonths(6);
-            
+
             while ($startDate->lt(Carbon::now())) {
                 $endDate = $period === 'weekly' ? $startDate->copy()->addWeek() : $startDate->copy()->addMonth();
-                
+
                 $newUsers = ConversionMetric::where('event_type', 'signup')
                     ->whereBetween('created_at', [$startDate, $endDate])
                     ->count();
-                
+
                 $retainedUsers = ConversionMetric::where('event_type', 'login')
                     ->whereBetween('created_at', [$endDate, $endDate->copy()->addWeek()])
                     ->whereIn('user_id', function ($query) use ($startDate, $endDate) {
@@ -96,17 +96,17 @@ class ConversionTrackingService
                     })
                     ->distinct('user_id')
                     ->count();
-                
+
                 $cohorts[] = [
                     'period' => $startDate->format('Y-m-d'),
                     'new_users' => $newUsers,
                     'retained_users' => $retainedUsers,
                     'retention_rate' => $newUsers > 0 ? round(($retainedUsers / $newUsers) * 100, 2) : 0,
                 ];
-                
+
                 $startDate = $endDate;
             }
-            
+
             return $cohorts;
         });
     }

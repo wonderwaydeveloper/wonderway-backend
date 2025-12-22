@@ -39,7 +39,7 @@ class WebApplicationFirewall
         ];
 
         $input = json_encode($request->all());
-        
+
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $input)) {
                 return true;
@@ -53,7 +53,7 @@ class WebApplicationFirewall
     {
         $patterns = [
             '/<script[^>]*>/i',
-            '/<\/script>/i', 
+            '/<\/script>/i',
             '/<iframe[^>]*>/i',
             '/<object[^>]*>/i',
             '/<embed[^>]*>/i',
@@ -67,7 +67,7 @@ class WebApplicationFirewall
         ];
 
         $input = json_encode($request->all());
-        
+
         foreach ($patterns as $pattern) {
             if (preg_match($pattern, $input)) {
                 return true;

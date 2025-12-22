@@ -4,8 +4,8 @@ namespace Tests\Feature;
 
 use App\Events\PostInteraction;
 use App\Events\PostPublished;
-use App\Models\User;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Event;
 use Tests\TestCase;
@@ -17,12 +17,12 @@ class RealTimeTimelineTest extends TestCase
     public function test_post_published_event_broadcasts()
     {
         Event::fake([PostPublished::class]);
-        
+
         $user = User::factory()->create();
 
         $this->actingAs($user, 'sanctum')
             ->postJson('/api/posts', [
-                'content' => 'New real-time post!'
+                'content' => 'New real-time post!',
             ])
             ->assertStatus(201);
 
@@ -32,7 +32,7 @@ class RealTimeTimelineTest extends TestCase
     public function test_post_interaction_broadcasts_on_like()
     {
         Event::fake([PostInteraction::class]);
-        
+
         $postOwner = User::factory()->create();
         $liker = User::factory()->create();
         $post = Post::factory()->create(['user_id' => $postOwner->id]);
@@ -49,14 +49,14 @@ class RealTimeTimelineTest extends TestCase
     public function test_post_interaction_broadcasts_on_comment()
     {
         Event::fake([PostInteraction::class]);
-        
+
         $postOwner = User::factory()->create();
         $commenter = User::factory()->create();
         $post = Post::factory()->create(['user_id' => $postOwner->id]);
 
         $this->actingAs($commenter, 'sanctum')
             ->postJson("/api/posts/{$post->id}/comments", [
-                'content' => 'Great post!'
+                'content' => 'Great post!',
             ])
             ->assertStatus(201);
 
@@ -69,12 +69,12 @@ class RealTimeTimelineTest extends TestCase
     {
         $user = User::factory()->create();
         $followedUser = User::factory()->create();
-        
+
         $user->following()->attach($followedUser->id);
-        
+
         $post = Post::factory()->create([
             'user_id' => $followedUser->id,
-            'published_at' => now()
+            'published_at' => now(),
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -107,10 +107,10 @@ class RealTimeTimelineTest extends TestCase
         $post->load('user');
 
         $event = new PostPublished($post);
-        
+
         $channels = $event->broadcastOn();
         $this->assertCount(2, $channels);
-        
+
         $broadcastData = $event->broadcastWith();
         $this->assertArrayHasKey('id', $broadcastData);
         $this->assertArrayHasKey('content', $broadcastData);
@@ -124,10 +124,10 @@ class RealTimeTimelineTest extends TestCase
         $post = Post::factory()->create();
 
         $event = new PostInteraction($post, 'like', $user, ['liked' => true]);
-        
+
         $channels = $event->broadcastOn();
         $this->assertCount(1, $channels);
-        
+
         $broadcastData = $event->broadcastWith();
         $this->assertArrayHasKey('post_id', $broadcastData);
         $this->assertArrayHasKey('type', $broadcastData);

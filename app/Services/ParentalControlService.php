@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\ParentalControl;
-use App\Models\User;
 
 class ParentalControlService
 {
@@ -24,20 +23,21 @@ class ParentalControlService
     {
         $control = ParentalControl::findOrFail($controlId);
         $control->update($settings);
+
         return $control;
     }
 
     public function canViewContent($userId, $postId)
     {
         $control = ParentalControl::where('child_id', $userId)->first();
-        
-        if (!$control || !$control->content_filter_enabled) {
+
+        if (! $control || ! $control->content_filter_enabled) {
             return true;
         }
 
         $post = \App\Models\Post::find($postId);
-        
-        if (!$post) {
+
+        if (! $post) {
             return false;
         }
 
@@ -52,7 +52,7 @@ class ParentalControlService
         }
 
         // Check allowed only mode
-        if ($control->allowed_only_mode && !in_array($post->user_id, $control->allowed_users)) {
+        if ($control->allowed_only_mode && ! in_array($post->user_id, $control->allowed_users)) {
             return false;
         }
 
@@ -63,8 +63,8 @@ class ParentalControlService
     {
         $control = ParentalControl::findOrFail($controlId);
         $keywords = $control->blocked_keywords ?? [];
-        
-        if (!in_array($keyword, $keywords)) {
+
+        if (! in_array($keyword, $keywords)) {
             $keywords[] = $keyword;
             $control->update(['blocked_keywords' => $keywords]);
         }
@@ -76,8 +76,8 @@ class ParentalControlService
     {
         $control = ParentalControl::findOrFail($controlId);
         $blockedUsers = $control->blocked_users ?? [];
-        
-        if (!in_array($userId, $blockedUsers)) {
+
+        if (! in_array($userId, $blockedUsers)) {
             $blockedUsers[] = $userId;
             $control->update(['blocked_users' => $blockedUsers]);
         }
@@ -113,7 +113,7 @@ class ParentalControlService
 
     private function containsBlockedKeywords($content, $keywords)
     {
-        if (!$keywords) {
+        if (! $keywords) {
             return false;
         }
 

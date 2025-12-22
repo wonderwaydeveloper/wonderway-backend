@@ -12,7 +12,7 @@ class CheckReplyPermission
         $post = $request->route('post');
         $user = $request->user();
 
-        if (!$post) {
+        if (! $post) {
             return $next($request);
         }
 
@@ -25,21 +25,23 @@ class CheckReplyPermission
                 ], 403);
 
             case 'following':
-                if (!$post->user->followers()->where('follower_id', $user->id)->exists()) {
+                if (! $post->user->followers()->where('follower_id', $user->id)->exists()) {
                     return response()->json([
                         'message' => 'Only followers can reply to this post',
                     ], 403);
                 }
+
                 break;
 
             case 'mentioned':
                 $content = $post->content;
                 $username = $user->username;
-                if (!str_contains($content, '@' . $username)) {
+                if (! str_contains($content, '@' . $username)) {
                     return response()->json([
                         'message' => 'Only mentioned users can reply to this post',
                     ], 403);
                 }
+
                 break;
 
             case 'everyone':

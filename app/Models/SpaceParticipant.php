@@ -16,13 +16,13 @@ class SpaceParticipant extends Model
         'status',
         'is_muted',
         'joined_at',
-        'left_at'
+        'left_at',
     ];
 
     protected $casts = [
         'joined_at' => 'datetime',
         'left_at' => 'datetime',
-        'is_muted' => 'boolean'
+        'is_muted' => 'boolean',
     ];
 
     public function space()
@@ -42,6 +42,6 @@ class SpaceParticipant extends Model
 
     public function canSpeak()
     {
-        return $this->isSpeaker() && !$this->is_muted;
+        return $this->isSpeaker() && ! $this->is_muted;
     }
 }

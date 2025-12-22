@@ -13,8 +13,9 @@ class DatabaseService
             return DB::connection('mysql');
         } catch (\Exception $e) {
             Log::warning('Read replica connection failed, falling back to write', [
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return DB::connection('mysql');
         }
     }
@@ -32,11 +33,11 @@ class DatabaseService
 
             // Get master status
             $masterStatus = $writeConnection->select('SHOW MASTER STATUS')[0] ?? null;
-            
+
             // Get slave status
             $slaveStatus = $readConnection->select('SHOW SLAVE STATUS')[0] ?? null;
 
-            if (!$masterStatus || !$slaveStatus) {
+            if (! $masterStatus || ! $slaveStatus) {
                 return ['status' => 'unknown', 'lag' => null];
             }
 
@@ -52,6 +53,7 @@ class DatabaseService
             ];
         } catch (\Exception $e) {
             Log::error('Failed to check replication lag', ['error' => $e->getMessage()]);
+
             return ['status' => 'error', 'lag' => null, 'error' => $e->getMessage()];
         }
     }

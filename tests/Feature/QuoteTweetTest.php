@@ -23,7 +23,7 @@ class QuoteTweetTest extends TestCase
 
         $response->assertStatus(201)
             ->assertJsonStructure([
-                'id', 'content', 'quoted_post_id', 'user', 'quoted_post'
+                'id', 'content', 'quoted_post_id', 'user', 'quoted_post',
             ]);
 
         $this->assertDatabaseHas('posts', [
@@ -49,15 +49,15 @@ class QuoteTweetTest extends TestCase
     {
         $user = User::factory()->create();
         $originalPost = Post::factory()->create(['published_at' => now()]);
-        
+
         // Create quote tweets
         Post::factory()->create([
             'quoted_post_id' => $originalPost->id,
-            'published_at' => now()
+            'published_at' => now(),
         ]);
         Post::factory()->create([
             'quoted_post_id' => $originalPost->id,
-            'published_at' => now()
+            'published_at' => now(),
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -71,10 +71,10 @@ class QuoteTweetTest extends TestCase
     {
         $user = User::factory()->create();
         $originalPost = Post::factory()->create(['published_at' => now()]);
-        
+
         Post::factory()->create([
             'quoted_post_id' => $originalPost->id,
-            'published_at' => now()
+            'published_at' => now(),
         ]);
 
         $response = $this->actingAs($user, 'sanctum')

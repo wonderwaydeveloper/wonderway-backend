@@ -14,7 +14,7 @@ class MomentController extends Controller
         $moments = Moment::public()
             ->with(['user:id,name,username,avatar'])
             ->withCount('posts')
-            ->when($request->featured, fn($q) => $q->featured())
+            ->when($request->featured, fn ($q) => $q->featured())
             ->latest()
             ->paginate(20);
 
@@ -29,7 +29,7 @@ class MomentController extends Controller
             'privacy' => 'required|in:public,private',
             'cover_image' => 'nullable|image|max:2048',
             'post_ids' => 'required|array|min:2|max:20',
-            'post_ids.*' => 'exists:posts,id'
+            'post_ids.*' => 'exists:posts,id',
         ]);
 
         $moment = Moment::create([
@@ -37,7 +37,7 @@ class MomentController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'privacy' => $request->privacy,
-            'cover_image' => $request->hasFile('cover_image') 
+            'cover_image' => $request->hasFile('cover_image')
                 ? $request->file('cover_image')->store('moments', 'public')
                 : null,
         ]);
@@ -61,7 +61,7 @@ class MomentController extends Controller
         $moment->load([
             'user:id,name,username,avatar',
             'posts.user:id,name,username,avatar',
-            'posts.hashtags:id,name,slug'
+            'posts.hashtags:id,name,slug',
         ])->loadCount('posts');
 
         $moment->incrementViews();
@@ -99,7 +99,7 @@ class MomentController extends Controller
 
         $request->validate([
             'post_id' => 'required|exists:posts,id',
-            'position' => 'nullable|integer|min:0'
+            'position' => 'nullable|integer|min:0',
         ]);
 
         if ($moment->posts()->where('post_id', $request->post_id)->exists()) {
@@ -115,7 +115,7 @@ class MomentController extends Controller
     {
         $this->authorize('update', $moment);
 
-        if (!$moment->posts()->where('post_id', $post->id)->exists()) {
+        if (! $moment->posts()->where('post_id', $post->id)->exists()) {
             return response()->json(['message' => 'Post not in moment'], 404);
         }
 

@@ -12,12 +12,12 @@ class StreamViewer extends Model
         'user_id',
         'joined_at',
         'left_at',
-        'duration'
+        'duration',
     ];
 
     protected $casts = [
         'joined_at' => 'datetime',
-        'left_at' => 'datetime'
+        'left_at' => 'datetime',
     ];
 
     public function stream(): BelongsTo

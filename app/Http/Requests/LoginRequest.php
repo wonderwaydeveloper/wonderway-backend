@@ -45,14 +45,14 @@ class LoginRequest extends FormRequest
         // Normalize email
         if ($this->has('email')) {
             $this->merge([
-                'email' => strtolower(trim($this->input('email')))
+                'email' => strtolower(trim($this->input('email'))),
             ]);
         }
 
         // Clean 2FA code
         if ($this->has('two_factor_code')) {
             $this->merge([
-                'two_factor_code' => preg_replace('/\D/', '', $this->input('two_factor_code'))
+                'two_factor_code' => preg_replace('/\D/', '', $this->input('two_factor_code')),
             ]);
         }
     }

@@ -35,7 +35,7 @@ class CommentController extends Controller
 
         // Process mentions in comment
         $mentionedUsers = $comment->processMentions($comment->content);
-        
+
         // Fire comment created event
         event(new CommentCreated($comment, $request->user()));
 
@@ -44,8 +44,8 @@ class CommentController extends Controller
             'comment' => [
                 'id' => $comment->id,
                 'content' => $comment->content,
-                'user' => $comment->user->only(['id', 'name', 'username', 'avatar'])
-            ]
+                'user' => $comment->user->only(['id', 'name', 'username', 'avatar']),
+            ],
         ]));
 
         $post->increment('comments_count');

@@ -7,8 +7,8 @@ use App\Jobs\GenerateThumbnailJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class MediaController extends Controller
 {
@@ -17,7 +17,7 @@ class MediaController extends Controller
         $request->validate([
             'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:10240', // 10MB max
             'type' => 'in:post,avatar,cover,story',
-            'quality' => 'integer|min:60|max:100'
+            'quality' => 'integer|min:60|max:100',
         ]);
 
         try {
@@ -31,7 +31,7 @@ class MediaController extends Controller
 
             // Process and optimize image
             $processedImage = $this->processImage($file, $type, $quality);
-            
+
             // Store original and processed versions
             $fullPath = "{$path}/{$filename}";
             Storage::disk('public')->put($fullPath, $processedImage);
@@ -51,14 +51,14 @@ class MediaController extends Controller
                     'filename' => $filename,
                     'size' => strlen($processedImage),
                     'type' => $type,
-                    'dimensions' => $this->getImageDimensions($processedImage)
-                ]
+                    'dimensions' => $this->getImageDimensions($processedImage),
+                ],
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'خطا در آپلود فایل',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -67,7 +67,7 @@ class MediaController extends Controller
     {
         $request->validate([
             'video' => 'required|mimes:mp4,mov,avi,wmv|max:51200', // 50MB max
-            'type' => 'in:post,story'
+            'type' => 'in:post,story',
         ]);
 
         try {
@@ -93,14 +93,14 @@ class MediaController extends Controller
                     'filename' => $filename,
                     'size' => $size,
                     'type' => $type,
-                    'duration' => null // Could be extracted using FFmpeg
-                ]
+                    'duration' => null, // Could be extracted using FFmpeg
+                ],
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'خطا در آپلود ویدیو',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -132,14 +132,14 @@ class MediaController extends Controller
                     'path' => $fullPath,
                     'filename' => $filename,
                     'size' => $size,
-                    'original_name' => $file->getClientOriginalName()
-                ]
+                    'original_name' => $file->getClientOriginalName(),
+                ],
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'خطا در آپلود سند',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -147,15 +147,15 @@ class MediaController extends Controller
     public function deleteMedia(Request $request)
     {
         $request->validate([
-            'path' => 'required|string'
+            'path' => 'required|string',
         ]);
 
         try {
             $path = $request->input('path');
-            
+
             if (Storage::disk('public')->exists($path)) {
                 Storage::disk('public')->delete($path);
-                
+
                 // Also delete thumbnail if exists
                 $thumbnailPath = str_replace('/media/', '/media/thumbnails/', $path);
                 if (Storage::disk('public')->exists($thumbnailPath)) {
@@ -170,7 +170,7 @@ class MediaController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'خطا در حذف فایل',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -189,12 +189,15 @@ class MediaController extends Controller
         switch ($type) {
             case 'avatar':
                 $image->cover(400, 400);
+
                 break;
             case 'cover':
                 $image->cover(1200, 400);
+
                 break;
             case 'story':
                 $image->cover(1080, 1920);
+
                 break;
             case 'post':
             default:
@@ -202,6 +205,7 @@ class MediaController extends Controller
                 if ($image->width() > 1200) {
                     $image->scale(width: 1200);
                 }
+
                 break;
         }
 
@@ -213,9 +217,10 @@ class MediaController extends Controller
     {
         $manager = new ImageManager(new Driver());
         $image = $manager->read($imageData);
+
         return [
             'width' => $image->width(),
-            'height' => $image->height()
+            'height' => $image->height(),
         ];
     }
 }

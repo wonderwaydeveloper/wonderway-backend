@@ -8,10 +8,12 @@ use Illuminate\Queue\SerializesModels;
 
 class UserFollowed
 {
-    use Dispatchable, SerializesModels;
+    use Dispatchable;
+    use SerializesModels;
 
     public function __construct(
         public User $followedUser,
         public User $follower
-    ) {}
+    ) {
+    }
 }

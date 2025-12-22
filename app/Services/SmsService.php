@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use Twilio\Rest\Client;
 use Illuminate\Support\Facades\Log;
+use Twilio\Rest\Client;
 
 class SmsService
 {
@@ -26,14 +26,16 @@ class SmsService
                 $phoneNumber,
                 [
                     'from' => $this->fromNumber,
-                    'body' => "کد تایید WonderWay: $otp"
+                    'body' => "کد تایید WonderWay: $otp",
                 ]
             );
 
             Log::info('SMS sent', ['phone' => $phoneNumber, 'sid' => $message->sid]);
+
             return true;
         } catch (\Exception $e) {
             Log::error('SMS failed', ['phone' => $phoneNumber, 'error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -50,12 +52,14 @@ class SmsService
                 $phoneNumber,
                 [
                     'from' => $this->fromNumber,
-                    'body' => $message
+                    'body' => $message,
                 ]
             );
+
             return true;
         } catch (\Exception $e) {
             Log::error('SMS notification failed', ['error' => $e->getMessage()]);
+
             return false;
         }
     }

@@ -2,15 +2,15 @@
 
 namespace App\Monetization\Models;
 
+use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\User;
 
 class Advertisement extends Model
 {
     use HasFactory;
-    
+
     protected $fillable = [
         'advertiser_id',
         'title',
@@ -53,8 +53,8 @@ class Advertisement extends Model
 
     public function isActive(): bool
     {
-        return $this->status === 'active' 
-            && $this->start_date <= now() 
+        return $this->status === 'active'
+            && $this->start_date <= now()
             && $this->end_date >= now()
             && $this->total_spent < $this->budget;
     }
@@ -66,15 +66,15 @@ class Advertisement extends Model
 
     public function getCTR(): float
     {
-        return $this->impressions_count > 0 
-            ? ($this->clicks_count / $this->impressions_count) * 100 
+        return $this->impressions_count > 0
+            ? ($this->clicks_count / $this->impressions_count) * 100
             : 0;
     }
 
     public function getConversionRate(): float
     {
-        return $this->clicks_count > 0 
-            ? ($this->conversions_count / $this->clicks_count) * 100 
+        return $this->clicks_count > 0
+            ? ($this->conversions_count / $this->clicks_count) * 100
             : 0;
     }
 }

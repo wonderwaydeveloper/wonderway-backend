@@ -13,7 +13,7 @@ class CommentResource extends JsonResource
             'id' => $this->id,
             'content' => $this->content,
             'likes_count' => $this->likes_count,
-            'is_liked' => $this->when(auth()->check(), fn() => $this->isLikedBy(auth()->id())),
+            'is_liked' => $this->when(auth()->check(), fn () => $this->isLikedBy(auth()->id())),
             'user' => new UserResource($this->whenLoaded('user')),
             'created_at' => $this->created_at,
         ];

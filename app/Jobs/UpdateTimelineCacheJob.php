@@ -12,11 +12,15 @@ use Illuminate\Support\Facades\Cache;
 
 class UpdateTimelineCacheJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     public function __construct(
         private Post $post
-    ) {}
+    ) {
+    }
 
     public function handle(): void
     {
@@ -25,7 +29,7 @@ class UpdateTimelineCacheJob implements ShouldQueue
 
         // Clear followers' timeline caches
         $followerIds = $this->post->user->followers()->pluck('users.id');
-        
+
         foreach ($followerIds as $followerId) {
             $this->clearUserTimeline($followerId);
         }

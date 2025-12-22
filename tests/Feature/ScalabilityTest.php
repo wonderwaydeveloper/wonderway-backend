@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Models\User;
-use App\Services\QueueManager;
 use App\Services\DatabaseService;
+use App\Services\QueueManager;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -37,7 +37,7 @@ class ScalabilityTest extends TestCase
     public function test_database_service_provides_connections()
     {
         $databaseService = app(DatabaseService::class);
-        
+
         $readConnection = $databaseService->getReadConnection();
         $writeConnection = $databaseService->getWriteConnection();
 

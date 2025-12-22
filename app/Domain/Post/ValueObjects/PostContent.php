@@ -49,12 +49,14 @@ class PostContent
     public function getHashtags(): array
     {
         preg_match_all('/#(\w+)/', $this->value, $matches);
+
         return $matches[1] ?? [];
     }
 
     public function getMentions(): array
     {
         preg_match_all('/@(\w+)/', $this->value, $matches);
+
         return $matches[1] ?? [];
     }
 }

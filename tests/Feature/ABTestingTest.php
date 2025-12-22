@@ -28,15 +28,15 @@ class ABTestingTest extends TestCase
             'description' => 'Testing button colors',
             'variants' => [
                 'A' => ['button_color' => 'blue'],
-                'B' => ['button_color' => 'red']
+                'B' => ['button_color' => 'red'],
             ],
-            'traffic_percentage' => 50
+            'traffic_percentage' => 50,
         ]);
 
         $response->assertStatus(201);
         $this->assertDatabaseHas('ab_tests', [
             'name' => 'button_color_test',
-            'status' => 'draft'
+            'status' => 'draft',
         ]);
     }
 
@@ -58,7 +58,7 @@ class ABTestingTest extends TestCase
         $this->assertDatabaseHas('ab_test_participants', [
             'ab_test_id' => $testId,
             'user_id' => $user->id,
-            'variant' => $variant
+            'variant' => $variant,
         ]);
     }
 
@@ -88,7 +88,7 @@ class ABTestingTest extends TestCase
             'ab_test_id' => $testId,
             'user_id' => $user->id,
             'variant' => $variant,
-            'event_type' => 'conversion'
+            'event_type' => 'conversion',
         ]);
     }
 
@@ -106,7 +106,7 @@ class ABTestingTest extends TestCase
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)->postJson('/api/ab-tests/assign', [
-            'test_name' => 'api_test'
+            'test_name' => 'api_test',
         ]);
 
         $response->assertStatus(200);
@@ -131,7 +131,7 @@ class ABTestingTest extends TestCase
         $response = $this->actingAs($user)->postJson('/api/ab-tests/track', [
             'test_name' => 'track_test',
             'event_type' => 'click',
-            'event_data' => ['button' => 'signup']
+            'event_data' => ['button' => 'signup'],
         ]);
 
         $response->assertStatus(200);
@@ -169,7 +169,7 @@ class ABTestingTest extends TestCase
             'test',
             'participants',
             'results',
-            'conversion_rates'
+            'conversion_rates',
         ]);
     }
 

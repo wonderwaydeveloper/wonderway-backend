@@ -23,7 +23,7 @@ class GroupChatController extends Controller
         ]);
 
         $members = array_unique(array_merge([$request->user()->id], $request->member_ids));
-        
+
         foreach ($members as $memberId) {
             $group->members()->attach($memberId, [
                 'is_admin' => $memberId === $request->user()->id,
@@ -41,7 +41,7 @@ class GroupChatController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
-        if (!$group->members()->where('user_id', $request->user()->id)->wherePivot('is_admin', true)->exists()) {
+        if (! $group->members()->where('user_id', $request->user()->id)->wherePivot('is_admin', true)->exists()) {
             return response()->json(['message' => 'Only admins can add members'], 403);
         }
 
@@ -56,7 +56,7 @@ class GroupChatController extends Controller
 
     public function removeMember(Request $request, GroupConversation $group, $userId)
     {
-        if (!$group->members()->where('user_id', $request->user()->id)->wherePivot('is_admin', true)->exists()) {
+        if (! $group->members()->where('user_id', $request->user()->id)->wherePivot('is_admin', true)->exists()) {
             return response()->json(['message' => 'Only admins can remove members'], 403);
         }
 
@@ -72,7 +72,7 @@ class GroupChatController extends Controller
             'avatar' => 'sometimes|image|max:2048',
         ]);
 
-        if (!$group->members()->where('user_id', $request->user()->id)->wherePivot('is_admin', true)->exists()) {
+        if (! $group->members()->where('user_id', $request->user()->id)->wherePivot('is_admin', true)->exists()) {
             return response()->json(['message' => 'Only admins can update group'], 403);
         }
 
@@ -94,11 +94,11 @@ class GroupChatController extends Controller
             'media' => 'nullable|file|mimes:jpg,jpeg,png,gif,mp4,mov|max:10240',
         ]);
 
-        if (!$group->members()->where('user_id', $request->user()->id)->exists()) {
+        if (! $group->members()->where('user_id', $request->user()->id)->exists()) {
             return response()->json(['message' => 'You are not a member of this group'], 403);
         }
 
-        if (!$request->content && !$request->hasFile('media')) {
+        if (! $request->content && ! $request->hasFile('media')) {
             return response()->json(['message' => 'Content or media is required'], 400);
         }
 
@@ -112,7 +112,7 @@ class GroupChatController extends Controller
             $file = $request->file('media');
             $extension = $file->getClientOriginalExtension();
             $mediaType = in_array($extension, ['mp4', 'mov']) ? 'video' : 'image';
-            
+
             $data['media_path'] = $file->store('group_messages', 'public');
             $data['media_type'] = $mediaType;
         }
@@ -127,7 +127,7 @@ class GroupChatController extends Controller
 
     public function messages(GroupConversation $group)
     {
-        if (!$group->members()->where('user_id', auth()->id())->exists()) {
+        if (! $group->members()->where('user_id', auth()->id())->exists()) {
             return response()->json(['message' => 'You are not a member of this group'], 403);
         }
 

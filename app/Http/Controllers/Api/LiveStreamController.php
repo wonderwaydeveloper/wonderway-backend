@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Events\StreamStarted;
 use App\Events\StreamEnded;
+use App\Events\StreamStarted;
 use App\Events\StreamViewerJoined;
 use App\Events\StreamViewerLeft;
 use App\Http\Controllers\Controller;
@@ -60,7 +60,7 @@ class LiveStreamController extends Controller
             'started_at' => now(),
         ]);
 
-        if (!app()->environment('testing')) {
+        if (! app()->environment('testing')) {
             broadcast(new StreamStarted($stream));
         }
 
@@ -80,7 +80,7 @@ class LiveStreamController extends Controller
             'duration' => max(0, $duration), // Ensure duration is never negative
         ]);
 
-        if (!app()->environment('testing')) {
+        if (! app()->environment('testing')) {
             broadcast(new StreamEnded($stream));
         }
 
@@ -89,19 +89,19 @@ class LiveStreamController extends Controller
 
     public function join(LiveStream $stream)
     {
-        if ($stream->is_private && !$stream->user->isFollowing(auth()->id())) {
+        if ($stream->is_private && ! $stream->user->isFollowing(auth()->id())) {
             return response()->json(['message' => 'Access denied'], 403);
         }
 
         $stream->viewers()->syncWithoutDetaching([auth()->id()]);
         $stream->increment('viewer_count');
-        
+
         if ($stream->viewer_count > $stream->max_viewers) {
             $stream->update(['max_viewers' => $stream->viewer_count]);
         }
 
         // Only broadcast in non-testing environment
-        if (!app()->environment('testing')) {
+        if (! app()->environment('testing')) {
             broadcast(new StreamViewerJoined($stream, auth()->user()));
         }
 
@@ -114,7 +114,7 @@ class LiveStreamController extends Controller
         $stream->decrement('viewer_count');
 
         // Only broadcast in non-testing environment
-        if (!app()->environment('testing')) {
+        if (! app()->environment('testing')) {
             broadcast(new StreamViewerLeft($stream, auth()->user()));
         }
 

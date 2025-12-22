@@ -16,20 +16,20 @@ class PasswordResetTest extends TestCase
         $user = User::factory()->create(['email' => 'test@example.com']);
 
         $response = $this->postJson('/api/auth/password/forgot', [
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ]);
 
         $response->assertStatus(200);
 
         $this->assertDatabaseHas('password_reset_tokens', [
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ]);
     }
 
     public function test_password_reset_requires_existing_email(): void
     {
         $response = $this->postJson('/api/auth/password/forgot', [
-            'email' => 'nonexistent@example.com'
+            'email' => 'nonexistent@example.com',
         ]);
 
         $response->assertStatus(422)
@@ -39,17 +39,17 @@ class PasswordResetTest extends TestCase
     public function test_user_can_verify_reset_token(): void
     {
         $user = User::factory()->create(['email' => 'test@example.com']);
-        
+
         // Create a password reset token
         \DB::table('password_reset_tokens')->insert([
             'email' => 'test@example.com',
             'token' => Hash::make('test-token'),
-            'created_at' => now()
+            'created_at' => now(),
         ]);
 
         $response = $this->postJson('/api/auth/password/verify-token', [
             'email' => 'test@example.com',
-            'token' => 'test-token'
+            'token' => 'test-token',
         ]);
 
         $response->assertStatus(200)
@@ -59,19 +59,19 @@ class PasswordResetTest extends TestCase
     public function test_user_can_reset_password(): void
     {
         $user = User::factory()->create(['email' => 'test@example.com']);
-        
+
         // Create a password reset token
         \DB::table('password_reset_tokens')->insert([
             'email' => 'test@example.com',
             'token' => Hash::make('test-token'),
-            'created_at' => now()
+            'created_at' => now(),
         ]);
 
         $response = $this->postJson('/api/auth/password/reset', [
             'email' => 'test@example.com',
             'token' => 'test-token',
             'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123'
+            'password_confirmation' => 'newpassword123',
         ]);
 
         $response->assertStatus(200);
@@ -82,7 +82,7 @@ class PasswordResetTest extends TestCase
 
         // Verify token was deleted
         $this->assertDatabaseMissing('password_reset_tokens', [
-            'email' => 'test@example.com'
+            'email' => 'test@example.com',
         ]);
     }
 
@@ -94,7 +94,7 @@ class PasswordResetTest extends TestCase
             'email' => 'test@example.com',
             'token' => 'invalid-token',
             'password' => 'newpassword123',
-            'password_confirmation' => 'newpassword123'
+            'password_confirmation' => 'newpassword123',
         ]);
 
         $response->assertStatus(422)
@@ -106,7 +106,7 @@ class PasswordResetTest extends TestCase
         $response = $this->postJson('/api/auth/password/reset', [
             'email' => 'test@example.com',
             'token' => 'test-token',
-            'password' => 'newpassword123'
+            'password' => 'newpassword123',
         ]);
 
         $response->assertStatus(422)

@@ -11,24 +11,44 @@ use App\Models\User;
 use App\Notifications\MentionNotification;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * Post Service Class
+ *
+ * Handles all post-related business logic including creation, updates,
+ * likes, timeline management, and spam detection.
+ *
+ * @package App\Services
+ * @author WonderWay Team
+ * @version 1.0.0
+ */
 class PostService
 {
+    /**
+     * PostService constructor.
+     *
+     * @param PostRepositoryInterface $postRepository Post repository for data access
+     * @param SpamDetectionService $spamDetectionService Service for spam detection
+     * @param DatabaseOptimizationService $databaseOptimizationService Service for database optimization
+     */
     public function __construct(
         private PostRepositoryInterface $postRepository,
         private SpamDetectionService $spamDetectionService,
         private DatabaseOptimizationService $databaseOptimizationService
-    ) {}
+    ) {
+    }
 
     /**
      * Get public posts with caching
+     *
+     * @param int $page Page number for pagination
+     * @return LengthAwarePaginator Paginated posts
      */
     public function getPublicPosts(int $page = 1): LengthAwarePaginator
     {
         $cacheKey = "posts:public:page:{$page}";
-        
+
         return cache()->remember($cacheKey, 600, function () use ($page) {
             return $this->postRepository->getPublicPosts($page);
         });
@@ -36,6 +56,12 @@ class PostService
 
     /**
      * Create a new post
+     *
+     * @param array $data Post data including content, settings, etc.
+     * @param User $user User creating the post
+     * @param UploadedFile|null $image Optional image attachment
+     * @return Post Created post with relations
+     * @throws \Exception When post is detected as spam
      */
     public function createPost(array $data, User $user, ?UploadedFile $image = null): Post
     {
@@ -58,23 +84,23 @@ class PostService
         $postData['published_at'] = $isDraft ? null : now();
 
         $post = $this->postRepository->create($postData);
-        
+
         // Process hashtags and mentions
         $this->processPostContent($post);
-        
+
         // Handle spam detection for published posts
-        if (!$isDraft) {
+        if (! $isDraft) {
             $this->handleSpamDetection($post);
         }
-        
+
         // Process post asynchronously
         $this->processPostAsync($post, $isDraft);
-        
+
         // Broadcast if published
-        if (!$isDraft) {
+        if (! $isDraft) {
             broadcast(new PostPublished($post->load('user:id,name,username,avatar')));
         }
-        
+
         return $post->load('user:id,name,username,avatar', 'hashtags');
     }
 
@@ -88,7 +114,7 @@ class PostService
             'comments.user:id,name,username,avatar',
             'hashtags',
             'quotedPost.user:id,name,username,avatar',
-            'threadPosts.user:id,name,username,avatar'
+            'threadPosts.user:id,name,username,avatar',
         ])->loadCount('likes', 'comments', 'quotes');
 
         $response = $post->toArray();
@@ -96,7 +122,7 @@ class PostService
         if ($post->threadPosts()->exists()) {
             $response['thread_info'] = [
                 'total_posts' => $post->threadPosts->count() + 1,
-                'is_main_thread' => true
+                'is_main_thread' => true,
             ];
         }
 
@@ -149,7 +175,7 @@ class PostService
 
         return [
             'data' => $posts,
-            'optimized' => true
+            'optimized' => true,
         ];
     }
 
@@ -215,7 +241,7 @@ class PostService
         );
 
         $post->syncHashtags();
-        
+
         return $post->load('user:id,name,username,avatar', 'hashtags', 'edits');
     }
 
@@ -225,10 +251,10 @@ class PostService
     public function getEditHistory(Post $post): array
     {
         $edits = $post->edits()->with('post:id,content')->get();
-        
+
         return [
             'current_content' => $post->content,
-            'edit_history' => $edits
+            'edit_history' => $edits,
         ];
     }
 
@@ -239,7 +265,7 @@ class PostService
     {
         $post->syncHashtags();
         $mentionedUsers = $post->processMentions($post->content);
-        
+
         foreach ($mentionedUsers as $mentionedUser) {
             $mentionedUser->notify(new MentionNotification(auth()->user(), $post));
         }
@@ -251,15 +277,15 @@ class PostService
     private function handleSpamDetection(Post $post): void
     {
         $spamResult = $this->spamDetectionService->checkPost($post);
-        
+
         if ($spamResult['is_spam']) {
             $post->delete();
-            
+
             $errorType = 'SPAM_DETECTED';
             if (in_array('Too many links detected (3 links)', $spamResult['reasons'])) {
                 $errorType = 'TOO_MANY_LINKS';
             }
-            
+
             throw new \Exception('پست شما به دلیل مشکوک بودن تأیید نشد', 422);
         }
     }
@@ -269,7 +295,7 @@ class PostService
      */
     private function processPostAsync(Post $post, bool $isDraft): void
     {
-        if (!$isDraft && !app()->environment('testing')) {
+        if (! $isDraft && ! app()->environment('testing')) {
             dispatch(new ProcessPostJob($post))->onQueue('high');
         }
     }

@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Services\StreamingService;
 use App\Models\Stream;
-use Illuminate\Http\Request;
+use App\Services\StreamingService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class StreamingController extends Controller
 {
@@ -26,7 +26,7 @@ class StreamingController extends Controller
             'is_private' => 'boolean',
             'scheduled_at' => 'nullable|date|after:now',
             'allow_chat' => 'boolean',
-            'record_stream' => 'boolean'
+            'record_stream' => 'boolean',
         ]);
 
         $stream = $this->streamingService->createStream(auth()->user(), $request->all());
@@ -38,23 +38,23 @@ class StreamingController extends Controller
                 'title' => $stream->title,
                 'stream_key' => $stream->stream_key,
                 'rtmp_url' => config('streaming.rtmp_url') . '/' . $stream->stream_key,
-                'status' => $stream->status
-            ]
+                'status' => $stream->status,
+            ],
         ], 201);
     }
 
     public function start(Request $request): JsonResponse
     {
         $request->validate([
-            'stream_key' => 'required|string'
+            'stream_key' => 'required|string',
         ]);
 
         $success = $this->streamingService->startStream($request->stream_key);
 
-        if (!$success) {
+        if (! $success) {
             return response()->json([
                 'success' => false,
-                'message' => 'Stream not found or cannot be started'
+                'message' => 'Stream not found or cannot be started',
             ], 404);
         }
 
@@ -64,15 +64,15 @@ class StreamingController extends Controller
     public function end(Request $request): JsonResponse
     {
         $request->validate([
-            'stream_key' => 'required|string'
+            'stream_key' => 'required|string',
         ]);
 
         $success = $this->streamingService->endStream($request->stream_key);
 
-        if (!$success) {
+        if (! $success) {
             return response()->json([
                 'success' => false,
-                'message' => 'Stream not found'
+                'message' => 'Stream not found',
             ], 404);
         }
 
@@ -83,7 +83,7 @@ class StreamingController extends Controller
     {
         $result = $this->streamingService->joinStream($streamKey, auth()->user());
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             return response()->json($result, 404);
         }
 
@@ -103,7 +103,7 @@ class StreamingController extends Controller
 
         return response()->json([
             'success' => true,
-            'stats' => $stats
+            'stats' => $stats,
         ]);
     }
 
@@ -113,14 +113,14 @@ class StreamingController extends Controller
 
         return response()->json([
             'success' => true,
-            'streams' => $streams
+            'streams' => $streams,
         ]);
     }
 
     public function show(Stream $stream): JsonResponse
     {
         $stream->load('user:id,name,username,avatar');
-        
+
         return response()->json([
             'success' => true,
             'stream' => [
@@ -137,8 +137,8 @@ class StreamingController extends Controller
                 'urls' => $stream->is_live ? $stream->stream_urls : null,
                 'created_at' => $stream->created_at,
                 'started_at' => $stream->started_at,
-                'ended_at' => $stream->ended_at
-            ]
+                'ended_at' => $stream->ended_at,
+            ],
         ]);
     }
 
@@ -150,7 +150,7 @@ class StreamingController extends Controller
 
         return response()->json([
             'success' => true,
-            'streams' => $streams
+            'streams' => $streams,
         ]);
     }
 
@@ -159,7 +159,7 @@ class StreamingController extends Controller
         if ($stream->user_id !== auth()->id()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized'
+                'message' => 'Unauthorized',
             ], 403);
         }
 
@@ -176,8 +176,8 @@ class StreamingController extends Controller
     public function auth(Request $request): JsonResponse
     {
         $streamKey = $request->input('name');
-        
-        if (!$streamKey) {
+
+        if (! $streamKey) {
             return response()->json(['success' => false], 403);
         }
 
@@ -189,7 +189,7 @@ class StreamingController extends Controller
     public function publishDone(Request $request): JsonResponse
     {
         $streamKey = $request->input('name');
-        
+
         if ($streamKey) {
             $this->streamingService->endStream($streamKey);
         }
@@ -200,7 +200,7 @@ class StreamingController extends Controller
     public function play(Request $request): JsonResponse
     {
         $streamKey = $request->input('name');
-        
+
         if ($streamKey) {
             $this->streamingService->joinStream($streamKey);
         }
@@ -211,7 +211,7 @@ class StreamingController extends Controller
     public function playDone(Request $request): JsonResponse
     {
         $streamKey = $request->input('name');
-        
+
         if ($streamKey) {
             $this->streamingService->leaveStream($streamKey);
         }

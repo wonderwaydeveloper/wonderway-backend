@@ -92,8 +92,8 @@ class RepostTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'user_id', 'post_id']
-                ]
+                    '*' => ['id', 'user_id', 'post_id'],
+                ],
             ]);
     }
 

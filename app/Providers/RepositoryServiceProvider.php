@@ -2,12 +2,12 @@
 
 namespace App\Providers;
 
+use App\Contracts\NotificationRepositoryInterface;
 use App\Contracts\PostRepositoryInterface;
 use App\Contracts\UserRepositoryInterface;
-use App\Contracts\NotificationRepositoryInterface;
+use App\Repositories\NotificationRepository;
 use App\Repositories\PostRepository;
 use App\Repositories\UserRepository;
-use App\Repositories\NotificationRepository;
 use Illuminate\Support\ServiceProvider;
 
 class RepositoryServiceProvider extends ServiceProvider

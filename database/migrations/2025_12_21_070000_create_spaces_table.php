@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     public function up(): void
     {
         Schema::create('spaces', function (Blueprint $table) {
@@ -22,7 +21,7 @@ return new class extends Migration
             $table->datetime('ended_at')->nullable();
             $table->json('settings')->nullable(); // Recording, chat enabled, etc.
             $table->timestamps();
-            
+
             $table->index(['status', 'privacy']);
             $table->index('scheduled_at');
         });

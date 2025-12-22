@@ -25,6 +25,6 @@ class PhoneVerificationCode extends Model
 
     public function isValid()
     {
-        return !$this->verified && !$this->isExpired();
+        return ! $this->verified && ! $this->isExpired();
     }
 }

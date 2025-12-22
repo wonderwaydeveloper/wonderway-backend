@@ -33,7 +33,7 @@ class StoryController extends Controller
 
         $mediaType = $request->file('media')->getMimeType();
         $mediaType = str_starts_with($mediaType, 'video') ? 'video' : 'image';
-        
+
         $mediaUrl = $request->file('media')->store('stories', 'public');
 
         $story = Story::create([
@@ -62,6 +62,7 @@ class StoryController extends Controller
     public function view(Story $story)
     {
         $story->increment('views_count');
+
         return response()->json(['message' => 'مشاهده شد']);
     }
 }

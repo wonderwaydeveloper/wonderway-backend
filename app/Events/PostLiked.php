@@ -9,10 +9,12 @@ use Illuminate\Queue\SerializesModels;
 
 class PostLiked
 {
-    use Dispatchable, SerializesModels;
+    use Dispatchable;
+    use SerializesModels;
 
     public function __construct(
         public Post $post,
         public User $user
-    ) {}
+    ) {
+    }
 }

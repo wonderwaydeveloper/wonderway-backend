@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Models\User;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Support\Facades\Http;
 
 class RichNotificationService
@@ -11,7 +11,7 @@ class RichNotificationService
     public function sendRichNotification(User $user, array $data): bool
     {
         $payload = $this->buildRichPayload($data);
-        
+
         // Send to multiple channels
         $results = [
             'push' => $this->sendPushNotification($user, $payload),
@@ -43,7 +43,7 @@ class RichNotificationService
                     'priority' => 'high',
                     'default_sound' => true,
                     'default_vibrate_timings' => true,
-                ]
+                ],
             ],
             'apns' => [
                 'payload' => [
@@ -55,16 +55,16 @@ class RichNotificationService
                         'badge' => $data['badge'] ?? 1,
                         'sound' => 'default',
                         'category' => $data['category'] ?? 'GENERAL',
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
     }
 
     private function sendPushNotification(User $user, array $payload): bool
     {
         $tokens = $user->devices()->pluck('token')->toArray();
-        
+
         if (empty($tokens)) {
             return false;
         }
@@ -90,26 +90,29 @@ class RichNotificationService
         } catch (\Exception $e) {
             \Log::error('Rich push notification failed', [
                 'user_id' => $user->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
 
     private function sendEmailNotification(User $user, array $payload): bool
     {
-        if (!$user->email_verified_at) {
+        if (! $user->email_verified_at) {
             return false;
         }
 
         try {
             $user->notify(new \App\Notifications\RichEmailNotification($payload));
+
             return true;
         } catch (\Exception $e) {
             \Log::error('Rich email notification failed', [
                 'user_id' => $user->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -125,13 +128,14 @@ class RichNotificationService
 
             // Broadcast real-time
             broadcast(new \App\Events\NotificationSent($user, $payload));
-            
+
             return true;
         } catch (\Exception $e) {
             \Log::error('Rich in-app notification failed', [
                 'user_id' => $user->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }

@@ -43,8 +43,8 @@ class TrendingController extends Controller
             'meta' => [
                 'limit' => $request->input('limit', 10),
                 'timeframe_hours' => $request->input('timeframe', 24),
-                'generated_at' => now()
-            ]
+                'generated_at' => now(),
+            ],
         ]);
     }
 
@@ -76,8 +76,8 @@ class TrendingController extends Controller
             'meta' => [
                 'limit' => $request->input('limit', 20),
                 'timeframe_hours' => $request->input('timeframe', 24),
-                'generated_at' => now()
-            ]
+                'generated_at' => now(),
+            ],
         ]);
     }
 
@@ -109,8 +109,8 @@ class TrendingController extends Controller
             'meta' => [
                 'limit' => $request->input('limit', 10),
                 'timeframe_hours' => $request->input('timeframe', 168),
-                'generated_at' => now()
-            ]
+                'generated_at' => now(),
+            ],
         ]);
     }
 
@@ -140,8 +140,8 @@ class TrendingController extends Controller
             'meta' => [
                 'limit' => $request->input('limit', 10),
                 'user_id' => $request->user()->id,
-                'generated_at' => now()
-            ]
+                'generated_at' => now(),
+            ],
         ]);
     }
 
@@ -163,7 +163,7 @@ class TrendingController extends Controller
             'hours' => 'nullable|integer|min:1|max:24',
         ]);
 
-        if (!in_array($type, ['hashtag', 'post'])) {
+        if (! in_array($type, ['hashtag', 'post'])) {
             return response()->json(['error' => 'Invalid type'], 400);
         }
 
@@ -179,7 +179,7 @@ class TrendingController extends Controller
             'velocity' => $velocity,
             'hours_analyzed' => $request->input('hours', 6),
             'interpretation' => $velocity > 0 ? 'accelerating' : ($velocity < 0 ? 'decelerating' : 'stable'),
-            'generated_at' => now()
+            'generated_at' => now(),
         ]);
     }
 
@@ -202,7 +202,7 @@ class TrendingController extends Controller
             'hashtags' => $hashtags,
             'posts' => $posts,
             'users' => $users,
-            'generated_at' => now()
+            'generated_at' => now(),
         ]);
     }
 
@@ -237,7 +237,7 @@ class TrendingController extends Controller
 
         return response()->json([
             'message' => 'Trending data refreshed successfully',
-            'result' => $result
+            'result' => $result,
         ]);
     }
 }

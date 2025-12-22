@@ -20,13 +20,13 @@ class EnhancedThreadTest extends TestCase
                 'posts' => [
                     ['content' => 'First post in thread'],
                     ['content' => 'Second post in thread'],
-                    ['content' => 'Third post in thread']
-                ]
+                    ['content' => 'Third post in thread'],
+                ],
             ]);
 
         $response->assertStatus(201)
             ->assertJsonStructure([
-                'id', 'content', 'thread_posts'
+                'id', 'content', 'thread_posts',
             ]);
 
         $this->assertDatabaseHas('posts', [
@@ -46,18 +46,18 @@ class EnhancedThreadTest extends TestCase
     {
         $user = User::factory()->create();
         $mainPost = Post::factory()->create(['user_id' => $user->id, 'published_at' => now()]);
-        
+
         // Create initial thread post
         Post::factory()->create([
             'user_id' => $user->id,
             'thread_id' => $mainPost->id,
             'thread_position' => 1,
-            'published_at' => now()
+            'published_at' => now(),
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
             ->postJson("/api/threads/{$mainPost->id}/add", [
-                'content' => 'Adding to existing thread'
+                'content' => 'Adding to existing thread',
             ]);
 
         $response->assertStatus(201);
@@ -74,19 +74,19 @@ class EnhancedThreadTest extends TestCase
     {
         $user = User::factory()->create();
         $mainPost = Post::factory()->create(['user_id' => $user->id, 'published_at' => now()]);
-        
+
         // Create thread posts
         Post::factory()->create([
             'user_id' => $user->id,
             'thread_id' => $mainPost->id,
             'thread_position' => 1,
-            'published_at' => now()
+            'published_at' => now(),
         ]);
         Post::factory()->create([
             'user_id' => $user->id,
             'thread_id' => $mainPost->id,
             'thread_position' => 2,
-            'published_at' => now()
+            'published_at' => now(),
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -96,7 +96,7 @@ class EnhancedThreadTest extends TestCase
             ->assertJsonStructure([
                 'thread_root',
                 'thread_posts',
-                'total_posts'
+                'total_posts',
             ])
             ->assertJson(['total_posts' => 3]);
     }
@@ -105,12 +105,12 @@ class EnhancedThreadTest extends TestCase
     {
         $user = User::factory()->create();
         $mainPost = Post::factory()->create(['user_id' => $user->id, 'published_at' => now()]);
-        
+
         Post::factory()->create([
             'user_id' => $user->id,
             'thread_id' => $mainPost->id,
             'thread_position' => 1,
-            'published_at' => now()
+            'published_at' => now(),
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -123,7 +123,7 @@ class EnhancedThreadTest extends TestCase
                 'total_comments',
                 'participants',
                 'created_at',
-                'last_updated'
+                'last_updated',
             ]);
     }
 
@@ -134,8 +134,8 @@ class EnhancedThreadTest extends TestCase
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/threads', [
                 'posts' => [
-                    ['content' => 'Only one post']
-                ]
+                    ['content' => 'Only one post'],
+                ],
             ]);
 
         $response->assertStatus(422)
@@ -145,7 +145,7 @@ class EnhancedThreadTest extends TestCase
     public function test_thread_creation_limits_maximum_posts(): void
     {
         $user = User::factory()->create();
-        
+
         $posts = [];
         for ($i = 0; $i < 26; $i++) {
             $posts[] = ['content' => "Post number {$i}"];
@@ -162,12 +162,12 @@ class EnhancedThreadTest extends TestCase
     {
         $user = User::factory()->create();
         $mainPost = Post::factory()->create(['user_id' => $user->id, 'published_at' => now()]);
-        
+
         Post::factory()->create([
             'user_id' => $user->id,
             'thread_id' => $mainPost->id,
             'thread_position' => 1,
-            'published_at' => now()
+            'published_at' => now(),
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -181,25 +181,25 @@ class EnhancedThreadTest extends TestCase
     {
         $user = User::factory()->create();
         $mainPost = Post::factory()->create(['user_id' => $user->id, 'published_at' => now()]);
-        
+
         // Create thread post (should not appear in timeline)
         Post::factory()->create([
             'user_id' => $user->id,
             'thread_id' => $mainPost->id,
             'thread_position' => 1,
-            'published_at' => now()
+            'published_at' => now(),
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
             ->getJson('/api/posts');
 
         $response->assertStatus(200);
-        
+
         $posts = $response->json('data');
         $threadPosts = collect($posts)->filter(function ($post) {
-            return !is_null($post['thread_id']);
+            return ! is_null($post['thread_id']);
         });
-        
+
         $this->assertTrue($threadPosts->isEmpty(), 'Timeline should not show thread posts');
     }
 
@@ -208,8 +208,8 @@ class EnhancedThreadTest extends TestCase
         $response = $this->postJson('/api/threads', [
             'posts' => [
                 ['content' => 'First post'],
-                ['content' => 'Second post']
-            ]
+                ['content' => 'Second post'],
+            ],
         ]);
 
         $response->assertStatus(401);

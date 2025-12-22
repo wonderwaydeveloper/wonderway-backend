@@ -6,15 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Services\CacheManagementService;
 use App\Services\DatabaseOptimizationService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class PerformanceController extends Controller
 {
     public function __construct(
         private CacheManagementService $cacheService,
         private DatabaseOptimizationService $dbService
-    ) {}
+    ) {
+    }
 
     public function dashboard()
     {
@@ -35,7 +36,7 @@ class PerformanceController extends Controller
         return response()->json([
             'posts' => $posts,
             'cached' => true,
-            'performance' => 'optimized'
+            'performance' => 'optimized',
         ]);
     }
 
@@ -45,7 +46,7 @@ class PerformanceController extends Controller
 
         return response()->json([
             'message' => 'Cache warmed up successfully',
-            'timestamp' => now()
+            'timestamp' => now(),
         ]);
     }
 
@@ -57,19 +58,22 @@ class PerformanceController extends Controller
             case 'user':
                 $userId = $request->input('user_id');
                 $this->cacheService->invalidateUserCache($userId);
+
                 break;
             case 'posts':
                 Cache::forget('posts:popular:24h');
                 Cache::forget('posts:public:*');
+
                 break;
             case 'all':
                 Cache::flush();
+
                 break;
         }
 
         return response()->json([
             'message' => "Cache cleared: {$type}",
-            'timestamp' => now()
+            'timestamp' => now(),
         ]);
     }
 
@@ -95,7 +99,7 @@ class PerformanceController extends Controller
     private function getPerformanceMetrics()
     {
         $startTime = defined('LARAVEL_START') ? LARAVEL_START : $_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true);
-        
+
         return [
             'memory_usage' => memory_get_usage(true),
             'memory_peak' => memory_get_peak_usage(true),

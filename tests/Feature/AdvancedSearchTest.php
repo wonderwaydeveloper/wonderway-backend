@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Hashtag;
 use App\Models\Post;
 use App\Models\User;
-use App\Models\Hashtag;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -16,21 +16,21 @@ class AdvancedSearchTest extends TestCase
     {
         $user = User::factory()->create();
         $targetUser = User::factory()->create();
-        
+
         // Create posts with different characteristics
         $post1 = Post::factory()->create([
             'user_id' => $targetUser->id,
             'content' => 'Test post with image',
             'image' => 'test.jpg',
             'likes_count' => 10,
-            'published_at' => now()->subDays(1)
+            'published_at' => now()->subDays(1),
         ]);
-        
+
         $post2 = Post::factory()->create([
             'user_id' => $user->id,
             'content' => 'Another test post',
             'likes_count' => 5,
-            'published_at' => now()
+            'published_at' => now(),
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -39,68 +39,68 @@ class AdvancedSearchTest extends TestCase
                 'user_id' => $targetUser->id,
                 'has_media' => true,
                 'min_likes' => 8,
-                'sort' => 'popular'
+                'sort' => 'popular',
             ]));
 
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data',
-                'total'
+                'total',
             ]);
     }
 
     public function test_advanced_user_search_with_filters(): void
     {
         $user = User::factory()->create();
-        
+
         User::factory()->create([
             'name' => 'John Verified',
-            'username' => 'johnverified'
+            'username' => 'johnverified',
         ]);
-        
+
         User::factory()->create([
             'name' => 'Jane Normal',
-            'username' => 'janenormal'
+            'username' => 'janenormal',
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
             ->getJson('/api/search/users?' . http_build_query([
                 'q' => 'john',
-                'sort' => 'newest'
+                'sort' => 'newest',
             ]));
 
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data',
-                'total'
+                'total',
             ]);
     }
 
     public function test_hashtag_search_with_filters(): void
     {
         $user = User::factory()->create();
-        
+
         Hashtag::factory()->create([
             'name' => 'trending',
-            'posts_count' => 100
+            'posts_count' => 100,
         ]);
-        
+
         Hashtag::factory()->create([
             'name' => 'trendy',
-            'posts_count' => 10
+            'posts_count' => 10,
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
             ->getJson('/api/search/hashtags?' . http_build_query([
                 'q' => 'trend',
                 'min_posts' => 50,
-                'sort' => 'popular'
+                'sort' => 'popular',
             ]));
 
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data',
-                'total'
+                'total',
             ]);
     }
 
@@ -113,7 +113,7 @@ class AdvancedSearchTest extends TestCase
                 'q' => 'test',
                 'type' => 'posts',
                 'has_media' => true,
-                'sort' => 'latest'
+                'sort' => 'latest',
             ]));
 
         $response->assertStatus(200);
@@ -126,7 +126,7 @@ class AdvancedSearchTest extends TestCase
         $response = $this->actingAs($user, 'sanctum')
             ->getJson('/api/search/suggestions?' . http_build_query([
                 'q' => 'test',
-                'type' => 'all'
+                'type' => 'all',
             ]));
 
         $response->assertStatus(200);
@@ -148,7 +148,7 @@ class AdvancedSearchTest extends TestCase
             ->getJson('/api/search/posts?' . http_build_query([
                 'q' => 'test',
                 'date_from' => '2024-01-01',
-                'date_to' => '2023-12-31'
+                'date_to' => '2023-12-31',
             ]));
 
         $response->assertStatus(422)
@@ -158,7 +158,7 @@ class AdvancedSearchTest extends TestCase
         $response = $this->actingAs($user, 'sanctum')
             ->getJson('/api/search/posts?' . http_build_query([
                 'q' => 'test',
-                'sort' => 'invalid_sort'
+                'sort' => 'invalid_sort',
             ]));
 
         $response->assertStatus(422)
@@ -173,7 +173,7 @@ class AdvancedSearchTest extends TestCase
             ->getJson('/api/search/posts?' . http_build_query([
                 'q' => 'test',
                 'date_from' => now()->subDays(7)->format('Y-m-d'),
-                'date_to' => now()->format('Y-m-d')
+                'date_to' => now()->format('Y-m-d'),
             ]));
 
         $response->assertStatus(200);
@@ -186,7 +186,7 @@ class AdvancedSearchTest extends TestCase
         $response = $this->actingAs($user, 'sanctum')
             ->getJson('/api/search/posts?' . http_build_query([
                 'q' => 'test',
-                'hashtags' => ['wonderway', 'social']
+                'hashtags' => ['wonderway', 'social'],
             ]));
 
         $response->assertStatus(200);

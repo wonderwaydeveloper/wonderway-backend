@@ -13,7 +13,7 @@ class SocialAuthController extends Controller
     public function redirectToGoogle()
     {
         return response()->json([
-            'url' => Socialite::driver('google')->stateless()->redirect()->getTargetUrl()
+            'url' => Socialite::driver('google')->stateless()->redirect()->getTargetUrl(),
         ]);
     }
 
@@ -21,6 +21,7 @@ class SocialAuthController extends Controller
     {
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
+
             return $this->createOrUpdateUser($googleUser, 'google');
         } catch (\Exception $e) {
             return response()->json(['error' => 'Google authentication failed'], 401);
@@ -30,7 +31,7 @@ class SocialAuthController extends Controller
     public function redirectToGithub()
     {
         return response()->json([
-            'url' => Socialite::driver('github')->stateless()->redirect()->getTargetUrl()
+            'url' => Socialite::driver('github')->stateless()->redirect()->getTargetUrl(),
         ]);
     }
 
@@ -38,6 +39,7 @@ class SocialAuthController extends Controller
     {
         try {
             $githubUser = Socialite::driver('github')->stateless()->user();
+
             return $this->createOrUpdateUser($githubUser, 'github');
         } catch (\Exception $e) {
             return response()->json(['error' => 'GitHub authentication failed'], 401);
@@ -47,7 +49,7 @@ class SocialAuthController extends Controller
     public function redirectToFacebook()
     {
         return response()->json([
-            'url' => Socialite::driver('facebook')->stateless()->redirect()->getTargetUrl()
+            'url' => Socialite::driver('facebook')->stateless()->redirect()->getTargetUrl(),
         ]);
     }
 
@@ -55,6 +57,7 @@ class SocialAuthController extends Controller
     {
         try {
             $facebookUser = Socialite::driver('facebook')->stateless()->user();
+
             return $this->createOrUpdateUser($facebookUser, 'facebook');
         } catch (\Exception $e) {
             return response()->json(['error' => 'Facebook authentication failed'], 401);
@@ -65,7 +68,7 @@ class SocialAuthController extends Controller
     {
         $user = User::where('email', $socialUser->getEmail())->first();
 
-        if (!$user) {
+        if (! $user) {
             $user = User::create([
                 'name' => $socialUser->getName(),
                 'email' => $socialUser->getEmail(),
@@ -93,6 +96,7 @@ class SocialAuthController extends Controller
     {
         $username = str_replace(' ', '', strtolower($name));
         $count = User::where('username', 'like', $username . '%')->count();
+
         return $count > 0 ? $username . $count : $username;
     }
 }

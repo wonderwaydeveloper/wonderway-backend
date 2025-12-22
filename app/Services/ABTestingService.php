@@ -3,16 +3,16 @@
 namespace App\Services;
 
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class ABTestingService
 {
     public function assignUserToTest($testName, User $user)
     {
         $test = $this->getActiveTest($testName);
-        
-        if (!$test) {
+
+        if (! $test) {
             return null;
         }
 
@@ -47,8 +47,8 @@ class ABTestingService
     public function trackEvent($testName, User $user, $eventType, $eventData = null)
     {
         $test = $this->getActiveTest($testName);
-        
-        if (!$test) {
+
+        if (! $test) {
             return false;
         }
 
@@ -57,7 +57,7 @@ class ABTestingService
             ->where('user_id', $user->id)
             ->first();
 
-        if (!$participant) {
+        if (! $participant) {
             return false;
         }
 
@@ -77,8 +77,8 @@ class ABTestingService
     public function getTestResults($testId)
     {
         $test = DB::table('ab_tests')->find($testId);
-        
-        if (!$test) {
+
+        if (! $test) {
             return null;
         }
 
@@ -87,7 +87,7 @@ class ABTestingService
                 'variant',
                 'event_type',
                 DB::raw('COUNT(*) as count'),
-                DB::raw('COUNT(DISTINCT user_id) as unique_users')
+                DB::raw('COUNT(DISTINCT user_id) as unique_users'),
             ])
             ->where('ab_test_id', $testId)
             ->groupBy(['variant', 'event_type'])
@@ -104,7 +104,7 @@ class ABTestingService
             'test' => $test,
             'participants' => $participants,
             'results' => $results,
-            'conversion_rates' => $this->calculateConversionRates($results, $participants)
+            'conversion_rates' => $this->calculateConversionRates($results, $participants),
         ];
     }
 
@@ -115,12 +115,12 @@ class ABTestingService
                 ->where('name', $testName)
                 ->where('status', 'active')
                 ->where('starts_at', '<=', now())
-                ->where(function($q) {
+                ->where(function ($q) {
                     $q->whereNull('ends_at')
                       ->orWhere('ends_at', '>', now());
                 })
                 ->first();
-                
+
             return $test ? (array) $test : null;
         });
     }
@@ -128,17 +128,17 @@ class ABTestingService
     private function calculateConversionRates($results, $participants)
     {
         $rates = [];
-        
+
         foreach (['A', 'B'] as $variant) {
             $totalParticipants = $participants->get($variant, 0);
             $conversions = $results->get($variant, collect())->where('event_type', 'conversion')->first();
             $conversionCount = $conversions ? $conversions->unique_users : 0;
-            
-            $rates[$variant] = $totalParticipants > 0 
+
+            $rates[$variant] = $totalParticipants > 0
                 ? round(($conversionCount / $totalParticipants) * 100, 2)
                 : 0;
         }
-        
+
         return $rates;
     }
 

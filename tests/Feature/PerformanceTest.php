@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Post;
+use App\Models\User;
 use App\Services\CacheManagementService;
 use App\Services\DatabaseOptimizationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -31,7 +31,7 @@ class PerformanceTest extends TestCase
     {
         $user = User::factory()->create();
         $followedUser = User::factory()->create();
-        
+
         $user->following()->attach($followedUser->id);
         Post::factory()->create(['user_id' => $followedUser->id, 'published_at' => now()]);
 
@@ -59,7 +59,7 @@ class PerformanceTest extends TestCase
     public function test_cache_clear_works()
     {
         $user = User::factory()->create();
-        
+
         // Set some cache
         Cache::put('test:key', 'value', 60);
         $this->assertTrue(Cache::has('test:key'));
@@ -75,7 +75,7 @@ class PerformanceTest extends TestCase
     {
         $user = User::factory()->create();
         $followedUser = User::factory()->create();
-        
+
         $user->following()->attach($followedUser->id);
         Post::factory()->create(['user_id' => $followedUser->id, 'published_at' => now()]);
 
@@ -88,7 +88,7 @@ class PerformanceTest extends TestCase
     public function test_cache_management_service()
     {
         $service = new CacheManagementService();
-        
+
         // Test trending hashtags cache
         $trending = $service->cacheTrendingHashtags();
         $this->assertTrue(Cache::has('hashtags:trending'));
@@ -103,13 +103,13 @@ class PerformanceTest extends TestCase
     {
         $user = User::factory()->create();
         $service = new CacheManagementService();
-        
+
         // Set user cache
         Cache::put("user:stats:{$user->id}", ['posts' => 5], 60);
-        
+
         // Invalidate cache
         $service->invalidateUserCache($user->id);
-        
+
         $this->assertFalse(Cache::has("user:stats:{$user->id}"));
     }
 
@@ -117,13 +117,13 @@ class PerformanceTest extends TestCase
     {
         $post = Post::factory()->create();
         $service = new CacheManagementService();
-        
+
         // Set post cache
         Cache::put("post:{$post->id}", $post->toArray(), 60);
-        
+
         // Invalidate cache
         $service->invalidatePostCache($post->id);
-        
+
         $this->assertFalse(Cache::has("post:{$post->id}"));
     }
 }

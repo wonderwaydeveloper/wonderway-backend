@@ -31,7 +31,7 @@ trait Mentionable
     {
         // Extract @username patterns
         preg_match_all('/@([a-zA-Z0-9_]+)/', $content, $matches);
-        
+
         if (empty($matches[1])) {
             return [];
         }
@@ -41,13 +41,13 @@ trait Mentionable
 
         foreach ($usernames as $username) {
             $user = User::where('username', $username)->first();
-            
+
             if ($user) {
                 // Create mention record
                 $this->mentions()->firstOrCreate([
                     'user_id' => $user->id,
                 ]);
-                
+
                 $mentionedUsers[] = $user;
             }
         }

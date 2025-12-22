@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class SecurityTest extends TestCase
 {
@@ -26,7 +26,7 @@ class SecurityTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/posts', [
-                'content' => "'; DROP TABLE users; --"
+                'content' => "'; DROP TABLE users; --",
             ]);
 
         $response->assertStatus(403)
@@ -39,7 +39,7 @@ class SecurityTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/posts', [
-                'content' => '<script>alert("xss")</script>'
+                'content' => '<script>alert("xss")</script>',
             ]);
 
         $response->assertStatus(403)
@@ -55,9 +55,9 @@ class SecurityTest extends TestCase
         for ($i = 0; $i < 15; $i++) {
             $response = $this->actingAs($user, 'sanctum')
                 ->postJson('/api/posts', [
-                    'content' => "Test post {$i}"
+                    'content' => "Test post {$i}",
                 ]);
-            
+
             // If we hit rate limit, break
             if ($response->status() === 429) {
                 break;
@@ -77,7 +77,7 @@ class SecurityTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/posts', [
-                'content' => 'This is spam content with fake information'
+                'content' => 'This is spam content with fake information',
             ]);
 
         $response->assertStatus(422)
@@ -90,7 +90,7 @@ class SecurityTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/posts', [
-                'content' => 'Check out https://link1.com and https://link2.com and https://link3.com'
+                'content' => 'Check out https://link1.com and https://link2.com and https://link3.com',
             ]);
 
         $response->assertStatus(422)

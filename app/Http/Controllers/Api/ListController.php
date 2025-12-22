@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\UserList;
 use App\Models\User;
+use App\Models\UserList;
 use Illuminate\Http\Request;
 
 class ListController extends Controller
@@ -24,14 +24,14 @@ class ListController extends Controller
         $request->validate([
             'name' => 'required|string|max:100',
             'description' => 'nullable|string|max:500',
-            'privacy' => 'required|in:public,private'
+            'privacy' => 'required|in:public,private',
         ]);
 
         $list = UserList::create([
             'user_id' => $request->user()->id,
             'name' => $request->name,
             'description' => $request->description,
-            'privacy' => $request->privacy
+            'privacy' => $request->privacy,
         ]);
 
         return response()->json($list, 201);
@@ -56,7 +56,7 @@ class ListController extends Controller
         $request->validate([
             'name' => 'required|string|max:100',
             'description' => 'nullable|string|max:500',
-            'privacy' => 'required|in:public,private'
+            'privacy' => 'required|in:public,private',
         ]);
 
         $list->update($request->only(['name', 'description', 'privacy']));
@@ -78,7 +78,7 @@ class ListController extends Controller
         $this->authorize('update', $list);
 
         $request->validate([
-            'user_id' => 'required|exists:users,id'
+            'user_id' => 'required|exists:users,id',
         ]);
 
         if ($list->hasMember($request->user_id)) {
@@ -95,7 +95,7 @@ class ListController extends Controller
     {
         $this->authorize('update', $list);
 
-        if (!$list->hasMember($user->id)) {
+        if (! $list->hasMember($user->id)) {
             return response()->json(['message' => 'User not in list'], 404);
         }
 
@@ -127,7 +127,7 @@ class ListController extends Controller
     {
         $userId = $request->user()->id;
 
-        if (!$list->isSubscribedBy($userId)) {
+        if (! $list->isSubscribedBy($userId)) {
             return response()->json(['message' => 'Not subscribed'], 404);
         }
 

@@ -2,9 +2,9 @@
 
 namespace App\Monetization\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\User;
 
 class CreatorFund extends Model
 {
@@ -38,18 +38,18 @@ class CreatorFund extends Model
         if ($this->total_views == 0) {
             return 0;
         }
-        
+
         $baseRate = 0.001; // $0.001 per view
         $engagementMultiplier = min($this->total_engagement / $this->total_views, 0.1);
         $qualityMultiplier = $this->quality_score / 100;
-        
+
         return $this->total_views * $baseRate * (1 + $engagementMultiplier) * $qualityMultiplier;
     }
 
     public function isEligible(): bool
     {
-        return $this->total_views >= 10000 
-            && $this->quality_score >= 70 
+        return $this->total_views >= 10000
+            && $this->quality_score >= 70
             && $this->creator->followers()->count() >= 1000;
     }
 }

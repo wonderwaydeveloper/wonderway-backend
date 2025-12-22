@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ProfileTest extends TestCase
 {
@@ -16,7 +16,7 @@ class ProfileTest extends TestCase
         $user = User::factory()->create([
             'name' => 'John Doe',
             'username' => 'johndoe',
-            'bio' => 'Test bio'
+            'bio' => 'Test bio',
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -24,7 +24,7 @@ class ProfileTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'id', 'name', 'username', 'bio', 'avatar'
+                'id', 'name', 'username', 'bio', 'avatar',
             ]);
     }
 
@@ -54,27 +54,27 @@ class ProfileTest extends TestCase
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
             'name' => 'Updated Name',
-            'bio' => 'Updated bio'
+            'bio' => 'Updated bio',
         ]);
     }
 
     public function test_user_can_update_avatar()
     {
         $user = User::factory()->create([
-            'bio' => 'Test bio'
+            'bio' => 'Test bio',
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
             ->putJson('/api/profile', [
                 'name' => $user->name,
                 'bio' => $user->bio,
-                'avatar' => 'https://example.com/avatar.jpg'
+                'avatar' => 'https://example.com/avatar.jpg',
             ]);
 
         $response->assertStatus(200);
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
-            'avatar' => 'https://example.com/avatar.jpg'
+            'avatar' => 'https://example.com/avatar.jpg',
         ]);
     }
 
@@ -89,8 +89,8 @@ class ProfileTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'name', 'username']
-                ]
+                    '*' => ['id', 'name', 'username'],
+                ],
             ]);
     }
 
@@ -106,7 +106,7 @@ class ProfileTest extends TestCase
         $response->assertStatus(200);
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
-            'is_private' => true
+            'is_private' => true,
         ]);
     }
 

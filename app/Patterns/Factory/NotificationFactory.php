@@ -35,7 +35,7 @@ class NotificationFactory
 
     public function createMultiple(array $types): array
     {
-        return array_map(fn($type) => $this->create($type), $types);
+        return array_map(fn ($type) => $this->create($type), $types);
     }
 }
 
@@ -46,7 +46,9 @@ interface NotificationServiceInterface
 
 class EmailNotificationService implements NotificationServiceInterface
 {
-    public function __construct(private EmailService $emailService) {}
+    public function __construct(private EmailService $emailService)
+    {
+    }
 
     public function send(string $recipient, string $message, array $data = []): bool
     {
@@ -56,7 +58,9 @@ class EmailNotificationService implements NotificationServiceInterface
 
 class PushNotificationServiceAdapter implements NotificationServiceInterface
 {
-    public function __construct(private PushNotificationService $pushService) {}
+    public function __construct(private PushNotificationService $pushService)
+    {
+    }
 
     public function send(string $recipient, string $message, array $data = []): bool
     {
@@ -66,7 +70,9 @@ class PushNotificationServiceAdapter implements NotificationServiceInterface
 
 class SmsNotificationService implements NotificationServiceInterface
 {
-    public function __construct(private SmsService $smsService) {}
+    public function __construct(private SmsService $smsService)
+    {
+    }
 
     public function send(string $recipient, string $message, array $data = []): bool
     {

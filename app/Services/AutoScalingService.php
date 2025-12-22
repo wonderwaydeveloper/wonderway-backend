@@ -22,8 +22,8 @@ class AutoScalingService
     {
         $metrics = $this->getCurrentMetrics();
         $recommendations = $this->analyzeMetrics($metrics);
-        
-        if (!empty($recommendations)) {
+
+        if (! empty($recommendations)) {
             $this->executeScalingActions($recommendations);
         }
 
@@ -133,13 +133,13 @@ class AutoScalingService
     {
         // Simple load prediction based on historical data
         $historical = $this->getHistoricalMetrics($hours * 7); // 7 days of data
-        
+
         if (empty($historical)) {
             return [
                 'predicted_cpu' => 45.0,
                 'predicted_memory' => 60.0,
                 'predicted_throughput' => 100.0,
-                'confidence' => 0.5
+                'confidence' => 0.5,
             ];
         }
 
@@ -160,8 +160,10 @@ class AutoScalingService
         return Cache::remember('cpu_usage', 60, function () {
             if (function_exists('sys_getloadavg')) {
                 $load = sys_getloadavg()[0] ?? 0;
+
                 return min($load * 25, 100);
             }
+
             // Windows fallback
             return rand(20, 60); // Simulate CPU usage for testing
         });
@@ -173,6 +175,7 @@ class AutoScalingService
             $used = memory_get_usage(true);
             $limit = ini_get('memory_limit');
             $limit = $this->convertToBytes($limit);
+
             return round(($used / $limit) * 100, 2);
         });
     }
@@ -251,7 +254,7 @@ class AutoScalingService
     {
         $unit = strtolower(substr($value, -1));
         $value = (int) $value;
-        
+
         return match ($unit) {
             'g' => $value * 1024 * 1024 * 1024,
             'm' => $value * 1024 * 1024,

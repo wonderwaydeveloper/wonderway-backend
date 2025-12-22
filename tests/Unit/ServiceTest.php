@@ -2,9 +2,9 @@
 
 namespace Tests\Unit;
 
-use Tests\TestCase;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class ServiceTest extends TestCase
 {
@@ -14,7 +14,7 @@ class ServiceTest extends TestCase
     {
         $user = User::factory()->create();
         User::factory()->count(10)->create();
-        
+
         // Test basic service instantiation
         $suggestionService = new \App\Services\UserSuggestionService();
         $this->assertInstanceOf(\App\Services\UserSuggestionService::class, $suggestionService);
@@ -35,10 +35,10 @@ class ServiceTest extends TestCase
     public function test_spam_detection_service_functionality()
     {
         $spamService = new \App\Services\SpamDetectionService();
-        
+
         // Test service instantiation
         $this->assertInstanceOf(\App\Services\SpamDetectionService::class, $spamService);
-        
+
         // Test public method if available
         if (method_exists($spamService, 'checkContent')) {
             $result = $spamService->checkContent('This is normal content');

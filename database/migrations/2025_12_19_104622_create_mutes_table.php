@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     /**
      * Run the migrations.
      */
@@ -16,7 +15,7 @@ return new class extends Migration
             $table->foreignId('muter_id')->constrained('users')->cascadeOnDelete();
             $table->foreignId('muted_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
-            
+
             $table->unique(['muter_id', 'muted_id']);
         });
     }

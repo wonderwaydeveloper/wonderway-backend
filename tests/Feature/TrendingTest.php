@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Hashtag;
 use App\Models\Post;
 use App\Models\User;
-use App\Models\Hashtag;
 use App\Services\TrendingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -33,12 +33,12 @@ class TrendingTest extends TestCase
         $post1 = Post::factory()->create([
             'user_id' => $user->id,
             'published_at' => now()->subHours(2),
-            'likes_count' => 20
+            'likes_count' => 20,
         ]);
         $post2 = Post::factory()->create([
             'user_id' => $user->id,
             'published_at' => now()->subHours(1),
-            'likes_count' => 15
+            'likes_count' => 15,
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -50,8 +50,8 @@ class TrendingTest extends TestCase
                 'meta' => [
                     'limit',
                     'timeframe_hours',
-                    'generated_at'
-                ]
+                    'generated_at',
+                ],
             ]);
     }
 
@@ -64,14 +64,14 @@ class TrendingTest extends TestCase
             'user_id' => $user->id,
             'published_at' => now()->subHours(2),
             'likes_count' => 50,
-            'comments_count' => 10
+            'comments_count' => 10,
         ]);
 
         Post::factory()->create([
             'user_id' => $user->id,
             'published_at' => now()->subHours(1),
             'likes_count' => 30,
-            'comments_count' => 5
+            'comments_count' => 5,
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -83,8 +83,8 @@ class TrendingTest extends TestCase
                 'meta' => [
                     'limit',
                     'timeframe_hours',
-                    'generated_at'
-                ]
+                    'generated_at',
+                ],
             ]);
     }
 
@@ -100,13 +100,13 @@ class TrendingTest extends TestCase
         Post::factory()->create([
             'user_id' => $activeUser1->id,
             'published_at' => now()->subHours(2),
-            'likes_count' => 25
+            'likes_count' => 25,
         ]);
 
         Post::factory()->create([
             'user_id' => $activeUser2->id,
             'published_at' => now()->subHours(1),
-            'likes_count' => 20
+            'likes_count' => 20,
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -118,8 +118,8 @@ class TrendingTest extends TestCase
                 'meta' => [
                     'limit',
                     'timeframe_hours',
-                    'generated_at'
-                ]
+                    'generated_at',
+                ],
             ]);
     }
 
@@ -131,7 +131,7 @@ class TrendingTest extends TestCase
         Post::factory()->create([
             'user_id' => $user->id,
             'published_at' => now()->subHours(2),
-            'likes_count' => 15
+            'likes_count' => 15,
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -143,8 +143,8 @@ class TrendingTest extends TestCase
                 'meta' => [
                     'limit',
                     'user_id',
-                    'generated_at'
-                ]
+                    'generated_at',
+                ],
             ]);
     }
 
@@ -163,7 +163,7 @@ class TrendingTest extends TestCase
                 'velocity',
                 'hours_analyzed',
                 'interpretation',
-                'generated_at'
+                'generated_at',
             ]);
     }
 
@@ -179,7 +179,7 @@ class TrendingTest extends TestCase
                 'hashtags',
                 'posts',
                 'users',
-                'generated_at'
+                'generated_at',
             ]);
     }
 
@@ -196,7 +196,7 @@ class TrendingTest extends TestCase
                 'total_trending_posts',
                 'total_trending_users',
                 'cache_status',
-                'last_updated'
+                'last_updated',
             ]);
     }
 
@@ -214,8 +214,8 @@ class TrendingTest extends TestCase
                     'hashtags_updated',
                     'posts_updated',
                     'users_updated',
-                    'timestamp'
-                ]
+                    'timestamp',
+                ],
             ]);
     }
 
@@ -258,7 +258,7 @@ class TrendingTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                '*' => ['id', 'name', 'slug', 'posts_count']
+                '*' => ['id', 'name', 'slug', 'posts_count'],
             ]);
     }
 
@@ -270,7 +270,7 @@ class TrendingTest extends TestCase
         // Create posts for the hashtag
         $post = Post::factory()->create([
             'user_id' => $user->id,
-            'published_at' => now()
+            'published_at' => now(),
         ]);
         $hashtag->posts()->attach($post->id);
 
@@ -284,8 +284,8 @@ class TrendingTest extends TestCase
                 'trending_info' => [
                     'velocity',
                     'is_trending',
-                    'trend_direction'
-                ]
+                    'trend_direction',
+                ],
             ]);
     }
 

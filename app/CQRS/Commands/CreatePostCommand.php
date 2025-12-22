@@ -11,7 +11,8 @@ class CreatePostCommand implements CommandInterface
         private ?string $parentId = null,
         private bool $isScheduled = false,
         private ?\DateTime $scheduledAt = null
-    ) {}
+    ) {
+    }
 
     public function getPayload(): array
     {

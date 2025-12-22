@@ -33,7 +33,7 @@ class NotificationPreferenceController extends Controller
                 'mentions' => true,
                 'reposts' => true,
                 'messages' => true,
-            ]
+            ],
         ];
 
         return response()->json(['preferences' => $preferences]);
@@ -54,26 +54,26 @@ class NotificationPreferenceController extends Controller
 
         return response()->json([
             'message' => 'تنظیمات اطلاعرسانی بروزرسانی شد',
-            'preferences' => $user->notification_preferences
+            'preferences' => $user->notification_preferences,
         ]);
     }
 
     public function updateType(Request $request, $type)
     {
         $request->validate([
-            'enabled' => 'required|boolean'
+            'enabled' => 'required|boolean',
         ]);
 
-        if (!in_array($type, ['email', 'push', 'in_app'])) {
+        if (! in_array($type, ['email', 'push', 'in_app'])) {
             return response()->json(['message' => 'نوع اطلاعرسانی نامعتبر'], 400);
         }
 
         $user = $request->user();
         $preferences = $user->notification_preferences ?? [];
-        
+
         // Enable/disable all notifications for this type
         $preferences[$type] = array_fill_keys([
-            'likes', 'comments', 'follows', 'mentions', 'reposts', 'messages'
+            'likes', 'comments', 'follows', 'mentions', 'reposts', 'messages',
         ], $request->enabled);
 
         $user->notification_preferences = $preferences;
@@ -81,27 +81,27 @@ class NotificationPreferenceController extends Controller
 
         return response()->json([
             'message' => "اطلاعرسانی {$type} " . ($request->enabled ? 'فعال' : 'غیرفعال') . ' شد',
-            'preferences' => $user->notification_preferences
+            'preferences' => $user->notification_preferences,
         ]);
     }
 
     public function updateSpecific(Request $request, $type, $category)
     {
         $request->validate([
-            'enabled' => 'required|boolean'
+            'enabled' => 'required|boolean',
         ]);
 
         $validTypes = ['email', 'push', 'in_app'];
         $validCategories = ['likes', 'comments', 'follows', 'mentions', 'reposts', 'messages'];
 
-        if (!in_array($type, $validTypes) || !in_array($category, $validCategories)) {
+        if (! in_array($type, $validTypes) || ! in_array($category, $validCategories)) {
             return response()->json(['message' => 'نوع یا دسته اطلاعرسانی نامعتبر'], 400);
         }
 
         $user = $request->user();
         $preferences = $user->notification_preferences ?? [];
-        
-        if (!isset($preferences[$type])) {
+
+        if (! isset($preferences[$type])) {
             $preferences[$type] = [];
         }
 
@@ -111,7 +111,7 @@ class NotificationPreferenceController extends Controller
 
         return response()->json([
             'message' => "تنظیمات {$category} برای {$type} بروزرسانی شد",
-            'preferences' => $user->notification_preferences
+            'preferences' => $user->notification_preferences,
         ]);
     }
 }

@@ -5,7 +5,6 @@ namespace App\Notifications;
 use App\Models\Stream;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 class StreamStarted extends Notification implements ShouldQueue
@@ -32,7 +31,7 @@ class StreamStarted extends Notification implements ShouldQueue
             'stream_title' => $this->stream->title,
             'streamer_name' => $this->stream->user->name,
             'streamer_username' => $this->stream->user->username,
-            'started_at' => $this->stream->started_at
+            'started_at' => $this->stream->started_at,
         ];
     }
 

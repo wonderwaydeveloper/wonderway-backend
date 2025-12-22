@@ -16,7 +16,7 @@ class PostResource extends JsonResource
             'gif_url' => $this->gif_url,
             'likes_count' => $this->likes_count ?? 0,
             'comments_count' => $this->comments_count ?? 0,
-            'is_liked' => $this->when(auth()->check(), fn() => $this->isLikedBy(auth()->id())),
+            'is_liked' => $this->when(auth()->check(), fn () => $this->isLikedBy(auth()->id())),
             'is_draft' => $this->is_draft,
             'reply_settings' => $this->reply_settings,
             'user' => new UserResource($this->whenLoaded('user')),

@@ -24,7 +24,7 @@ class PostTest extends TestCase
 
         $response->assertStatus(201)
             ->assertJsonStructure([
-                'id', 'content', 'user', 'created_at'
+                'id', 'content', 'user', 'created_at',
             ]);
 
         $this->assertDatabaseHas('posts', [
@@ -150,7 +150,7 @@ class PostTest extends TestCase
             ->getJson('/api/timeline');
 
         $response->assertStatus(200);
-        
+
         // Check if response has data structure (optimized timeline returns different format)
         $data = $response->json();
         $this->assertTrue(isset($data['data']) || isset($data['optimized']));

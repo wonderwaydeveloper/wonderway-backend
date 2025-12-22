@@ -18,7 +18,7 @@ class UserList extends Model
         'privacy',
         'members_count',
         'subscribers_count',
-        'banner_image'
+        'banner_image',
     ];
 
     public function owner()

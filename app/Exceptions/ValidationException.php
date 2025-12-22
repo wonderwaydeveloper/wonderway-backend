@@ -19,7 +19,7 @@ class ValidationException extends Exception
         return response()->json([
             'error' => 'Validation failed',
             'message' => $this->getMessage(),
-            'errors' => $this->errors
+            'errors' => $this->errors,
         ], $this->getCode());
     }
 

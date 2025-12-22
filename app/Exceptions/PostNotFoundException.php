@@ -11,7 +11,7 @@ class PostNotFoundException extends Exception
     {
         return response()->json([
             'message' => 'پست مورد نظر یافت نشد',
-            'error' => 'POST_NOT_FOUND'
+            'error' => 'POST_NOT_FOUND',
         ], 404);
     }
 }

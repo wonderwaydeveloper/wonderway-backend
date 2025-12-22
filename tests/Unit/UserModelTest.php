@@ -24,7 +24,7 @@ class UserModelTest extends TestCase
     {
         $user = User::factory()->create();
         $follower = User::factory()->create();
-        
+
         $user->followers()->attach($follower->id);
 
         $this->assertCount(1, $user->followers);
@@ -35,7 +35,7 @@ class UserModelTest extends TestCase
     {
         $user = User::factory()->create();
         $following = User::factory()->create();
-        
+
         $user->following()->attach($following->id);
 
         $this->assertCount(1, $user->following);
@@ -46,11 +46,11 @@ class UserModelTest extends TestCase
     {
         $user = User::factory()->create();
         $targetUser = User::factory()->create();
-        
+
         $this->assertFalse($user->isFollowing($targetUser->id));
-        
+
         $user->following()->attach($targetUser->id);
-        
+
         $this->assertTrue($user->isFollowing($targetUser->id));
     }
 
@@ -59,7 +59,7 @@ class UserModelTest extends TestCase
         $adult = User::factory()->create([
             'date_of_birth' => now()->subYears(20),
         ]);
-        
+
         $child = User::factory()->create([
             'date_of_birth' => now()->subYears(15),
         ]);

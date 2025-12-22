@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     public function up(): void
     {
         Schema::create('space_participants', function (Blueprint $table) {
@@ -18,7 +17,7 @@ return new class extends Migration
             $table->datetime('joined_at')->nullable();
             $table->datetime('left_at')->nullable();
             $table->timestamps();
-            
+
             $table->unique(['space_id', 'user_id']);
             $table->index(['space_id', 'role']);
         });

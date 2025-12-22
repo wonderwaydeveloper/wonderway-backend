@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
 use App\Models\Post;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -17,28 +17,28 @@ class EditPostTest extends TestCase
         $post = Post::factory()->create([
             'user_id' => $user->id,
             'content' => 'Original content',
-            'created_at' => now()->subMinutes(10)
+            'created_at' => now()->subMinutes(10),
         ]);
 
         $this->actingAs($user);
 
         $response = $this->putJson("/api/posts/{$post->id}", [
             'content' => 'Updated content',
-            'edit_reason' => 'Fixed typo'
+            'edit_reason' => 'Fixed typo',
         ]);
 
         $response->assertStatus(200);
-        
+
         $post->refresh();
         $this->assertEquals('Updated content', $post->content);
         $this->assertTrue($post->is_edited);
         $this->assertNotNull($post->last_edited_at);
-        
+
         $this->assertDatabaseHas('post_edits', [
             'post_id' => $post->id,
             'original_content' => 'Original content',
             'new_content' => 'Updated content',
-            'edit_reason' => 'Fixed typo'
+            'edit_reason' => 'Fixed typo',
         ]);
     }
 
@@ -48,18 +48,18 @@ class EditPostTest extends TestCase
         $post = Post::factory()->create([
             'user_id' => $user->id,
             'content' => 'Original content',
-            'created_at' => now()->subMinutes(35)
+            'created_at' => now()->subMinutes(35),
         ]);
 
         $this->actingAs($user);
 
         $response = $this->putJson("/api/posts/{$post->id}", [
-            'content' => 'Updated content'
+            'content' => 'Updated content',
         ]);
 
         $response->assertStatus(422);
         $response->assertJson([
-            'message' => 'Post cannot be edited after 30 minutes'
+            'message' => 'Post cannot be edited after 30 minutes',
         ]);
     }
 
@@ -68,7 +68,7 @@ class EditPostTest extends TestCase
         $user = User::factory()->create();
         $post = Post::factory()->create([
             'user_id' => $user->id,
-            'content' => 'Original content'
+            'content' => 'Original content',
         ]);
 
         // Edit the post
@@ -86,9 +86,9 @@ class EditPostTest extends TestCase
                     'original_content',
                     'new_content',
                     'edit_reason',
-                    'edited_at'
-                ]
-            ]
+                    'edited_at',
+                ],
+            ],
         ]);
     }
 
@@ -101,7 +101,7 @@ class EditPostTest extends TestCase
         $this->actingAs($user2);
 
         $response = $this->putJson("/api/posts/{$post->id}", [
-            'content' => 'Hacked content'
+            'content' => 'Hacked content',
         ]);
 
         $response->assertStatus(403);

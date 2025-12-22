@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
-use App\Models\Post;
 use App\Models\Comment;
 use App\Models\Mention;
+use App\Models\Post;
+use App\Models\User;
 use App\Notifications\MentionNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -27,14 +27,14 @@ class MentionTest extends TestCase
         $mentionedUser = User::factory()->create(['username' => 'testuser']);
 
         $response = $this->actingAs($user)->postJson('/api/posts', [
-            'content' => 'Hello @testuser! How are you?'
+            'content' => 'Hello @testuser! How are you?',
         ]);
 
         $response->assertStatus(201);
-        
+
         $post = Post::first();
         $this->assertTrue($post->isMentioned($mentionedUser->id));
-        
+
         Notification::assertSentTo($mentionedUser, MentionNotification::class);
     }
 
@@ -45,15 +45,15 @@ class MentionTest extends TestCase
         $user2 = User::factory()->create(['username' => 'user2']);
 
         $response = $this->actingAs($user)->postJson('/api/posts', [
-            'content' => 'Hello @user1 and @user2!'
+            'content' => 'Hello @user1 and @user2!',
         ]);
 
         $response->assertStatus(201);
-        
+
         $post = Post::first();
         $this->assertTrue($post->isMentioned($user1->id));
         $this->assertTrue($post->isMentioned($user2->id));
-        
+
         Notification::assertSentTo($user1, MentionNotification::class);
         Notification::assertSentTo($user2, MentionNotification::class);
     }
@@ -63,18 +63,18 @@ class MentionTest extends TestCase
         $user = User::factory()->create();
         $postOwner = User::factory()->create();
         $mentionedUser = User::factory()->create(['username' => 'mentioned']);
-        
+
         $post = Post::factory()->create(['user_id' => $postOwner->id]);
 
         $response = $this->actingAs($user)->postJson("/api/posts/{$post->id}/comments", [
-            'content' => 'Great post @mentioned!'
+            'content' => 'Great post @mentioned!',
         ]);
 
         $response->assertStatus(201);
-        
+
         $comment = Comment::first();
         $this->assertTrue($comment->isMentioned($mentionedUser->id));
-        
+
         // Just check mention exists - notification is tested elsewhere
         $this->assertDatabaseHas('mentions', [
             'user_id' => $mentionedUser->id,
@@ -88,11 +88,11 @@ class MentionTest extends TestCase
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)->postJson('/api/posts', [
-            'content' => 'Hello @nonexistentuser!'
+            'content' => 'Hello @nonexistentuser!',
         ]);
 
         $response->assertStatus(201);
-        
+
         $post = Post::first();
         $this->assertEquals(0, $post->mentions()->count());
     }
@@ -109,8 +109,8 @@ class MentionTest extends TestCase
             ->assertJsonStructure([
                 'success',
                 'data' => [
-                    '*' => ['id', 'username', 'name', 'avatar']
-                ]
+                    '*' => ['id', 'username', 'name', 'avatar'],
+                ],
             ]);
     }
 
@@ -118,12 +118,12 @@ class MentionTest extends TestCase
     {
         $user = User::factory()->create(['username' => 'mentioned']);
         $mentioner = User::factory()->create();
-        
+
         $post = Post::factory()->create([
             'user_id' => $mentioner->id,
-            'content' => 'Hello @mentioned!'
+            'content' => 'Hello @mentioned!',
         ]);
-        
+
         // Process mentions
         $post->processMentions($post->content);
 
@@ -134,9 +134,9 @@ class MentionTest extends TestCase
                 'success',
                 'data' => [
                     'data' => [
-                        '*' => ['id', 'user_id', 'mentionable_type', 'mentionable_id']
-                    ]
-                ]
+                        '*' => ['id', 'user_id', 'mentionable_type', 'mentionable_id'],
+                    ],
+                ],
             ]);
     }
 
@@ -147,7 +147,7 @@ class MentionTest extends TestCase
 
         $post = Post::factory()->create([
             'user_id' => $user->id,
-            'content' => 'Hello @testuser and @testuser again!'
+            'content' => 'Hello @testuser and @testuser again!',
         ]);
 
         $post->processMentions($post->content);
@@ -161,12 +161,12 @@ class MentionTest extends TestCase
         $mentionedUser = User::factory()->create(['username' => 'testuser']);
 
         $this->actingAs($user)->postJson('/api/posts', [
-            'content' => 'Hello @testuser! How are you?'
+            'content' => 'Hello @testuser! How are you?',
         ]);
 
         Notification::assertSentTo($mentionedUser, MentionNotification::class, function ($notification) use ($user, $mentionedUser) {
             $data = $notification->toArray($mentionedUser);
-            
+
             return $data['type'] === 'mention' &&
                    $data['mentioner_id'] === $user->id &&
                    $data['mentioner_username'] === $user->username;
@@ -177,12 +177,12 @@ class MentionTest extends TestCase
     {
         $user = User::factory()->create();
         $mentionedUser = User::factory()->create(['username' => 'testuser']);
-        
+
         $post = Post::factory()->create([
             'user_id' => $user->id,
-            'content' => 'Hello @testuser!'
+            'content' => 'Hello @testuser!',
         ]);
-        
+
         $post->processMentions($post->content);
 
         $response = $this->actingAs($user)->getJson("/api/mentions/post/{$post->id}");
@@ -191,8 +191,8 @@ class MentionTest extends TestCase
             ->assertJsonStructure([
                 'success',
                 'data' => [
-                    '*' => ['id', 'user_id', 'user']
-                ]
+                    '*' => ['id', 'user_id', 'user'],
+                ],
             ]);
     }
 }

@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\GroupConversation;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class GroupChatTest extends TestCase
 {
@@ -15,12 +15,12 @@ class GroupChatTest extends TestCase
     {
         $user = User::factory()->create();
         $members = User::factory()->count(3)->create();
-        
+
         $response = $this->actingAs($user)->postJson('/api/groups', [
             'name' => 'Test Group',
-            'member_ids' => $members->pluck('id')->toArray()
+            'member_ids' => $members->pluck('id')->toArray(),
         ]);
-        
+
         $response->assertStatus(201);
     }
 
@@ -29,11 +29,11 @@ class GroupChatTest extends TestCase
         $user = User::factory()->create();
         $group = GroupConversation::factory()->create();
         $group->members()->attach($user->id);
-        
+
         $response = $this->actingAs($user)->postJson("/api/groups/{$group->id}/messages", [
-            'content' => 'Hello group!'
+            'content' => 'Hello group!',
         ]);
-        
+
         $response->assertStatus(201);
     }
 }

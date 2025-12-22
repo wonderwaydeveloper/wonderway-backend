@@ -11,7 +11,8 @@ class UserService
 {
     public function __construct(
         private UserRepositoryInterface $userRepository
-    ) {}
+    ) {
+    }
 
     /**
      * Get user profile with counts
@@ -36,7 +37,7 @@ class UserService
     {
         $allowedFields = ['name', 'bio', 'avatar'];
         $updateData = array_intersect_key($data, array_flip($allowedFields));
-        
+
         return $this->userRepository->update($user, $updateData);
     }
 
@@ -70,7 +71,7 @@ class UserService
         // For now, just return success message
         return [
             'message' => 'User blocked successfully',
-            'blocked_user' => $targetUser->only(['id', 'name', 'username'])
+            'blocked_user' => $targetUser->only(['id', 'name', 'username']),
         ];
     }
 
@@ -83,7 +84,7 @@ class UserService
         // For now, just return success message
         return [
             'message' => 'User unblocked successfully',
-            'unblocked_user' => $targetUser->only(['id', 'name', 'username'])
+            'unblocked_user' => $targetUser->only(['id', 'name', 'username']),
         ];
     }
 
@@ -96,7 +97,7 @@ class UserService
         // For now, just return success message
         return [
             'message' => 'User muted successfully',
-            'muted_user' => $targetUser->only(['id', 'name', 'username'])
+            'muted_user' => $targetUser->only(['id', 'name', 'username']),
         ];
     }
 
@@ -109,7 +110,7 @@ class UserService
         // For now, just return success message
         return [
             'message' => 'User unmuted successfully',
-            'unmuted_user' => $targetUser->only(['id', 'name', 'username'])
+            'unmuted_user' => $targetUser->only(['id', 'name', 'username']),
         ];
     }
 }

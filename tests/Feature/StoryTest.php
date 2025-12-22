@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Story;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Tests\TestCase;
 
 class StoryTest extends TestCase
 {
@@ -18,12 +18,12 @@ class StoryTest extends TestCase
         Storage::fake('public');
         $user = User::factory()->create();
         $file = UploadedFile::fake()->image('story.jpg');
-        
+
         $response = $this->actingAs($user)->postJson('/api/stories', [
             'media' => $file,
-            'caption' => 'My story'
+            'caption' => 'My story',
         ]);
-        
+
         $response->assertStatus(201)
                 ->assertJsonStructure(['id', 'media_url', 'user_id']);
     }
@@ -33,11 +33,11 @@ class StoryTest extends TestCase
         $user = User::factory()->create();
         Story::factory()->count(3)->create([
             'user_id' => $user->id,
-            'expires_at' => now()->addHours(12)
+            'expires_at' => now()->addHours(12),
         ]);
-        
+
         $response = $this->actingAs($user)->getJson('/api/stories');
-        
+
         $response->assertStatus(200);
     }
 
@@ -46,11 +46,11 @@ class StoryTest extends TestCase
         $user = User::factory()->create();
         Story::factory()->create([
             'user_id' => $user->id,
-            'expires_at' => now()->subHours(1)
+            'expires_at' => now()->subHours(1),
         ]);
-        
+
         $response = $this->actingAs($user)->getJson('/api/stories');
-        
+
         $response->assertStatus(200);
     }
 }

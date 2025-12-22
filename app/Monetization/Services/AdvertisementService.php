@@ -2,8 +2,8 @@
 
 namespace App\Monetization\Services;
 
-use App\Monetization\Models\Advertisement;
 use App\Models\User;
+use App\Monetization\Models\Advertisement;
 use Illuminate\Support\Collection;
 
 class AdvertisementService
@@ -64,7 +64,7 @@ class AdvertisementService
     public function getAdvertiserAnalytics(int $advertiserId): array
     {
         $ads = Advertisement::where('advertiser_id', $advertiserId)->get();
-        
+
         return [
             'total_campaigns' => $ads->count(),
             'active_campaigns' => $ads->where('status', 'active')->count(),
@@ -72,8 +72,8 @@ class AdvertisementService
             'total_impressions' => $ads->sum('impressions_count'),
             'total_clicks' => $ads->sum('clicks_count'),
             'total_conversions' => $ads->sum('conversions_count'),
-            'average_ctr' => $ads->avg(fn($ad) => $ad->getCTR()),
-            'average_conversion_rate' => $ads->avg(fn($ad) => $ad->getConversionRate()),
+            'average_ctr' => $ads->avg(fn ($ad) => $ad->getCTR()),
+            'average_conversion_rate' => $ads->avg(fn ($ad) => $ad->getConversionRate()),
         ];
     }
 

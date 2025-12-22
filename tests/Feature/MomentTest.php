@@ -21,14 +21,14 @@ class MomentTest extends TestCase
             'title' => 'My First Moment',
             'description' => 'A collection of my best posts',
             'privacy' => 'public',
-            'post_ids' => $posts->pluck('id')->toArray()
+            'post_ids' => $posts->pluck('id')->toArray(),
         ]);
 
         $response->assertStatus(201);
         $this->assertDatabaseHas('moments', [
             'user_id' => $user->id,
             'title' => 'My First Moment',
-            'posts_count' => 3
+            'posts_count' => 3,
         ]);
     }
 
@@ -61,7 +61,7 @@ class MomentTest extends TestCase
 
         $response = $this->actingAs($user)
             ->postJson("/api/moments/{$moment->id}/posts", [
-                'post_id' => $post->id
+                'post_id' => $post->id,
             ]);
 
         $response->assertStatus(200);
@@ -73,7 +73,7 @@ class MomentTest extends TestCase
         $user = User::factory()->create();
         $moment = Moment::factory()->create(['user_id' => $user->id]);
         $post = Post::factory()->create();
-        
+
         $moment->addPost($post->id);
 
         $response = $this->actingAs($user)
@@ -91,7 +91,7 @@ class MomentTest extends TestCase
         $response = $this->actingAs($user)->postJson('/api/moments', [
             'title' => 'My Moment',
             'privacy' => 'public',
-            'post_ids' => [$post->id] // Only 1 post, minimum is 2
+            'post_ids' => [$post->id], // Only 1 post, minimum is 2
         ]);
 
         $response->assertStatus(422);
@@ -101,7 +101,7 @@ class MomentTest extends TestCase
     {
         // Create test in isolated scope
         $user = User::factory()->create();
-        
+
         // Create moments with unique titles to avoid conflicts
         $featured1 = Moment::factory()->featured()->public()->create(['title' => 'Featured Test 1']);
         $featured2 = Moment::factory()->featured()->public()->create(['title' => 'Featured Test 2']);
@@ -110,14 +110,14 @@ class MomentTest extends TestCase
         $response = $this->actingAs($user)->getJson('/api/moments/featured');
 
         $response->assertStatus(200);
-        
+
         // Check that we have at least our 2 featured moments
         $data = $response->json('data');
         $featuredTitles = collect($data)->where('is_featured', true)->pluck('title')->toArray();
-        
+
         $this->assertContains('Featured Test 1', $featuredTitles);
         $this->assertContains('Featured Test 2', $featuredTitles);
-        
+
         // Ensure all returned items are featured
         foreach ($data as $moment) {
             $this->assertTrue($moment['is_featured'], 'All returned moments should be featured');
@@ -144,7 +144,7 @@ class MomentTest extends TestCase
         $response = $this->postJson('/api/moments', [
             'title' => 'My Moment',
             'privacy' => 'public',
-            'post_ids' => $posts->pluck('id')->toArray()
+            'post_ids' => $posts->pluck('id')->toArray(),
         ]);
 
         $response->assertStatus(401);

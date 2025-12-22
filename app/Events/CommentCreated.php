@@ -9,10 +9,12 @@ use Illuminate\Queue\SerializesModels;
 
 class CommentCreated
 {
-    use Dispatchable, SerializesModels;
+    use Dispatchable;
+    use SerializesModels;
 
     public function __construct(
         public Comment $comment,
         public User $user
-    ) {}
+    ) {
+    }
 }

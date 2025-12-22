@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     public function up(): void
     {
         Schema::create('moments', function (Blueprint $table) {
@@ -19,7 +18,7 @@ return new class extends Migration
             $table->integer('posts_count')->default(0);
             $table->integer('views_count')->default(0);
             $table->timestamps();
-            
+
             $table->index(['user_id', 'privacy']);
             $table->index('is_featured');
         });
@@ -30,7 +29,7 @@ return new class extends Migration
             $table->foreignId('post_id')->constrained()->onDelete('cascade');
             $table->integer('position')->default(0);
             $table->timestamps();
-            
+
             $table->unique(['moment_id', 'post_id']);
             $table->index('position');
         });

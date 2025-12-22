@@ -2,9 +2,9 @@
 
 namespace App\Monetization\Services;
 
-use App\Monetization\Models\CreatorFund;
-use App\Models\User;
 use App\Models\Post;
+use App\Models\User;
+use App\Monetization\Models\CreatorFund;
 use Illuminate\Support\Collection;
 
 class CreatorFundService
@@ -20,7 +20,7 @@ class CreatorFundService
         $totalLikes = $posts->sum('likes_count');
         $totalComments = $posts->sum('comments_count');
         $totalReposts = $posts->sum('reposts_count');
-        
+
         $totalEngagement = $totalLikes + $totalComments + $totalReposts;
         $qualityScore = $this->calculateQualityScore($creator, $posts);
 
@@ -57,7 +57,7 @@ class CreatorFundService
                 $query->where('is_verified', true);
             })
             ->get()
-            ->filter(fn($fund) => $fund->isEligible());
+            ->filter(fn ($fund) => $fund->isEligible());
 
         $processed = [];
         foreach ($eligibleFunds as $fund) {
@@ -73,7 +73,7 @@ class CreatorFundService
     {
         // Integration with payment gateway would go here
         // For now, we'll simulate successful payment
-        
+
         $fund->update([
             'status' => 'paid',
             'paid_at' => now(),
@@ -88,25 +88,37 @@ class CreatorFundService
     private function calculateQualityScore(User $creator, Collection $posts): float
     {
         $baseScore = 70;
-        
+
         // Engagement rate bonus
         $totalViews = $posts->sum('views_count');
         $totalEngagement = $posts->sum('likes_count') + $posts->sum('comments_count');
         $engagementRate = $totalViews > 0 ? ($totalEngagement / $totalViews) * 100 : 0;
-        
-        if ($engagementRate > 5) $baseScore += 10;
-        if ($engagementRate > 10) $baseScore += 10;
-        
+
+        if ($engagementRate > 5) {
+            $baseScore += 10;
+        }
+        if ($engagementRate > 10) {
+            $baseScore += 10;
+        }
+
         // Consistency bonus
         $postsCount = $posts->count();
-        if ($postsCount >= 10) $baseScore += 5;
-        if ($postsCount >= 20) $baseScore += 5;
-        
+        if ($postsCount >= 10) {
+            $baseScore += 5;
+        }
+        if ($postsCount >= 20) {
+            $baseScore += 5;
+        }
+
         // Follower count bonus
         $followersCount = $creator->followers()->count();
-        if ($followersCount > 10000) $baseScore += 5;
-        if ($followersCount > 100000) $baseScore += 5;
-        
+        if ($followersCount > 10000) {
+            $baseScore += 5;
+        }
+        if ($followersCount > 100000) {
+            $baseScore += 5;
+        }
+
         return min($baseScore, 100);
     }
 

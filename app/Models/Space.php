@@ -20,14 +20,14 @@ class Space extends Model
         'scheduled_at',
         'started_at',
         'ended_at',
-        'settings'
+        'settings',
     ];
 
     protected $casts = [
         'scheduled_at' => 'datetime',
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
-        'settings' => 'array'
+        'settings' => 'array',
     ];
 
     public function host()
@@ -63,21 +63,25 @@ class Space extends Model
     public function canJoin($userId)
     {
         // Check if space is live
-        if (!$this->isLive()) return false;
-        
+        if (! $this->isLive()) {
+            return false;
+        }
+
         // Always allow joining public spaces
-        if ($this->privacy === 'public') return true;
-        
+        if ($this->privacy === 'public') {
+            return true;
+        }
+
         // For followers-only spaces
         if ($this->privacy === 'followers') {
             return $this->host->followers()->where('follower_id', $userId)->exists();
         }
-        
+
         // For invited-only spaces
         if ($this->privacy === 'invited') {
             return $this->participants()->where('user_id', $userId)->where('status', 'invited')->exists();
         }
-        
+
         return false;
     }
 

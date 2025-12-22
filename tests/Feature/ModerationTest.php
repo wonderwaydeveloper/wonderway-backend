@@ -2,9 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
-use App\Models\Comment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
@@ -23,7 +23,7 @@ class ModerationTest extends TestCase
                 'reportable_type' => 'post',
                 'reportable_id' => $post->id,
                 'reason' => 'spam',
-                'description' => 'This post contains spam content'
+                'description' => 'This post contains spam content',
             ]);
 
         $response->assertStatus(200);
@@ -32,7 +32,7 @@ class ModerationTest extends TestCase
             'reporter_id' => $user->id,
             'reportable_type' => 'post',
             'reportable_id' => $post->id,
-            'reason' => 'spam'
+            'reason' => 'spam',
         ]);
     }
 
@@ -45,7 +45,7 @@ class ModerationTest extends TestCase
             ->postJson('/api/moderation/report', [
                 'reportable_type' => 'comment',
                 'reportable_id' => $comment->id,
-                'reason' => 'harassment'
+                'reason' => 'harassment',
             ]);
 
         $response->assertStatus(200);
@@ -54,7 +54,7 @@ class ModerationTest extends TestCase
             'reporter_id' => $user->id,
             'reportable_type' => 'comment',
             'reportable_id' => $comment->id,
-            'reason' => 'harassment'
+            'reason' => 'harassment',
         ]);
     }
 
@@ -67,7 +67,7 @@ class ModerationTest extends TestCase
             ->postJson('/api/moderation/report', [
                 'reportable_type' => 'user',
                 'reportable_id' => $reportedUser->id,
-                'reason' => 'harassment'
+                'reason' => 'harassment',
             ]);
 
         $response->assertStatus(200);
@@ -76,7 +76,7 @@ class ModerationTest extends TestCase
             'reporter_id' => $reporter->id,
             'reportable_type' => 'user',
             'reportable_id' => $reportedUser->id,
-            'reason' => 'harassment'
+            'reason' => 'harassment',
         ]);
     }
 
@@ -90,7 +90,7 @@ class ModerationTest extends TestCase
             ->postJson('/api/moderation/report', [
                 'reportable_type' => 'post',
                 'reportable_id' => $post->id,
-                'reason' => 'spam'
+                'reason' => 'spam',
             ]);
 
         // Second report (should fail)
@@ -98,7 +98,7 @@ class ModerationTest extends TestCase
             ->postJson('/api/moderation/report', [
                 'reportable_type' => 'post',
                 'reportable_id' => $post->id,
-                'reason' => 'inappropriate'
+                'reason' => 'inappropriate',
             ]);
 
         $response->assertStatus(400);
@@ -113,7 +113,7 @@ class ModerationTest extends TestCase
             ->postJson('/api/moderation/report', [
                 'reportable_type' => 'post',
                 'reportable_id' => $post->id,
-                'reason' => 'invalid_reason'
+                'reason' => 'invalid_reason',
             ]);
 
         $response->assertStatus(422)
@@ -123,14 +123,14 @@ class ModerationTest extends TestCase
     public function test_admin_can_view_reports(): void
     {
         $admin = User::factory()->create();
-        
+
         // Create admin role if not exists
-        if (!\Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
+        if (! \Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
             \Spatie\Permission\Models\Role::create(['name' => 'admin']);
         }
-        
+
         $admin->assignRole('admin');
-        
+
         $user = User::factory()->create();
         $post = Post::factory()->create();
 
@@ -141,7 +141,7 @@ class ModerationTest extends TestCase
             'reason' => 'spam',
             'status' => 'pending',
             'created_at' => now(),
-            'updated_at' => now()
+            'updated_at' => now(),
         ]);
 
         $response = $this->actingAs($admin, 'sanctum')
@@ -150,20 +150,20 @@ class ModerationTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'reason', 'status', 'reportable_type']
-                ]
+                    '*' => ['id', 'reason', 'status', 'reportable_type'],
+                ],
             ]);
     }
 
     public function test_admin_can_get_moderation_stats(): void
     {
         $admin = User::factory()->create();
-        
+
         // Create admin role if not exists
-        if (!\Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
+        if (! \Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
             \Spatie\Permission\Models\Role::create(['name' => 'admin']);
         }
-        
+
         $admin->assignRole('admin');
 
         $response = $this->actingAs($admin, 'sanctum')
@@ -172,7 +172,7 @@ class ModerationTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'reports' => ['total', 'pending', 'reviewed', 'resolved'],
-                'content' => ['total_posts', 'flagged_posts', 'total_users', 'suspended_users']
+                'content' => ['total_posts', 'flagged_posts', 'total_users', 'suspended_users'],
             ]);
     }
 
@@ -183,7 +183,7 @@ class ModerationTest extends TestCase
         $response = $this->postJson('/api/moderation/report', [
             'reportable_type' => 'post',
             'reportable_id' => $post->id,
-            'reason' => 'spam'
+            'reason' => 'spam',
         ]);
 
         $response->assertStatus(401);

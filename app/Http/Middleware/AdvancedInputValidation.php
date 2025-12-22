@@ -13,24 +13,24 @@ class AdvancedInputValidation
         if ($this->detectXss($request)) {
             return response()->json([
                 'message' => 'محتوای مشکوک شناسایی شد',
-                'error' => 'SUSPICIOUS_CONTENT'
+                'error' => 'SUSPICIOUS_CONTENT',
             ], 400);
         }
-        
+
         // Check for SQL injection patterns
         if ($this->detectSqlInjection($request)) {
             return response()->json([
                 'message' => 'درخواست نامعتبر شناسایی شد',
-                'error' => 'INVALID_REQUEST'
+                'error' => 'INVALID_REQUEST',
             ], 400);
         }
-        
+
         // Sanitize all string inputs AFTER detection
         $this->sanitizeInputs($request);
-        
+
         return $next($request);
     }
-    
+
     private function sanitizeInputs(Request $request)
     {
         $input = $request->all();
@@ -42,16 +42,16 @@ class AdvancedInputValidation
         });
         $request->merge($input);
     }
-    
+
     private function detectSqlInjection(Request $request): bool
     {
         $patterns = [
             '/(\bUNION\b|\bSELECT\b|\bINSERT\b|\bDELETE\b|\bUPDATE\b|\bDROP\b)/i',
             '/(\bOR\b|\bAND\b)\s+\d+\s*=\s*\d+/i',
             '/[\'";].*(\bOR\b|\bAND\b)/i',
-            '/\b(exec|execute|sp_|xp_)\b/i'
+            '/\b(exec|execute|sp_|xp_)\b/i',
         ];
-        
+
         foreach ($request->all() as $value) {
             if (is_string($value)) {
                 foreach ($patterns as $pattern) {
@@ -61,10 +61,10 @@ class AdvancedInputValidation
                 }
             }
         }
-        
+
         return false;
     }
-    
+
     private function detectXss(Request $request): bool
     {
         $patterns = [
@@ -73,9 +73,9 @@ class AdvancedInputValidation
             '/on\w+\s*=/i',
             '/<iframe[^>]*>/i',
             '/<object[^>]*>/i',
-            '/<embed[^>]*>/i'
+            '/<embed[^>]*>/i',
         ];
-        
+
         foreach ($request->all() as $value) {
             if (is_string($value)) {
                 foreach ($patterns as $pattern) {
@@ -85,7 +85,7 @@ class AdvancedInputValidation
                 }
             }
         }
-        
+
         return false;
     }
 }

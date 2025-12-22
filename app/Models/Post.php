@@ -9,7 +9,9 @@ use Laravel\Scout\Searchable;
 
 class Post extends Model
 {
-    use HasFactory, Searchable, Mentionable;
+    use HasFactory;
+    use Searchable;
+    use Mentionable;
 
     protected $guarded = ['id'];
 
@@ -80,7 +82,7 @@ class Post extends Model
         return $query->with([
             'user:id,name,username,avatar',
             'quotedPost:id,content,user_id',
-            'quotedPost.user:id,name,username'
+            'quotedPost.user:id,name,username',
         ]);
     }
 
@@ -103,9 +105,9 @@ class Post extends Model
     {
         $hashtags = Hashtag::createFromText($this->content);
         $hashtagIds = collect($hashtags)->pluck('id')->toArray();
-        
+
         $this->hashtags()->sync($hashtagIds);
-        
+
         foreach ($hashtags as $hashtag) {
             $hashtag->update(['posts_count' => $hashtag->posts()->count()]);
         }
@@ -160,12 +162,12 @@ class Post extends Model
 
     public function isQuote(): bool
     {
-        return !is_null($this->quoted_post_id);
+        return ! is_null($this->quoted_post_id);
     }
 
     public function isThread(): bool
     {
-        return !is_null($this->thread_id) || $this->threadPosts()->exists();
+        return ! is_null($this->thread_id) || $this->threadPosts()->exists();
     }
 
     public function isMainThread(): bool
@@ -181,6 +183,7 @@ class Post extends Model
     public function getFullThread()
     {
         $root = $this->getThreadRoot();
+
         return $root->load('threadPosts');
     }
 
@@ -197,7 +200,7 @@ class Post extends Model
             'is_draft' => $this->is_draft,
             'likes_count' => $this->likes_count,
             'comments_count' => $this->comments_count,
-            'has_media' => !empty($this->image) || !empty($this->gif_url),
+            'has_media' => ! empty($this->image) || ! empty($this->gif_url),
             'thread_id' => $this->thread_id,
             'quoted_post_id' => $this->quoted_post_id,
         ];
@@ -205,7 +208,7 @@ class Post extends Model
 
     public function shouldBeSearchable()
     {
-        return !$this->is_draft;
+        return ! $this->is_draft;
     }
 
     public function edits()
@@ -220,7 +223,7 @@ class Post extends Model
 
     public function editPost(string $newContent, ?string $reason = null): void
     {
-        if (!$this->canBeEdited()) {
+        if (! $this->canBeEdited()) {
             throw new \Exception('Post cannot be edited after 30 minutes');
         }
 

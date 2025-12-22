@@ -10,7 +10,8 @@ use Illuminate\Queue\SerializesModels;
 
 class NotificationEmail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public $user;
     public $notification;

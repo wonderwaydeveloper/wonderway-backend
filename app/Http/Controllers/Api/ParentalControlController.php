@@ -26,7 +26,7 @@ class ParentalControlController extends Controller
 
         $child = User::where('email', $request->child_email)->first();
 
-        if (!$child->is_child) {
+        if (! $child->is_child) {
             return response()->json(['message' => 'این کاربر کودک نیست'], 400);
         }
 
@@ -75,7 +75,7 @@ class ParentalControlController extends Controller
     {
         $control = $request->user()->parentalControl;
 
-        if (!$control) {
+        if (! $control) {
             return response()->json(['message' => 'کنترل والدین فعال نیست'], 404);
         }
 
@@ -85,13 +85,13 @@ class ParentalControlController extends Controller
     public function updateSettings(Request $request, User $child)
     {
         $parent = $request->user();
-        
+
         $link = ParentalLink::where('parent_id', $parent->id)
             ->where('child_id', $child->id)
             ->where('status', 'approved')
             ->first();
 
-        if (!$link) {
+        if (! $link) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
@@ -141,30 +141,31 @@ class ParentalControlController extends Controller
     public function childActivity(Request $request, User $child)
     {
         $parent = $request->user();
-        
+
         $link = ParentalLink::where('parent_id', $parent->id)
             ->where('child_id', $child->id)
             ->where('status', 'approved')
             ->first();
 
-        if (!$link) {
+        if (! $link) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         $activity = $this->service->getChildActivity($child->id);
+
         return response()->json($activity);
     }
 
     public function blockContent(Request $request, User $child)
     {
         $parent = $request->user();
-        
+
         $link = ParentalLink::where('parent_id', $parent->id)
             ->where('child_id', $child->id)
             ->where('status', 'approved')
             ->first();
 
-        if (!$link) {
+        if (! $link) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 

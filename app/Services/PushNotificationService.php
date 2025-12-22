@@ -16,19 +16,20 @@ class PushNotificationService
         if (app()->environment('testing')) {
             return;
         }
-        
+
         $credentialsPath = config('services.firebase.credentials');
-        
+
         // Skip if no credentials configured
-        if (empty($credentialsPath) || !file_exists($credentialsPath)) {
+        if (empty($credentialsPath) || ! file_exists($credentialsPath)) {
             Log::warning('Firebase credentials not found, push notifications disabled');
+
             return;
         }
-        
+
         $client = new Client();
         $client->setAuthConfig($credentialsPath);
         $client->addScope('https://www.googleapis.com/auth/firebase.messaging');
-        
+
         $this->messaging = new FirebaseCloudMessaging($client);
     }
 
@@ -37,15 +38,17 @@ class PushNotificationService
         // Mock response in testing environment
         if (app()->environment('testing')) {
             Log::info('Mock push notification sent', ['device' => $deviceToken]);
+
             return true;
         }
-        
+
         // Skip if messaging not initialized
-        if (!$this->messaging) {
+        if (! $this->messaging) {
             Log::warning('Firebase messaging not initialized');
+
             return false;
         }
-        
+
         try {
             $message = [
                 'token' => $deviceToken,
@@ -63,9 +66,11 @@ class PushNotificationService
             );
 
             Log::info('Push notification sent', ['device' => $deviceToken]);
+
             return true;
         } catch (\Exception $e) {
             Log::error('Push notification failed', ['error' => $e->getMessage()]);
+
             return false;
         }
     }
@@ -80,7 +85,7 @@ class PushNotificationService
     public function sendNotification($user, $type, $data)
     {
         $devices = $user->devices()->where('active', true)->get();
-        
+
         $title = $this->getNotificationTitle($type);
         $body = $this->getNotificationBody($type, $data);
 

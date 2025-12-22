@@ -2,11 +2,11 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
-use App\Models\Post;
 use App\Models\Follow;
+use App\Models\Post;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class TimelineTest extends TestCase
 {
@@ -16,16 +16,16 @@ class TimelineTest extends TestCase
     {
         $user = User::factory()->create();
         $followedUser = User::factory()->create();
-        
+
         Follow::create([
             'follower_id' => $user->id,
-            'following_id' => $followedUser->id
+            'following_id' => $followedUser->id,
         ]);
-        
+
         $post = Post::factory()->create(['user_id' => $followedUser->id]);
-        
+
         $response = $this->actingAs($user)->getJson('/api/timeline');
-        
+
         $response->assertStatus(200)
                 ->assertJsonStructure(['data' => [['id', 'content', 'user_id']]]);
     }
@@ -34,16 +34,16 @@ class TimelineTest extends TestCase
     {
         $user = User::factory()->create();
         $followedUser = User::factory()->create();
-        
+
         Follow::create([
             'follower_id' => $user->id,
-            'following_id' => $followedUser->id
+            'following_id' => $followedUser->id,
         ]);
-        
+
         Post::factory()->count(25)->create(['user_id' => $followedUser->id]);
-        
+
         $response = $this->actingAs($user)->getJson('/api/timeline?page=1');
-        
+
         $response->assertStatus(200);
         $this->assertLessThanOrEqual(20, count($response->json('data')));
     }

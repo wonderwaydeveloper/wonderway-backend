@@ -2,8 +2,8 @@
 
 namespace App\Policies;
 
-use App\Models\UserList;
 use App\Models\User;
+use App\Models\UserList;
 
 class UserListPolicy
 {

@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Services\DatabaseService;
 use App\Services\QueueManager;
 use App\Services\RedisClusterService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class MonitoringController extends Controller
@@ -75,7 +73,7 @@ class MonitoringController extends Controller
         try {
             $redis = \Illuminate\Support\Facades\Redis::connection();
             $info = $redis->info();
-            
+
             return [
                 'memory_used' => $info['used_memory_human'] ?? 'unknown',
                 'memory_peak' => $info['used_memory_peak_human'] ?? 'unknown',
@@ -93,6 +91,7 @@ class MonitoringController extends Controller
     private function getQueueStats(): array
     {
         $queueManager = app(QueueManager::class);
+
         return $queueManager->getQueueStats();
     }
 
@@ -111,6 +110,7 @@ class MonitoringController extends Controller
     {
         try {
             $connections = DB::select('SHOW PROCESSLIST');
+
             return [
                 'total' => count($connections),
                 'active' => collect($connections)->where('Command', '!=', 'Sleep')->count(),
@@ -127,7 +127,7 @@ class MonitoringController extends Controller
             // This would require slow query log to be enabled
             return [
                 'enabled' => false,
-                'message' => 'Slow query log not configured'
+                'message' => 'Slow query log not configured',
             ];
         } catch (\Exception $e) {
             return ['error' => $e->getMessage()];
@@ -155,13 +155,14 @@ class MonitoringController extends Controller
         $hits = $info['keyspace_hits'] ?? 0;
         $misses = $info['keyspace_misses'] ?? 0;
         $total = $hits + $misses;
-        
+
         return $total > 0 ? round(($hits / $total) * 100, 2) : 0;
     }
 
     private function getUptime(): string
     {
         $uptime = time() - filectime(__FILE__);
+
         return gmdate('H:i:s', $uptime);
     }
 }

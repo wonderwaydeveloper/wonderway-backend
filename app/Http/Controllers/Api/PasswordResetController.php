@@ -54,7 +54,7 @@ class PasswordResetController extends Controller
             ->where('email', $request->email)
             ->first();
 
-        if (!$tokenData || !Hash::check($request->token, $tokenData->token)) {
+        if (! $tokenData || ! Hash::check($request->token, $tokenData->token)) {
             throw ValidationException::withMessages([
                 'token' => ['Invalid token'],
             ]);
@@ -85,7 +85,7 @@ class PasswordResetController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user) {
+        if (! $user) {
             return response()->json([
                 'valid' => false,
                 'message' => 'User not found',
@@ -96,14 +96,14 @@ class PasswordResetController extends Controller
             ->where('email', $request->email)
             ->first();
 
-        if (!$tokenData) {
+        if (! $tokenData) {
             return response()->json([
                 'valid' => false,
                 'message' => 'Invalid token',
             ], 400);
         }
 
-        if (!Hash::check($request->token, $tokenData->token)) {
+        if (! Hash::check($request->token, $tokenData->token)) {
             return response()->json([
                 'valid' => false,
                 'message' => 'Invalid token',

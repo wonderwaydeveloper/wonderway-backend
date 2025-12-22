@@ -97,24 +97,25 @@ class NotificationService
             return $notification;
         } catch (\Exception $e) {
             Log::error('Notification creation failed', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
 
     private function sendPushNotification($user, $type, $userName)
     {
-        if (!$this->pushService) {
+        if (! $this->pushService) {
             return;
         }
-        
+
         try {
             // Check user preferences
-            if (!$this->shouldSendPushNotification($user, $type)) {
+            if (! $this->shouldSendPushNotification($user, $type)) {
                 return;
             }
 
             $devices = $user->devices()->where('active', true)->get();
-            
+
             if ($devices->isEmpty()) {
                 return;
             }
@@ -132,13 +133,13 @@ class NotificationService
 
     private function sendEmailNotification($user, $type, $userName)
     {
-        if (!$this->emailService) {
+        if (! $this->emailService) {
             return;
         }
-        
+
         try {
             // Check user preferences
-            if (!$this->shouldSendEmailNotification($user, $type)) {
+            if (! $this->shouldSendEmailNotification($user, $type)) {
                 return;
             }
 
@@ -156,15 +157,15 @@ class NotificationService
     private function shouldSendPushNotification($user, $type)
     {
         $preferences = $user->notification_preferences;
-        
-        if (!$preferences || !isset($preferences['push'])) {
+
+        if (! $preferences || ! isset($preferences['push'])) {
             return true; // Default to enabled
         }
 
         $pushPrefs = $preferences['push'];
         $typeMap = [
             'like' => 'likes',
-            'comment' => 'comments', 
+            'comment' => 'comments',
             'follow' => 'follows',
             'mention' => 'mentions',
             'repost' => 'reposts',
@@ -172,14 +173,15 @@ class NotificationService
         ];
 
         $prefKey = $typeMap[$type] ?? null;
+
         return $prefKey ? ($pushPrefs[$prefKey] ?? true) : true;
     }
 
     private function shouldSendEmailNotification($user, $type)
     {
         $preferences = $user->notification_preferences;
-        
-        if (!$preferences || !isset($preferences['email'])) {
+
+        if (! $preferences || ! isset($preferences['email'])) {
             return true; // Default to enabled
         }
 
@@ -187,13 +189,14 @@ class NotificationService
         $typeMap = [
             'like' => 'likes',
             'comment' => 'comments',
-            'follow' => 'follows', 
+            'follow' => 'follows',
             'mention' => 'mentions',
             'repost' => 'reposts',
             'message' => 'messages',
         ];
 
         $prefKey = $typeMap[$type] ?? null;
+
         return $prefKey ? ($emailPrefs[$prefKey] ?? true) : true;
     }
 

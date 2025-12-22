@@ -34,7 +34,7 @@ class ABTestController extends Controller
             'variants' => 'required|array',
             'variants.A' => 'required|array',
             'variants.B' => 'required|array',
-            'traffic_percentage' => 'integer|min:1|max:100'
+            'traffic_percentage' => 'integer|min:1|max:100',
         ]);
 
         $testId = $this->abTestingService->createTest(
@@ -46,7 +46,7 @@ class ABTestController extends Controller
 
         return response()->json([
             'message' => 'A/B test created successfully',
-            'test_id' => $testId
+            'test_id' => $testId,
         ], 201);
     }
 
@@ -54,7 +54,7 @@ class ABTestController extends Controller
     {
         $results = $this->abTestingService->getTestResults($id);
 
-        if (!$results) {
+        if (! $results) {
             return response()->json(['message' => 'Test not found'], 404);
         }
 
@@ -78,7 +78,7 @@ class ABTestController extends Controller
     public function assign(Request $request)
     {
         $request->validate([
-            'test_name' => 'required|string'
+            'test_name' => 'required|string',
         ]);
 
         $variant = $this->abTestingService->assignUserToTest(
@@ -88,7 +88,7 @@ class ABTestController extends Controller
 
         return response()->json([
             'variant' => $variant,
-            'in_test' => $variant !== null
+            'in_test' => $variant !== null,
         ]);
     }
 
@@ -97,7 +97,7 @@ class ABTestController extends Controller
         $request->validate([
             'test_name' => 'required|string',
             'event_type' => 'required|string',
-            'event_data' => 'nullable|array'
+            'event_data' => 'nullable|array',
         ]);
 
         $tracked = $this->abTestingService->trackEvent(
@@ -109,7 +109,7 @@ class ABTestController extends Controller
 
         return response()->json([
             'tracked' => $tracked,
-            'message' => $tracked ? 'Event tracked' : 'User not in test'
+            'message' => $tracked ? 'Event tracked' : 'User not in test',
         ]);
     }
 }

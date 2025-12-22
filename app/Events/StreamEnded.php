@@ -5,15 +5,15 @@ namespace App\Events;
 use App\Models\Stream;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
 class StreamEnded implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     public Stream $stream;
 
@@ -26,7 +26,7 @@ class StreamEnded implements ShouldBroadcast
     {
         return [
             new Channel('streams'),
-            new Channel('user.' . $this->stream->user_id)
+            new Channel('user.' . $this->stream->user_id),
         ];
     }
 
@@ -39,8 +39,8 @@ class StreamEnded implements ShouldBroadcast
                 'user' => $this->stream->user->only(['id', 'name', 'username']),
                 'status' => $this->stream->status,
                 'ended_at' => $this->stream->ended_at,
-                'duration' => $this->stream->duration
-            ]
+                'duration' => $this->stream->duration,
+            ],
         ];
     }
 }

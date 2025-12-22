@@ -14,7 +14,8 @@ class ModerationResult
         private array $violations = [],
         private int $confidenceScore = 0,
         private array $suggestedActions = []
-    ) {}
+    ) {
+    }
 
     public function isApproved(): bool
     {
@@ -77,7 +78,7 @@ class ProfanityFilterStrategy implements ContentModerationStrategy
     {
         $violations = [];
         $lowerContent = strtolower($content);
-        
+
         foreach ($this->profanityWords as $word) {
             if (strpos($lowerContent, $word) !== false) {
                 $violations[] = "Contains inappropriate word: {$word}";
@@ -116,6 +117,7 @@ class ContentModerationContext
             $this->setStrategy($strategy);
             $results[] = $this->moderate($content);
         }
+
         return $results;
     }
 }

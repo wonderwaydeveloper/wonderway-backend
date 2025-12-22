@@ -33,14 +33,14 @@ class SpamDetectionMiddleware
         // Pre-check content for obvious spam
         if ($request->has('content')) {
             $content = $request->input('content');
-            
+
             // Quick spam keyword check
             $spamKeywords = ['spam', 'fake', 'scam', 'اسپم', 'جعلی'];
             foreach ($spamKeywords as $keyword) {
                 if (stripos($content, $keyword) !== false) {
                     return response()->json([
                         'message' => 'محتوای شما حاوی کلمات مشکوک است',
-                        'error' => 'SPAM_DETECTED'
+                        'error' => 'SPAM_DETECTED',
                     ], 422);
                 }
             }
@@ -49,7 +49,7 @@ class SpamDetectionMiddleware
             if (preg_match_all('/https?:\/\/[^\s]+/', $content) > 2) {
                 return response()->json([
                     'message' => 'تعداد لینک در محتوا بیش از حد مجاز است',
-                    'error' => 'TOO_MANY_LINKS'
+                    'error' => 'TOO_MANY_LINKS',
                 ], 422);
             }
         }

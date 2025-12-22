@@ -9,7 +9,8 @@ class GetTimelineQuery implements QueryInterface
         private int $limit = 20,
         private ?string $cursor = null,
         private array $filters = []
-    ) {}
+    ) {
+    }
 
     public function getCriteria(): array
     {

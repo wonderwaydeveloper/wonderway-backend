@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
-use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -17,7 +17,7 @@ class ModerationController extends Controller
             'reportable_type' => 'required|in:post,comment,user',
             'reportable_id' => 'required|integer',
             'reason' => 'required|in:spam,harassment,inappropriate,copyright,fake_news,violence,hate_speech,other',
-            'description' => 'nullable|string|max:500'
+            'description' => 'nullable|string|max:500',
         ]);
 
         try {
@@ -41,7 +41,7 @@ class ModerationController extends Controller
                 'description' => $request->description,
                 'status' => 'pending',
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
 
             // Auto-moderate based on report count
@@ -52,7 +52,7 @@ class ModerationController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'خطا در ثبت گزارش',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -63,7 +63,7 @@ class ModerationController extends Controller
         $request->validate([
             'status' => 'nullable|in:pending,reviewed,resolved,dismissed',
             'type' => 'nullable|in:post,comment,user',
-            'per_page' => 'nullable|integer|min:1|max:100'
+            'per_page' => 'nullable|integer|min:1|max:100',
         ]);
 
         $query = DB::table('reports')
@@ -71,7 +71,7 @@ class ModerationController extends Controller
             ->select([
                 'reports.*',
                 'reporters.name as reporter_name',
-                'reporters.username as reporter_username'
+                'reporters.username as reporter_username',
             ])
             ->orderBy('reports.created_at', 'desc');
 
@@ -98,13 +98,13 @@ class ModerationController extends Controller
         $request->validate([
             'status' => 'required|in:reviewed,resolved,dismissed',
             'admin_notes' => 'nullable|string|max:1000',
-            'action_taken' => 'nullable|in:none,warning,content_removed,user_suspended,user_banned'
+            'action_taken' => 'nullable|in:none,warning,content_removed,user_suspended,user_banned',
         ]);
 
         try {
             $report = DB::table('reports')->where('id', $reportId)->first();
-            
-            if (!$report) {
+
+            if (! $report) {
                 return response()->json(['message' => 'گزارش یافت نشد'], 404);
             }
 
@@ -117,7 +117,7 @@ class ModerationController extends Controller
                     'action_taken' => $request->action_taken,
                     'reviewed_by' => auth()->id(),
                     'reviewed_at' => now(),
-                    'updated_at' => now()
+                    'updated_at' => now(),
                 ]);
 
             // Take action if specified
@@ -130,7 +130,7 @@ class ModerationController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'خطا در بروزرسانی گزارش',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -150,7 +150,7 @@ class ModerationController extends Controller
                     'flagged_posts' => Post::where('is_flagged', true)->count(),
                     'total_users' => User::count(),
                     'suspended_users' => User::where('is_suspended', true)->count(),
-                ]
+                ],
             ];
 
             return response()->json($stats);
@@ -158,7 +158,7 @@ class ModerationController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'خطا در دریافت آمار',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -176,9 +176,11 @@ class ModerationController extends Controller
             switch ($type) {
                 case 'post':
                     Post::where('id', $id)->update(['is_flagged' => true]);
+
                     break;
                 case 'user':
                     User::where('id', $id)->update(['is_flagged' => true]);
+
                     break;
             }
         }
@@ -188,6 +190,7 @@ class ModerationController extends Controller
             switch ($type) {
                 case 'post':
                     Post::where('id', $id)->update(['is_hidden' => true]);
+
                     break;
             }
         }
@@ -221,24 +224,27 @@ class ModerationController extends Controller
                 } elseif ($report->reportable_type === 'comment') {
                     Comment::where('id', $report->reportable_id)->delete();
                 }
+
                 break;
-            
+
             case 'user_suspended':
                 if ($report->reportable_type === 'user') {
                     User::where('id', $report->reportable_id)->update([
                         'is_suspended' => true,
-                        'suspended_until' => now()->addDays(7)
+                        'suspended_until' => now()->addDays(7),
                     ]);
                 }
+
                 break;
-            
+
             case 'user_banned':
                 if ($report->reportable_type === 'user') {
                     User::where('id', $report->reportable_id)->update([
                         'is_banned' => true,
-                        'banned_at' => now()
+                        'banned_at' => now(),
                     ]);
                 }
+
                 break;
         }
     }

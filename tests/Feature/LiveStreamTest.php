@@ -24,7 +24,7 @@ class LiveStreamTest extends TestCase
 
         $response->assertStatus(201)
             ->assertJsonStructure([
-                'id', 'title', 'description', 'stream_key', 'rtmp_url', 'hls_url'
+                'id', 'title', 'description', 'stream_key', 'rtmp_url', 'hls_url',
             ]);
 
         $this->assertDatabaseHas('live_streams', [
@@ -42,7 +42,7 @@ class LiveStreamTest extends TestCase
             ->postJson("/api/streams/{$stream->id}/start");
 
         $response->assertOk();
-        
+
         $stream->refresh();
         $this->assertEquals('live', $stream->status);
         $this->assertNotNull($stream->started_at);
@@ -62,7 +62,7 @@ class LiveStreamTest extends TestCase
             ->postJson("/api/streams/{$stream->id}/join");
 
         $response->assertOk();
-        
+
         $this->assertTrue($stream->viewers()->where('user_id', $viewer->id)->exists());
     }
 
@@ -93,8 +93,8 @@ class LiveStreamTest extends TestCase
         $response->assertOk()
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'title', 'user', 'viewer_count']
-                ]
+                    '*' => ['id', 'title', 'user', 'viewer_count'],
+                ],
             ]);
     }
 

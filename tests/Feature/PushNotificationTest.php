@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\DeviceToken;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class PushNotificationTest extends TestCase
 {
@@ -19,7 +19,7 @@ class PushNotificationTest extends TestCase
             ->postJson('/api/push/register', [
                 'token' => 'test_device_token_123',
                 'device_type' => 'android',
-                'device_name' => 'Samsung Galaxy S21'
+                'device_name' => 'Samsung Galaxy S21',
             ]);
 
         $response->assertStatus(200)
@@ -29,7 +29,7 @@ class PushNotificationTest extends TestCase
             'user_id' => $user->id,
             'token' => 'test_device_token_123',
             'device_type' => 'android',
-            'active' => true
+            'active' => true,
         ]);
     }
 
@@ -37,42 +37,42 @@ class PushNotificationTest extends TestCase
     {
         $user = User::factory()->create();
         $token = 'test_device_token_123';
-        
+
         DeviceToken::create([
             'user_id' => $user->id,
             'token' => $token,
             'device_type' => 'android',
-            'active' => true
+            'active' => true,
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
             ->deleteJson("/api/push/unregister/{$token}");
 
         $response->assertStatus(200);
-        
+
         $this->assertDatabaseHas('device_tokens', [
             'user_id' => $user->id,
             'token' => $token,
-            'active' => false
+            'active' => false,
         ]);
     }
 
     public function test_user_can_get_devices(): void
     {
         $user = User::factory()->create();
-        
+
         DeviceToken::create([
             'user_id' => $user->id,
             'token' => 'token1',
             'device_type' => 'android',
-            'active' => true
+            'active' => true,
         ]);
-        
+
         DeviceToken::create([
             'user_id' => $user->id,
             'token' => 'token2',
             'device_type' => 'ios',
-            'active' => false
+            'active' => false,
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -88,7 +88,7 @@ class PushNotificationTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/push/register', [
-                'device_type' => 'android'
+                'device_type' => 'android',
             ]);
 
         $response->assertStatus(422)
@@ -102,7 +102,7 @@ class PushNotificationTest extends TestCase
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/push/register', [
                 'token' => 'test_token',
-                'device_type' => 'invalid_type'
+                'device_type' => 'invalid_type',
             ]);
 
         $response->assertStatus(422)
@@ -113,7 +113,7 @@ class PushNotificationTest extends TestCase
     {
         $response = $this->postJson('/api/push/register', [
             'token' => 'test_token',
-            'device_type' => 'android'
+            'device_type' => 'android',
         ]);
 
         $response->assertStatus(401);

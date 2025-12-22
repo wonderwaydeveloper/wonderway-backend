@@ -15,12 +15,14 @@ class AutoScalingController extends Controller
     public function status()
     {
         $status = $this->autoScalingService->checkAndScale();
+
         return response()->json($status);
     }
 
     public function metrics()
     {
         $metrics = $this->autoScalingService->getCurrentMetrics();
+
         return response()->json($metrics);
     }
 
@@ -28,6 +30,7 @@ class AutoScalingController extends Controller
     {
         $days = $request->integer('days', 7);
         $history = $this->autoScalingService->getScalingHistory($days);
+
         return response()->json($history);
     }
 
@@ -35,6 +38,7 @@ class AutoScalingController extends Controller
     {
         $hours = $request->integer('hours', 24);
         $prediction = $this->autoScalingService->predictLoad($hours);
+
         return response()->json($prediction);
     }
 

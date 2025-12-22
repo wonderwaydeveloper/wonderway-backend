@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
-use App\Monetization\Services\CreatorFundService;
 use App\Models\User;
+use App\Monetization\Services\CreatorFundService;
+use Illuminate\Console\Command;
 
 class Phase3ManagementCommand extends Command
 {
@@ -18,15 +18,19 @@ class Phase3ManagementCommand extends Command
         switch ($action) {
             case 'process-creator-payments':
                 $this->processCreatorPayments();
+
                 break;
             case 'generate-analytics':
                 $this->generateAnalytics();
+
                 break;
             case 'optimize-performance':
                 $this->optimizePerformance();
+
                 break;
             case 'status':
                 $this->showStatus();
+
                 break;
             default:
                 $this->error('Unknown action. Available: process-creator-payments, generate-analytics, optimize-performance, status');
@@ -44,7 +48,7 @@ class Phase3ManagementCommand extends Command
         $processed = $service->processPayments($month, $year);
 
         $this->info("Processed " . count($processed) . " payments");
-        
+
         foreach ($processed as $fund) {
             $this->line("- {$fund->creator->name}: $" . number_format($fund->earnings, 2));
         }
@@ -53,7 +57,7 @@ class Phase3ManagementCommand extends Command
     private function generateAnalytics()
     {
         $this->info('Generating enterprise analytics...');
-        
+
         $stats = [
             'total_users' => User::count(),
             'active_creators' => User::whereHas('creatorFunds')->count(),
@@ -63,41 +67,41 @@ class Phase3ManagementCommand extends Command
 
         $this->table(
             ['Metric', 'Value'],
-            collect($stats)->map(fn($value, $key) => [ucwords(str_replace('_', ' ', $key)), $value])
+            collect($stats)->map(fn ($value, $key) => [ucwords(str_replace('_', ' ', $key)), $value])
         );
     }
 
     private function optimizePerformance()
     {
         $this->info('Running performance optimizations...');
-        
+
         // Clear expired cache
         $this->call('cache:clear');
-        
+
         // Optimize routes
         $this->call('route:cache');
-        
+
         // Optimize config
         $this->call('config:cache');
-        
+
         $this->info('Performance optimization completed!');
     }
 
     private function showStatus()
     {
         $this->info('WonderWay Phase 3 Status:');
-        
+
         $features = [
             'Domain-Driven Design' => '✅ Active',
-            'CQRS Pattern' => '✅ Active', 
+            'CQRS Pattern' => '✅ Active',
             'Advanced Patterns' => '✅ Active',
             'Monetization Platform' => '✅ Active',
             'Advertisement System' => '✅ Active',
             'Creator Fund' => '✅ Active',
         ];
 
-        $this->table(['Feature', 'Status'], collect($features)->map(fn($status, $feature) => [$feature, $status]));
-        
+        $this->table(['Feature', 'Status'], collect($features)->map(fn ($status, $feature) => [$feature, $status]));
+
         $this->info('🚀 Phase 3 Enterprise Excellence: COMPLETE');
         $this->info('📊 Overall Score: 95/100');
         $this->info('🎯 Ready for Enterprise Scale!');

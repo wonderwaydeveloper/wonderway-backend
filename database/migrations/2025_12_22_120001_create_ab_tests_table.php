@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     public function up(): void
     {
         Schema::create('ab_tests', function (Blueprint $table) {
@@ -19,7 +18,7 @@ return new class extends Migration
             $table->datetime('starts_at')->nullable();
             $table->datetime('ends_at')->nullable();
             $table->timestamps();
-            
+
             $table->index(['status', 'starts_at']);
         });
 
@@ -29,7 +28,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('variant'); // A or B
             $table->timestamp('assigned_at');
-            
+
             $table->unique(['ab_test_id', 'user_id']);
             $table->index('variant');
         });
@@ -42,7 +41,7 @@ return new class extends Migration
             $table->string('event_type'); // view, click, conversion, etc.
             $table->json('event_data')->nullable();
             $table->timestamps();
-            
+
             $table->index(['ab_test_id', 'variant', 'event_type']);
         });
     }

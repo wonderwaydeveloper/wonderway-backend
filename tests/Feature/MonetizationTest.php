@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Monetization\Models\Advertisement;
-use App\Monetization\Services\AdvertisementService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -37,7 +36,7 @@ class MonetizationTest extends TestCase
     {
         $user = User::factory()->create();
         $advertiser = User::factory()->create();
-        
+
         Advertisement::factory()->create([
             'advertiser_id' => $advertiser->id,
             'status' => 'active',
@@ -53,8 +52,8 @@ class MonetizationTest extends TestCase
         $response->assertStatus(200);
         $response->assertJsonStructure([
             'data' => [
-                '*' => ['id', 'title', 'content', 'advertiser']
-            ]
+                '*' => ['id', 'title', 'content', 'advertiser'],
+            ],
         ]);
     }
 
@@ -77,7 +76,7 @@ class MonetizationTest extends TestCase
     public function test_creator_fund_calculation()
     {
         $creator = User::factory()->create();
-        
+
         // Create some posts with views for the creator
         $creator->posts()->create([
             'content' => 'Test post',
@@ -96,7 +95,7 @@ class MonetizationTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
-            'data' => ['month', 'year', 'earnings']
+            'data' => ['month', 'year', 'earnings'],
         ]);
     }
 }

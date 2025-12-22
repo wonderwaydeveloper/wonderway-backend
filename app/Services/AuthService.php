@@ -11,7 +11,8 @@ class AuthService
 {
     public function __construct(
         private EmailService $emailService
-    ) {}
+    ) {
+    }
 
     /**
      * Register a new user
@@ -47,7 +48,7 @@ class AuthService
     {
         $user = User::where('email', $credentials['email'])->first();
 
-        if (!$user || !Hash::check($credentials['password'], $user->password)) {
+        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['اطلاعات ورود صحیح نیست'],
             ]);
@@ -90,18 +91,18 @@ class AuthService
      */
     private function handle2FA(User $user, ?string $twoFactorCode): array
     {
-        if (!$twoFactorCode) {
+        if (! $twoFactorCode) {
             return [
                 'requires_2fa' => true,
                 'message' => 'کد تأیید دو مرحلهای مورد نیاز است',
-                'status' => 403
+                'status' => 403,
             ];
         }
 
         $secret = decrypt($user->two_factor_secret);
         $google2fa = new Google2FA();
-        
-        if (!$google2fa->verifyKey($secret, $twoFactorCode)) {
+
+        if (! $google2fa->verifyKey($secret, $twoFactorCode)) {
             throw ValidationException::withMessages([
                 'two_factor_code' => ['کد تأیید دو مرحلهای نامعتبر است'],
             ]);

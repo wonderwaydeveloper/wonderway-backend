@@ -55,12 +55,12 @@ class Poll extends Model
     public function results(): array
     {
         $options = $this->options()->withCount('votes')->get();
-        
+
         return $options->map(function ($option) {
-            $percentage = $this->total_votes > 0 
+            $percentage = $this->total_votes > 0
                 ? round(($option->votes_count / $this->total_votes) * 100, 1)
                 : 0;
-                
+
             return [
                 'id' => $option->id,
                 'text' => $option->text,

@@ -11,7 +11,7 @@ class UnauthorizedException extends Exception
     {
         return response()->json([
             'message' => $this->message ?: 'شما مجاز به انجام این عملیات نیستید',
-            'error' => 'UNAUTHORIZED'
+            'error' => 'UNAUTHORIZED',
         ], 403);
     }
 }

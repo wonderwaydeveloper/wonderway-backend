@@ -10,10 +10,10 @@ class EnsureEmailIsVerified
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->user() || !$request->user()->hasVerifiedEmail()) {
+        if (! $request->user() || ! $request->user()->hasVerifiedEmail()) {
             return response()->json([
                 'message' => 'ایمیل شما تایید نشده است',
-                'error' => 'EMAIL_NOT_VERIFIED'
+                'error' => 'EMAIL_NOT_VERIFIED',
             ], 403);
         }
 

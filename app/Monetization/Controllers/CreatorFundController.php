@@ -4,14 +4,15 @@ namespace App\Monetization\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Monetization\Services\CreatorFundService;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class CreatorFundController extends Controller
 {
     public function __construct(
         private CreatorFundService $creatorFundService
-    ) {}
+    ) {
+    }
 
     public function getAnalytics(): JsonResponse
     {
@@ -38,8 +39,8 @@ class CreatorFundController extends Controller
             'data' => [
                 'month' => $request->month,
                 'year' => $request->year,
-                'earnings' => $earnings
-            ]
+                'earnings' => $earnings,
+            ],
         ]);
     }
 
@@ -66,11 +67,11 @@ class CreatorFundController extends Controller
             ->where('year', $request->year)
             ->first();
 
-        if (!$fund) {
+        if (! $fund) {
             return response()->json(['message' => 'No earnings found for this period'], 404);
         }
 
-        if (!$fund->isEligible()) {
+        if (! $fund->isEligible()) {
             return response()->json(['message' => 'Not eligible for payout'], 400);
         }
 
@@ -82,7 +83,7 @@ class CreatorFundController extends Controller
 
         return response()->json([
             'message' => 'Payout request submitted successfully',
-            'data' => $fund
+            'data' => $fund,
         ]);
     }
 }

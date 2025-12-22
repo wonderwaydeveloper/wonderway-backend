@@ -10,7 +10,8 @@ use Illuminate\Queue\SerializesModels;
 
 class VerificationEmail extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public $user;
     public $code;

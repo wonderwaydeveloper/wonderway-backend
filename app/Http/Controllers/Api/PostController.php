@@ -14,7 +14,8 @@ class PostController extends Controller
 {
     public function __construct(
         private PostService $postService
-    ) {}
+    ) {
+    }
 
     /**
      * @OA\Get(
@@ -30,6 +31,7 @@ class PostController extends Controller
     public function index(): JsonResponse
     {
         $posts = $this->postService->getPublicPosts(request('page', 1));
+
         return response()->json($posts);
     }
 
@@ -69,7 +71,7 @@ class PostController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => $e->getMessage(),
-                'error' => 'POST_CREATION_FAILED'
+                'error' => 'POST_CREATION_FAILED',
             ], 422);
         }
     }
@@ -77,61 +79,66 @@ class PostController extends Controller
     public function show(Post $post): JsonResponse
     {
         $post = $this->postService->getPostWithRelations($post);
+
         return response()->json($post);
     }
 
     public function destroy(Post $post): JsonResponse
     {
         $this->authorize('delete', $post);
-        
+
         $this->postService->deletePost($post);
-        
+
         return response()->json(['message' => 'Post deleted successfully']);
     }
 
     public function like(Post $post): JsonResponse
     {
         $result = $this->postService->toggleLike($post, auth()->user());
+
         return response()->json($result);
     }
 
     public function timeline(): JsonResponse
     {
         $timeline = $this->postService->getUserTimeline(auth()->user());
+
         return response()->json($timeline);
     }
 
     public function drafts(): JsonResponse
     {
         $drafts = $this->postService->getUserDrafts(auth()->user());
+
         return response()->json($drafts);
     }
 
     public function publish(Post $post): JsonResponse
     {
         $this->authorize('delete', $post);
-        
+
         $post = $this->postService->publishPost($post);
-        
+
         return response()->json(['message' => 'پست منتشر شد', 'post' => $post]);
     }
 
     public function quote(Request $request, Post $post): JsonResponse
     {
         $request->validate(['content' => 'required|string|max:280']);
-        
+
         $quotePost = $this->postService->createQuotePost(
             $request->only('content'),
             $request->user(),
             $post
         );
-        
+
         return response()->json($quotePost, 201);
     }
 
     public function quotes(Post $post): JsonResponse
     {
         $quotes = $this->postService->getPostQuotes($post);
+
         return response()->json($quotes);
     }
 
@@ -139,14 +146,14 @@ class PostController extends Controller
     {
         try {
             $post = $this->postService->updatePost($post, $request->validated());
-            
+
             return response()->json([
                 'message' => 'Post updated successfully',
-                'post' => $post
+                'post' => $post,
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ], 422);
         }
     }
@@ -154,9 +161,9 @@ class PostController extends Controller
     public function editHistory(Post $post): JsonResponse
     {
         $this->authorize('view', $post);
-        
+
         $history = $this->postService->getEditHistory($post);
-        
+
         return response()->json($history);
     }
 }

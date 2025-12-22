@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
-use App\Models\Comment;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -12,7 +12,7 @@ class SpamDetectionService
 {
     private $spamKeywords = [
         'spam', 'fake', 'scam', 'click here', 'free money', 'win now',
-        'اسپم', 'جعلی', 'کلاهبرداری', 'اینجا کلیک', 'پول رایگان'
+        'اسپم', 'جعلی', 'کلاهبرداری', 'اینجا کلیک', 'پول رایگان',
     ];
 
     private $suspiciousPatterns = [
@@ -51,7 +51,7 @@ class SpamDetectionService
         return [
             'is_spam' => $isSpam,
             'score' => $score,
-            'reasons' => $reasons
+            'reasons' => $reasons,
         ];
     }
 
@@ -79,7 +79,7 @@ class SpamDetectionService
         return [
             'is_spam' => $isSpam,
             'score' => $score,
-            'reasons' => $reasons
+            'reasons' => $reasons,
         ];
     }
 
@@ -161,7 +161,7 @@ class SpamDetectionService
         // Check follower ratio
         $followers = $user->followers()->count();
         $following = $user->following()->count();
-        
+
         if ($following > 100 && $followers < 10) {
             $score += 15;
             $reasons[] = "Suspicious follower ratio";
@@ -213,20 +213,20 @@ class SpamDetectionService
                 $post->update([
                     'is_flagged' => true,
                     'is_hidden' => true,
-                    'flagged_at' => now()
+                    'flagged_at' => now(),
                 ]);
-                
+
                 Log::warning('Post auto-flagged as spam', [
                     'post_id' => $post->id,
                     'user_id' => $post->user_id,
                     'score' => $score,
-                    'reasons' => $reasons
+                    'reasons' => $reasons,
                 ]);
             } else {
                 // Just flag for review
                 $post->update([
                     'is_flagged' => true,
-                    'flagged_at' => now()
+                    'flagged_at' => now(),
                 ]);
             }
 
@@ -239,7 +239,7 @@ class SpamDetectionService
                 'detection_reasons' => json_encode($reasons),
                 'auto_detected' => true,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
 
             // Update user spam score
@@ -248,7 +248,7 @@ class SpamDetectionService
         } catch (\Exception $e) {
             Log::error('Error handling spam detection', [
                 'post_id' => $post->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -258,11 +258,11 @@ class SpamDetectionService
         try {
             if ($score >= 80) {
                 $comment->delete();
-                
+
                 Log::warning('Comment auto-deleted as spam', [
                     'comment_id' => $comment->id,
                     'user_id' => $comment->user_id,
-                    'score' => $score
+                    'score' => $score,
                 ]);
             }
 
@@ -275,13 +275,13 @@ class SpamDetectionService
                 'detection_reasons' => json_encode($reasons),
                 'auto_detected' => true,
                 'created_at' => now(),
-                'updated_at' => now()
+                'updated_at' => now(),
             ]);
 
         } catch (\Exception $e) {
             Log::error('Error handling spam comment', [
                 'comment_id' => $comment->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -298,12 +298,12 @@ class SpamDetectionService
         if ($newScore >= 50) {
             $user->update([
                 'is_suspended' => true,
-                'suspended_until' => now()->addDays(3)
+                'suspended_until' => now()->addDays(3),
             ]);
 
             Log::warning('User auto-suspended for spam', [
                 'user_id' => $user->id,
-                'spam_score' => $newScore
+                'spam_score' => $newScore,
             ]);
         }
     }

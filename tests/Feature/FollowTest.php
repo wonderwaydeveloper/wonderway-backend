@@ -111,7 +111,7 @@ class FollowTest extends TestCase
             'follower_id' => $user->id,
             'following_id' => $targetUser->id,
         ]);
-        
+
         // Just check that the follow worked - notification is tested elsewhere
         $this->assertTrue($user->isFollowing($targetUser->id));
     }

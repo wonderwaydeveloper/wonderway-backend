@@ -10,7 +10,8 @@ class CreatePostDTO
         public readonly ?string $gifUrl = null,
         public readonly string $replySettings = 'everyone',
         public readonly bool $isDraft = false
-    ) {}
+    ) {
+    }
 
     public function toArray(): array
     {

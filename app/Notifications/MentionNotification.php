@@ -28,8 +28,8 @@ class MentionNotification extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         $type = class_basename($this->mentionable);
-        
-        return (new MailMessage)
+
+        return (new MailMessage())
             ->subject('You were mentioned by ' . $this->mentioner->name)
             ->line($this->mentioner->name . ' mentioned you in a ' . strtolower($type))
             ->line('"' . substr($this->mentionable->content, 0, 100) . '..."')
@@ -47,8 +47,8 @@ class MentionNotification extends Notification implements ShouldQueue
             'mentionable_type' => class_basename($this->mentionable),
             'mentionable_id' => $this->mentionable->id,
             'content_preview' => substr($this->mentionable->content, 0, 100),
-            'post_id' => $this->mentionable instanceof \App\Models\Post 
-                ? $this->mentionable->id 
+            'post_id' => $this->mentionable instanceof \App\Models\Post
+                ? $this->mentionable->id
                 : $this->mentionable->post_id,
         ];
     }

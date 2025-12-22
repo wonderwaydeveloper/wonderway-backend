@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 
 class ConnectionManagementService
 {
@@ -17,7 +17,7 @@ class ConnectionManagementService
             'user_id' => $userId,
             'connected_at' => now()->timestamp,
             'last_activity' => now()->timestamp,
-            'metadata' => $metadata
+            'metadata' => $metadata,
         ];
 
         Redis::setex(
@@ -33,7 +33,7 @@ class ConnectionManagementService
     public function removeConnection(string $connectionId): void
     {
         $connectionData = $this->getConnection($connectionId);
-        
+
         if ($connectionData) {
             Redis::del(self::CONNECTION_PREFIX . $connectionId);
             Redis::srem(self::USER_CONNECTIONS_PREFIX . $connectionData['user_id'], $connectionId);
@@ -43,7 +43,7 @@ class ConnectionManagementService
     public function updateActivity(string $connectionId): void
     {
         $connectionData = $this->getConnection($connectionId);
-        
+
         if ($connectionData) {
             $connectionData['last_activity'] = now()->timestamp;
             Redis::setex(
@@ -57,6 +57,7 @@ class ConnectionManagementService
     public function getConnection(string $connectionId): ?array
     {
         $data = Redis::get(self::CONNECTION_PREFIX . $connectionId);
+
         return $data ? json_decode($data, true) : null;
     }
 
@@ -86,7 +87,7 @@ class ConnectionManagementService
     {
         $pattern = self::USER_CONNECTIONS_PREFIX . '*';
         $keys = Redis::keys($pattern);
-        
+
         return count(array_filter($keys, function ($key) {
             return Redis::scard($key) > 0;
         }));
@@ -103,7 +104,7 @@ class ConnectionManagementService
             if ($data) {
                 $connection = json_decode($data, true);
                 $lastActivity = $connection['last_activity'] ?? 0;
-                
+
                 if (now()->timestamp - $lastActivity > self::CONNECTION_TTL) {
                     $connectionId = str_replace(self::CONNECTION_PREFIX, '', $key);
                     $this->removeConnection($connectionId);
@@ -113,6 +114,7 @@ class ConnectionManagementService
         }
 
         Log::info("Cleaned up {$cleaned} stale connections");
+
         return $cleaned;
     }
 }

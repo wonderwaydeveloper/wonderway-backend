@@ -3,8 +3,8 @@
 namespace App\Http\Middleware;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Redis;
 use Symfony\Component\HttpFoundation\Response;
 
 class AdvancedApiRateLimit
@@ -21,22 +21,22 @@ class AdvancedApiRateLimit
     {
         $endpoint = $request->route()->uri();
         $userId = $request->user()?->id ?? $request->ip();
-        
+
         $limits = $this->endpointLimits[$endpoint] ?? ['attempts' => 60, 'decay' => 60];
-        
+
         $key = "api_limit:{$endpoint}:{$userId}";
-        
+
         if (RateLimiter::tooManyAttempts($key, $limits['attempts'])) {
             $this->logSuspiciousActivity($request, $userId, $endpoint);
-            
+
             return response()->json([
                 'error' => 'Too many requests',
-                'retry_after' => RateLimiter::availableIn($key)
+                'retry_after' => RateLimiter::availableIn($key),
             ], 429);
         }
-        
+
         RateLimiter::hit($key, $limits['decay']);
-        
+
         return $next($request);
     }
 
@@ -48,7 +48,7 @@ class AdvancedApiRateLimit
             'endpoint' => $endpoint,
             'user_agent' => $request->userAgent(),
             'timestamp' => now(),
-            'type' => 'rate_limit_exceeded'
+            'type' => 'rate_limit_exceeded',
         ]));
     }
 }

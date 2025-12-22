@@ -13,13 +13,13 @@ class SecurityHeaders
 
         // Enhanced Security Headers
         $this->setSecurityHeaders($response);
-        
+
         // Log security events
         $this->logSecurityEvent($request);
 
         return $response;
     }
-    
+
     private function setSecurityHeaders($response)
     {
         // Prevent clickjacking
@@ -57,18 +57,18 @@ class SecurityHeaders
 
         // Enhanced HSTS
         $response->header('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
-        
+
         // Additional Security Headers
         $response->header('X-Permitted-Cross-Domain-Policies', 'none');
         $response->header('Cross-Origin-Embedder-Policy', 'require-corp');
         $response->header('Cross-Origin-Opener-Policy', 'same-origin');
         $response->header('Cross-Origin-Resource-Policy', 'same-origin');
-        
+
         // Remove server information
         $response->header('Server', 'WonderWay');
         $response->header('X-Powered-By', null);
     }
-    
+
     private function logSecurityEvent(Request $request)
     {
         // Log suspicious requests
@@ -78,11 +78,11 @@ class SecurityHeaders
                 'user_agent' => $request->userAgent(),
                 'url' => $request->fullUrl(),
                 'method' => $request->method(),
-                'timestamp' => now()
+                'timestamp' => now(),
             ]);
         }
     }
-    
+
     private function isSuspiciousRequest(Request $request): bool
     {
         $suspiciousPatterns = [
@@ -91,14 +91,14 @@ class SecurityHeaders
             '/union.*select/i', // SQL injection
             '/eval\(/i',  // Code injection
         ];
-        
+
         $fullUrl = $request->fullUrl();
         foreach ($suspiciousPatterns as $pattern) {
             if (preg_match($pattern, $fullUrl)) {
                 return true;
             }
         }
-        
+
         return false;
     }
 }

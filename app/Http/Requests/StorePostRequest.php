@@ -61,12 +61,12 @@ class StorePostRequest extends FormRequest
         // Clean content from extra spaces
         if ($this->has('content')) {
             $this->merge([
-                'content' => trim($this->input('content'))
+                'content' => trim($this->input('content')),
             ]);
         }
 
         // Set default reply settings
-        if (!$this->has('reply_settings')) {
+        if (! $this->has('reply_settings')) {
             $this->merge(['reply_settings' => 'everyone']);
         }
     }

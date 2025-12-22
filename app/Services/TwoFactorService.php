@@ -39,6 +39,7 @@ class TwoFactorService
         for ($i = 0; $i < $count; $i++) {
             $codes[] = strtoupper(substr(bin2hex(random_bytes(5)), 0, 10));
         }
+
         return $codes;
     }
 }

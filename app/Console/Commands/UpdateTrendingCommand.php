@@ -46,6 +46,7 @@ class UpdateTrendingCommand extends Command
 
         } catch (\Exception $e) {
             $this->error("Failed to update trending calculations: " . $e->getMessage());
+
             return Command::FAILURE;
         }
     }

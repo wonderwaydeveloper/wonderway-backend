@@ -43,12 +43,12 @@ class ThreadController extends Controller
             $post = Post::create($data);
             $post->syncHashtags();
             $mentionedUsers = $post->processMentions($post->content);
-            
+
             foreach ($mentionedUsers as $mentionedUser) {
                 $mentionedUser->notify(new \App\Notifications\MentionNotification($user, $post));
             }
 
-            if (!$firstPost) {
+            if (! $firstPost) {
                 $firstPost = $post;
             }
         }
@@ -60,7 +60,7 @@ class ThreadController extends Controller
             'threadPosts.user:id,name,username,avatar',
             'threadPosts.hashtags',
             'user:id,name,username,avatar',
-            'hashtags'
+            'hashtags',
         ]);
 
         return response()->json($firstPost, 201);
@@ -79,7 +79,7 @@ class ThreadController extends Controller
             'threadPosts.quotedPost.user:id,name,username,avatar',
             'user:id,name,username,avatar',
             'hashtags',
-            'quotedPost.user:id,name,username,avatar'
+            'quotedPost.user:id,name,username,avatar',
         ])->loadCount('likes', 'comments', 'quotes');
 
         $threadRoot->threadPosts->each(function ($threadPost) {
@@ -89,7 +89,7 @@ class ThreadController extends Controller
         return response()->json([
             'thread_root' => $threadRoot,
             'thread_posts' => $threadRoot->threadPosts,
-            'total_posts' => $threadRoot->threadPosts->count() + 1
+            'total_posts' => $threadRoot->threadPosts->count() + 1,
         ]);
     }
 
@@ -122,7 +122,7 @@ class ThreadController extends Controller
         $newPost = Post::create($data);
         $newPost->syncHashtags();
         $mentionedUsers = $newPost->processMentions($newPost->content);
-        
+
         foreach ($mentionedUsers as $mentionedUser) {
             $mentionedUser->notify(new \App\Notifications\MentionNotification($request->user(), $newPost));
         }
@@ -140,14 +140,14 @@ class ThreadController extends Controller
     public function stats(Post $post)
     {
         $threadRoot = $post->getThreadRoot();
-        
+
         $stats = [
             'total_posts' => $threadRoot->threadPosts()->count() + 1,
             'total_likes' => $threadRoot->likes()->count() + $threadRoot->threadPosts()->withCount('likes')->get()->sum('likes_count'),
             'total_comments' => $threadRoot->comments()->count() + $threadRoot->threadPosts()->withCount('comments')->get()->sum('comments_count'),
             'participants' => $threadRoot->threadPosts()->distinct('user_id')->count('user_id') + 1,
             'created_at' => $threadRoot->created_at,
-            'last_updated' => $threadRoot->threadPosts()->latest()->first()?->created_at ?? $threadRoot->created_at
+            'last_updated' => $threadRoot->threadPosts()->latest()->first()?->created_at ?? $threadRoot->created_at,
         ];
 
         return response()->json($stats);

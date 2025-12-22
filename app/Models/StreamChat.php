@@ -11,11 +11,11 @@ class StreamChat extends Model
         'stream_id',
         'user_id',
         'message',
-        'sent_at'
+        'sent_at',
     ];
 
     protected $casts = [
-        'sent_at' => 'datetime'
+        'sent_at' => 'datetime',
     ];
 
     public function stream(): BelongsTo

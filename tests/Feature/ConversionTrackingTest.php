@@ -44,7 +44,7 @@ class ConversionTrackingTest extends TestCase
                 'signups',
                 'active_users',
                 'premium_subscriptions',
-                'conversion_rates'
+                'conversion_rates',
             ]);
     }
 
@@ -57,7 +57,7 @@ class ConversionTrackingTest extends TestCase
 
         $response->assertOk()
             ->assertJsonStructure([
-                '*' => ['source', 'conversions', 'total_value']
+                '*' => ['source', 'conversions', 'total_value'],
             ]);
     }
 
@@ -70,7 +70,7 @@ class ConversionTrackingTest extends TestCase
 
         $response->assertOk()
             ->assertJsonStructure([
-                '*' => ['event', 'timestamp', 'data', 'value']
+                '*' => ['event', 'timestamp', 'data', 'value'],
             ]);
     }
 
@@ -78,7 +78,7 @@ class ConversionTrackingTest extends TestCase
     {
         $user = User::factory()->create();
         $service = new ConversionTrackingService();
-        
+
         $service->track('signup', $user->id, [], 0);
         $service->track('post_create', $user->id, [], 0);
         $service->track('subscription', $user->id, [], 9.99);

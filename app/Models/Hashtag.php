@@ -23,7 +23,7 @@ class Hashtag extends Model
     public static function createFromText($text)
     {
         preg_match_all('/#(\w+)/u', $text, $matches);
-        
+
         $hashtags = [];
         foreach ($matches[1] as $tag) {
             $hashtags[] = self::firstOrCreate([
@@ -32,7 +32,7 @@ class Hashtag extends Model
                 'name' => $tag,
             ]);
         }
-        
+
         return $hashtags;
     }
 }

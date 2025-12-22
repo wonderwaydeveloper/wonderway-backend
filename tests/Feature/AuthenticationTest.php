@@ -14,7 +14,7 @@ class AuthenticationTest extends TestCase
     {
         $response = $this->withoutMiddleware([
                 \Illuminate\Routing\Middleware\ThrottleRequests::class,
-                \App\Http\Middleware\AdvancedRateLimit::class
+                \App\Http\Middleware\AdvancedRateLimit::class,
             ])
             ->postJson('/api/register', [
                 'name' => 'Test User',
@@ -34,7 +34,7 @@ class AuthenticationTest extends TestCase
 
         $response = $this->withoutMiddleware([
                 \Illuminate\Routing\Middleware\ThrottleRequests::class,
-                \App\Http\Middleware\AdvancedRateLimit::class
+                \App\Http\Middleware\AdvancedRateLimit::class,
             ])
             ->postJson('/api/register', [
                 'name' => 'Test User',
@@ -52,12 +52,12 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create([
             'email' => 'test@example.com',
-            'password' => bcrypt('password123')
+            'password' => bcrypt('password123'),
         ]);
 
         $response = $this->withoutMiddleware([
                 \Illuminate\Routing\Middleware\ThrottleRequests::class,
-                \App\Http\Middleware\AdvancedRateLimit::class
+                \App\Http\Middleware\AdvancedRateLimit::class,
             ])
             ->postJson('/api/login', [
                 'email' => 'test@example.com',
@@ -72,7 +72,7 @@ class AuthenticationTest extends TestCase
     {
         $response = $this->withoutMiddleware([
                 \Illuminate\Routing\Middleware\ThrottleRequests::class,
-                \App\Http\Middleware\AdvancedRateLimit::class
+                \App\Http\Middleware\AdvancedRateLimit::class,
             ])
             ->postJson('/api/login', [
                 'email' => 'nonexistent@example.com',
@@ -98,7 +98,7 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
         $user->assignRole('user');
-        
+
         $response = $this->actingAs($user, 'sanctum')->getJson('/api/me');
         $response->assertStatus(200)
             ->assertJsonStructure(['id', 'name', 'email', 'username']);

@@ -28,10 +28,10 @@ class MessageController extends Controller
     public function messages(Request $request, User $user)
     {
         $currentUser = $request->user();
-        
+
         $conversation = Conversation::between($currentUser->id, $user->id);
 
-        if (!$conversation) {
+        if (! $conversation) {
             return response()->json(['messages' => []]);
         }
 
@@ -62,13 +62,13 @@ class MessageController extends Controller
             return response()->json(['message' => 'نمیتوانید به خودتان پیام بدهید'], 400);
         }
 
-        if (!$request->content && !$request->hasFile('media') && !$request->gif_url) {
+        if (! $request->content && ! $request->hasFile('media') && ! $request->gif_url) {
             return response()->json(['message' => 'پیام یا فایل الزامی است'], 400);
         }
 
         $conversation = Conversation::between($currentUser->id, $user->id);
 
-        if (!$conversation) {
+        if (! $conversation) {
             $conversation = Conversation::create([
                 'user_one_id' => $currentUser->id,
                 'user_two_id' => $user->id,
@@ -86,7 +86,7 @@ class MessageController extends Controller
             $file = $request->file('media');
             $extension = $file->getClientOriginalExtension();
             $mediaType = in_array($extension, ['mp4', 'mov']) ? 'video' : 'image';
-            
+
             $data['media_path'] = $file->store('messages', 'public');
             $data['media_type'] = $mediaType;
         }

@@ -2,8 +2,8 @@
 
 namespace Database\Factories\Monetization\Models;
 
-use App\Monetization\Models\Advertisement;
 use App\Models\User;
+use App\Monetization\Models\Advertisement;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AdvertisementFactory extends Factory

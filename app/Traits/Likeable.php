@@ -19,7 +19,7 @@ trait Likeable
 
     public function like(int $userId): void
     {
-        if (!$this->isLikedBy($userId)) {
+        if (! $this->isLikedBy($userId)) {
             $this->likes()->create(['user_id' => $userId]);
             $this->increment('likes_count');
         }

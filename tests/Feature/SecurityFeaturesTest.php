@@ -2,16 +2,16 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
 use App\Models\User;
-use App\Services\SecurityMonitoringService;
+use App\Services\AuditTrailService;
 use App\Services\BotDetectionService;
 use App\Services\SecretsManagementService;
-use App\Services\AuditTrailService;
+use App\Services\SecurityMonitoringService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
-use Illuminate\Http\Request;
+use Tests\TestCase;
 
 class SecurityFeaturesTest extends TestCase
 {
@@ -26,16 +26,16 @@ class SecurityFeaturesTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->user = User::factory()->create();
         $this->securityService = app(SecurityMonitoringService::class);
         $this->botService = app(BotDetectionService::class);
         $this->secretsService = app(SecretsManagementService::class);
         $this->auditService = app(AuditTrailService::class);
-        
+
         Cache::flush();
         Redis::flushall();
-        
+
         // Clean up secrets directory
         $secretsPath = storage_path('app/secrets');
         if (is_dir($secretsPath)) {
@@ -47,9 +47,9 @@ class SecurityFeaturesTest extends TestCase
     public function waf_blocks_sql_injection_attempts()
     {
         $response = $this->post('/api/test', [
-            'input' => "'; DROP TABLE users; --"
+            'input' => "'; DROP TABLE users; --",
         ]);
-        
+
         // Should be blocked by WAF
         $this->assertEquals(403, $response->status());
     }
@@ -58,9 +58,9 @@ class SecurityFeaturesTest extends TestCase
     public function waf_blocks_xss_attempts()
     {
         $response = $this->post('/api/test', [
-            'input' => '<script>alert("xss")</script>'
+            'input' => '<script>alert("xss")</script>',
         ]);
-        
+
         // Should be blocked by WAF
         $this->assertEquals(403, $response->status());
     }
@@ -72,10 +72,10 @@ class SecurityFeaturesTest extends TestCase
         for ($i = 0; $i < 6; $i++) {
             $response = $this->post('/api/login', [
                 'email' => 'test@example.com',
-                'password' => 'wrong_password'
+                'password' => 'wrong_password',
             ]);
         }
-        
+
         // Should be rate limited or locked out
         $this->assertContains($response->status(), [423, 429]);
     }
@@ -84,12 +84,12 @@ class SecurityFeaturesTest extends TestCase
     public function api_rate_limiting_works()
     {
         $this->actingAs($this->user);
-        
+
         // Make requests rapidly to trigger rate limit
         for ($i = 0; $i < 15; $i++) {
             $response = $this->get('/api/user');
         }
-        
+
         // Should be rate limited or successful (depending on middleware order)
         $this->assertContains($response->status(), [200, 429]);
     }
@@ -99,9 +99,9 @@ class SecurityFeaturesTest extends TestCase
     {
         $request = Request::create('/test', 'GET');
         $request->headers->set('User-Agent', 'sqlmap/1.0');
-        
+
         $result = $this->botService->detectBot($request);
-        
+
         $this->assertTrue($result['is_bot']);
         $this->assertGreaterThan(70, $result['confidence']);
         $this->assertContains('bot_user_agent', $result['indicators']);
@@ -112,14 +112,14 @@ class SecurityFeaturesTest extends TestCase
     {
         $request = Request::create('/test', 'GET');
         $request->server->set('REMOTE_ADDR', '192.168.1.100');
-        
+
         // Simulate rapid requests
         for ($i = 0; $i < 15; $i++) {
             $this->botService->detectBot($request);
         }
-        
+
         $result = $this->botService->detectBot($request);
-        
+
         $this->assertTrue($result['is_bot']);
         $this->assertContains('rapid_requests', $result['indicators']);
     }
@@ -129,10 +129,10 @@ class SecurityFeaturesTest extends TestCase
     {
         $key = 'test_secret';
         $value = 'super_secret_value';
-        
+
         $stored = $this->secretsService->storeSecret($key, $value, 'api_keys');
         $this->assertTrue($stored);
-        
+
         $retrieved = $this->secretsService->getSecret($key);
         $this->assertEquals($value, $retrieved);
     }
@@ -142,18 +142,18 @@ class SecurityFeaturesTest extends TestCase
     {
         $key = 'expiring_secret';
         $value = 'temporary_value';
-        
+
         // Store with 1 second TTL
         $stored = $this->secretsService->storeSecret($key, $value, 'general', 1);
         $this->assertTrue($stored);
-        
+
         // Should be available immediately
         $retrieved = $this->secretsService->getSecret($key);
         $this->assertEquals($value, $retrieved);
-        
+
         // Wait for expiration
         sleep(2);
-        
+
         // Should be null after expiration
         $expired = $this->secretsService->getSecret($key);
         $this->assertNull($expired);
@@ -165,9 +165,9 @@ class SecurityFeaturesTest extends TestCase
         $key = 'rotatable_secret';
         $oldValue = 'old_value';
         $newValue = 'new_value';
-        
+
         $this->secretsService->storeSecret($key, $oldValue, 'api_keys');
-        
+
         $rotated = $this->secretsService->rotateSecret($key, $newValue);
         $this->assertTrue($rotated);
     }
@@ -178,10 +178,10 @@ class SecurityFeaturesTest extends TestCase
         $this->secretsService->storeSecret('secret1', 'value1', 'api_keys');
         $this->secretsService->storeSecret('secret2', 'value2', 'database_credentials');
         $this->secretsService->storeSecret('secret3', 'value3', 'api_keys');
-        
+
         $allSecrets = $this->secretsService->listSecrets();
         $this->assertCount(3, $allSecrets);
-        
+
         $apiKeySecrets = $this->secretsService->listSecrets('api_keys');
         $this->assertCount(2, $apiKeySecrets);
     }
@@ -190,12 +190,12 @@ class SecurityFeaturesTest extends TestCase
     public function audit_trail_logs_security_events()
     {
         $this->actingAs($this->user);
-        
+
         $this->auditService->log('user.login', [
             'ip' => '192.168.1.1',
-            'user_agent' => 'Test Browser'
+            'user_agent' => 'Test Browser',
         ]);
-        
+
         $trail = $this->auditService->getAuditTrail($this->user->id);
         $this->assertNotEmpty($trail);
         $this->assertEquals('user.login', $trail[0]['action']);
@@ -205,9 +205,9 @@ class SecurityFeaturesTest extends TestCase
     public function audit_trail_logs_data_access()
     {
         $this->actingAs($this->user);
-        
+
         $this->auditService->logDataAccess('users', 'read', ['id' => $this->user->id]);
-        
+
         $trail = $this->auditService->getAuditTrail($this->user->id);
         $this->assertNotEmpty($trail);
         $this->assertEquals('data.read', $trail[0]['action']);
@@ -218,9 +218,9 @@ class SecurityFeaturesTest extends TestCase
     {
         $this->securityService->logSecurityEvent('authentication.failed', [
             'user_id' => $this->user->id,
-            'ip' => '192.168.1.1'
+            'ip' => '192.168.1.1',
         ]);
-        
+
         // Check that event was logged (would normally check logs or database)
         $this->assertTrue(true); // Placeholder assertion
     }
@@ -229,12 +229,12 @@ class SecurityFeaturesTest extends TestCase
     public function database_encryption_service_works()
     {
         $encryptionService = app(\App\Services\DatabaseEncryptionService::class);
-        
+
         $plaintext = 'sensitive_data';
         $encrypted = $encryptionService->encryptField('users', 'phone', $plaintext);
-        
+
         $this->assertNotEquals($plaintext, $encrypted);
-        
+
         $decrypted = $encryptionService->decryptField('users', 'phone', $encrypted);
         $this->assertEquals($plaintext, $decrypted);
     }
@@ -243,17 +243,17 @@ class SecurityFeaturesTest extends TestCase
     public function database_encryption_handles_arrays()
     {
         $encryptionService = app(\App\Services\DatabaseEncryptionService::class);
-        
+
         $data = [
             'name' => 'John Doe',
             'phone' => '+1234567890',
-            'email' => 'john@example.com'
+            'email' => 'john@example.com',
         ];
-        
+
         $encrypted = $encryptionService->encryptArray('users', $data);
         $this->assertNotEquals($data['phone'], $encrypted['phone']);
         $this->assertEquals($data['name'], $encrypted['name']); // Not encrypted
-        
+
         $decrypted = $encryptionService->decryptArray('users', $encrypted);
         $this->assertEquals($data, $decrypted);
     }
@@ -262,7 +262,7 @@ class SecurityFeaturesTest extends TestCase
     public function security_headers_are_applied()
     {
         $response = $this->get('/');
-        
+
         $response->assertHeader('X-Content-Type-Options', 'nosniff');
         $response->assertHeader('X-Frame-Options', 'DENY');
         $response->assertHeader('X-XSS-Protection', '1; mode=block');
@@ -274,10 +274,10 @@ class SecurityFeaturesTest extends TestCase
     public function api_key_generation_and_validation_works()
     {
         $apiKey = $this->secretsService->generateApiKey('test_app', ['read', 'write']);
-        
+
         $this->assertStringStartsWith('ww_', $apiKey);
         $this->assertEquals(67, strlen($apiKey)); // 'ww_' + 64 hex chars
-        
+
         $keyData = $this->secretsService->validateApiKey($apiKey);
         $this->assertNotNull($keyData);
         $this->assertEquals('test_app', $keyData['name']);
@@ -290,10 +290,10 @@ class SecurityFeaturesTest extends TestCase
         $database = 'test_db';
         $username = 'test_user';
         $password = 'test_password';
-        
+
         $stored = $this->secretsService->createDatabaseCredentials($database, $username, $password);
         $this->assertTrue($stored);
-        
+
         $credentials = $this->secretsService->getDatabaseCredentials($database);
         $this->assertNotNull($credentials);
         $this->assertEquals($username, $credentials['username']);
@@ -306,7 +306,7 @@ class SecurityFeaturesTest extends TestCase
         $this->secretsService->storeSecret('audited_secret', 'value', 'api_keys');
         $this->secretsService->getSecret('audited_secret');
         $this->secretsService->getSecret('audited_secret');
-        
+
         $auditData = $this->secretsService->auditSecretAccess(1);
         $this->assertNotEmpty($auditData);
         $this->assertEquals(2, $auditData[0]['access_count']);
@@ -319,12 +319,12 @@ class SecurityFeaturesTest extends TestCase
         $this->secretsService->storeSecret('expired1', 'value1', 'general', 1);
         $this->secretsService->storeSecret('expired2', 'value2', 'general', 1);
         $this->secretsService->storeSecret('permanent', 'value3', 'general');
-        
+
         sleep(2); // Wait for expiration
-        
+
         $cleaned = $this->secretsService->cleanupExpiredSecrets();
         $this->assertEquals(2, $cleaned);
-        
+
         // Permanent secret should still exist
         $this->assertNotNull($this->secretsService->getSecret('permanent'));
     }
@@ -334,11 +334,11 @@ class SecurityFeaturesTest extends TestCase
     {
         // Test that multiple security middleware work together
         $response = $this->withHeaders([
-            'User-Agent' => 'sqlmap/1.0'
+            'User-Agent' => 'sqlmap/1.0',
         ])->post('/api/test', [
-            'input' => '<script>alert("xss")</script>'
+            'input' => '<script>alert("xss")</script>',
         ]);
-        
+
         // Should be blocked by either WAF or bot detection
         $this->assertContains($response->status(), [403, 429]);
     }

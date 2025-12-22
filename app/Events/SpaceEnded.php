@@ -3,7 +3,6 @@
 namespace App\Events;
 
 use App\Models\Space;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -12,7 +11,9 @@ use Illuminate\Queue\SerializesModels;
 
 class SpaceEnded implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     public $space;
 

@@ -4,7 +4,6 @@ namespace App\Services;
 
 use Illuminate\Database\Connection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Config;
 
 class ShardManager
 {
@@ -18,12 +17,14 @@ class ShardManager
     public function getShardForUser(int $userId): string
     {
         $shardId = $userId % $this->shardsCount;
+
         return "shard_{$shardId}";
     }
 
     public function getUserShard(int $userId): Connection
     {
         $shardName = $this->getShardForUser($userId);
+
         return DB::connection($shardName);
     }
 
@@ -33,6 +34,7 @@ class ShardManager
         for ($i = 0; $i < $this->shardsCount; $i++) {
             $shards[] = "shard_{$i}";
         }
+
         return $shards;
     }
 
@@ -47,13 +49,14 @@ class ShardManager
                 $results[$shard] = ['error' => $e->getMessage()];
             }
         }
+
         return $results;
     }
 
     public function migrateUserToShard(int $userId, string $targetShard): bool
     {
         $currentShard = $this->getShardForUser($userId);
-        
+
         if ($currentShard === $targetShard) {
             return true;
         }
@@ -86,8 +89,9 @@ class ShardManager
                 'user_id' => $userId,
                 'from' => $currentShard,
                 'to' => $targetShard,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }

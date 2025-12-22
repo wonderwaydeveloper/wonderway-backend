@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\ScheduledPost;
 use App\Models\Post;
+use App\Models\ScheduledPost;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 

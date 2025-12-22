@@ -2,10 +2,10 @@
 
 namespace Tests\Feature;
 
-use Tests\TestCase;
-use App\Models\User;
 use App\Models\Subscription;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 class SubscriptionTest extends TestCase
 {
@@ -14,12 +14,12 @@ class SubscriptionTest extends TestCase
     public function test_user_can_subscribe_to_premium()
     {
         $user = User::factory()->create();
-        
+
         $response = $this->actingAs($user)->postJson('/api/subscription/subscribe', [
             'plan' => 'premium',
-            'payment_method' => 'stripe_token_123'
+            'payment_method' => 'stripe_token_123',
         ]);
-        
+
         $response->assertStatus(201);
     }
 
@@ -29,11 +29,11 @@ class SubscriptionTest extends TestCase
         Subscription::factory()->create([
             'user_id' => $user->id,
             'plan' => 'premium',
-            'status' => 'active'
+            'status' => 'active',
         ]);
-        
+
         $response = $this->actingAs($user)->getJson('/api/subscription/current');
-        
+
         $response->assertStatus(200);
     }
 
@@ -42,11 +42,11 @@ class SubscriptionTest extends TestCase
         $user = User::factory()->create();
         Subscription::factory()->create([
             'user_id' => $user->id,
-            'status' => 'active'
+            'status' => 'active',
         ]);
-        
+
         $response = $this->actingAs($user)->postJson('/api/subscription/cancel');
-        
+
         $response->assertStatus(200);
     }
 }

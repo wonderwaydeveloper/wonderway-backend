@@ -17,7 +17,7 @@ class SubscriptionController extends Controller
     {
         $subscription = $request->user()->activeSubscription;
 
-        if (!$subscription) {
+        if (! $subscription) {
             return response()->json([
                 'plan' => 'basic',
                 'is_active' => false,
@@ -64,7 +64,7 @@ class SubscriptionController extends Controller
     {
         $subscription = $request->user()->activeSubscription;
 
-        if (!$subscription) {
+        if (! $subscription) {
             return response()->json(['message' => 'اشتراک فعالی وجود ندارد'], 404);
         }
 

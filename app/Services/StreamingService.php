@@ -4,9 +4,8 @@ namespace App\Services;
 
 use App\Models\Stream;
 use App\Models\User;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
 
 class StreamingService
@@ -25,7 +24,7 @@ class StreamingService
     public function createStream(User $user, array $data): Stream
     {
         $streamKey = $this->generateStreamKey();
-        
+
         $stream = Stream::create([
             'user_id' => $user->id,
             'title' => $data['title'],
@@ -38,8 +37,8 @@ class StreamingService
             'settings' => [
                 'allow_chat' => $data['allow_chat'] ?? true,
                 'record_stream' => $data['record_stream'] ?? true,
-                'quality_options' => ['480p', '720p', '1080p']
-            ]
+                'quality_options' => ['480p', '720p', '1080p'],
+            ],
         ]);
 
         // Store stream info in Redis for quick access
@@ -49,7 +48,7 @@ class StreamingService
             'title' => $stream->title,
             'status' => 'created',
             'viewers' => 0,
-            'created_at' => now()->toISOString()
+            'created_at' => now()->toISOString(),
         ]);
 
         Log::info('Stream created', ['stream_id' => $stream->id, 'user_id' => $user->id]);
@@ -60,24 +59,24 @@ class StreamingService
     public function startStream(string $streamKey): bool
     {
         $stream = Stream::where('stream_key', $streamKey)->first();
-        
-        if (!$stream) {
+
+        if (! $stream) {
             return false;
         }
 
         $stream->update([
             'status' => 'live',
-            'started_at' => now()
+            'started_at' => now(),
         ]);
 
         // Update Redis
         Redis::hset("stream:{$streamKey}", [
             'status' => 'live',
-            'started_at' => now()->toISOString()
+            'started_at' => now()->toISOString(),
         ]);
 
         // Broadcast stream started event
-        if (!app()->environment('testing')) {
+        if (! app()->environment('testing')) {
             broadcast(new \App\Events\StreamStarted($stream));
         }
 
@@ -92,8 +91,8 @@ class StreamingService
     public function endStream(string $streamKey): bool
     {
         $stream = Stream::where('stream_key', $streamKey)->first();
-        
-        if (!$stream) {
+
+        if (! $stream) {
             return false;
         }
 
@@ -106,18 +105,18 @@ class StreamingService
             'status' => 'ended',
             'ended_at' => now(),
             'duration' => $duration,
-            'peak_viewers' => Redis::hget("stream:{$streamKey}", 'peak_viewers') ?? 0
+            'peak_viewers' => Redis::hget("stream:{$streamKey}", 'peak_viewers') ?? 0,
         ]);
 
         // Update Redis
         Redis::hset("stream:{$streamKey}", [
             'status' => 'ended',
             'ended_at' => now()->toISOString(),
-            'duration' => $duration
+            'duration' => $duration,
         ]);
 
         // Broadcast stream ended event
-        if (!app()->environment('testing')) {
+        if (! app()->environment('testing')) {
             broadcast(new \App\Events\StreamEnded($stream));
         }
 
@@ -134,14 +133,14 @@ class StreamingService
     public function joinStream(string $streamKey, ?User $user = null): array
     {
         $streamData = Redis::hgetall("stream:{$streamKey}");
-        
+
         if (empty($streamData) || $streamData['status'] !== 'live') {
             return ['success' => false, 'message' => 'Stream not found or not live'];
         }
 
         // Increment viewer count
         $viewers = Redis::hincrby("stream:{$streamKey}", 'viewers', 1);
-        
+
         // Update peak viewers
         $peakViewers = Redis::hget("stream:{$streamKey}", 'peak_viewers') ?? 0;
         if ($viewers > $peakViewers) {
@@ -163,8 +162,8 @@ class StreamingService
                 'id' => $streamData['id'],
                 'title' => $streamData['title'],
                 'viewers' => $viewers,
-                'urls' => $urls
-            ]
+                'urls' => $urls,
+            ],
         ];
     }
 
@@ -190,13 +189,13 @@ class StreamingService
                     '480p' => "{$this->hlsUrl}/{$streamKey}_low/index.m3u8",
                     '720p' => "{$this->hlsUrl}/{$streamKey}_mid/index.m3u8",
                     '1080p' => "{$this->hlsUrl}/{$streamKey}_high/index.m3u8",
-                    'source' => "{$this->hlsUrl}/{$streamKey}_src/index.m3u8"
-                ]
+                    'source' => "{$this->hlsUrl}/{$streamKey}_src/index.m3u8",
+                ],
             ],
             'rtmp' => [
                 'publish' => "{$this->rtmpUrl}/{$streamKey}",
-                'play' => "{$this->rtmpUrl}/{$streamKey}"
-            ]
+                'play' => "{$this->rtmpUrl}/{$streamKey}",
+            ],
         ];
     }
 
@@ -204,13 +203,13 @@ class StreamingService
     {
         $streamData = Redis::hgetall("stream:{$streamKey}");
         $viewers = Redis::smembers("stream_viewers:{$streamKey}");
-        
+
         return [
             'viewers' => (int) ($streamData['viewers'] ?? 0),
             'peak_viewers' => (int) ($streamData['peak_viewers'] ?? 0),
             'duration' => $this->calculateDuration($streamData['started_at'] ?? null),
             'status' => $streamData['status'] ?? 'unknown',
-            'viewer_list' => $viewers
+            'viewer_list' => $viewers,
         ];
     }
 
@@ -224,6 +223,7 @@ class StreamingService
 
         return $liveStreams->map(function ($stream) {
             $stats = $this->getStreamStats($stream->stream_key);
+
             return [
                 'id' => $stream->id,
                 'title' => $stream->title,
@@ -232,7 +232,7 @@ class StreamingService
                 'viewers' => $stats['viewers'],
                 'duration' => $stats['duration'],
                 'thumbnail' => $this->getStreamThumbnail($stream->stream_key),
-                'urls' => $this->getStreamUrls($stream->stream_key)
+                'urls' => $this->getStreamUrls($stream->stream_key),
             ];
         })->toArray();
     }
@@ -240,11 +240,11 @@ class StreamingService
     public function authenticateStream(string $streamKey): bool
     {
         $stream = Stream::where('stream_key', $streamKey)->first();
-        
-        if (!$stream) {
+
+        if (! $stream) {
             return false;
         }
-        
+
         if ($stream->status === 'ended') {
             return false;
         }
@@ -257,19 +257,19 @@ class StreamingService
     {
         $thumbnailPath = storage_path("app/public/thumbnails/{$streamKey}.jpg");
         $hlsPath = storage_path("app/streams/{$streamKey}/index.m3u8");
-        
-        if (!file_exists($hlsPath)) {
+
+        if (! file_exists($hlsPath)) {
             return null;
         }
 
         // Use FFmpeg to generate thumbnail
         $command = "ffmpeg -i {$hlsPath} -ss 00:00:01 -vframes 1 -y {$thumbnailPath}";
         exec($command, $output, $returnCode);
-        
+
         if ($returnCode === 0 && file_exists($thumbnailPath)) {
             return asset("storage/thumbnails/{$streamKey}.jpg");
         }
-        
+
         return null;
     }
 
@@ -281,7 +281,7 @@ class StreamingService
     private function notifyFollowers(Stream $stream): void
     {
         $followers = $stream->user->followers;
-        
+
         foreach ($followers as $follower) {
             $follower->notify(new \App\Notifications\StreamStarted($stream));
         }
@@ -290,30 +290,31 @@ class StreamingService
     private function processRecording(Stream $stream): void
     {
         $recordingPath = storage_path("app/recordings/{$stream->stream_key}.flv");
-        
+
         if (file_exists($recordingPath)) {
             // Convert to MP4 for better compatibility
             $mp4Path = storage_path("app/recordings/{$stream->stream_key}.mp4");
             $command = "ffmpeg -i {$recordingPath} -c copy {$mp4Path}";
             exec($command);
-            
+
             // Update stream with recording info
             $stream->update([
                 'recording_path' => "recordings/{$stream->stream_key}.mp4",
-                'recording_size' => filesize($mp4Path)
+                'recording_size' => filesize($mp4Path),
             ]);
         }
     }
 
     private function calculateDuration(?string $startedAt): int
     {
-        if (!$startedAt) {
+        if (! $startedAt) {
             return 0;
         }
-        
+
         try {
             $started = \Carbon\Carbon::parse($startedAt);
             $duration = now()->diffInSeconds($started);
+
             return max(0, $duration); // Ensure non-negative
         } catch (\Exception $e) {
             return 0;
@@ -323,11 +324,11 @@ class StreamingService
     private function getStreamThumbnail(string $streamKey): ?string
     {
         $thumbnailPath = "thumbnails/{$streamKey}.jpg";
-        
+
         if (file_exists(storage_path("app/public/{$thumbnailPath}"))) {
             return asset("storage/{$thumbnailPath}");
         }
-        
+
         return null;
     }
 }

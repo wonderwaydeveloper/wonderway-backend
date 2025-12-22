@@ -30,8 +30,8 @@ class StreamFactory extends Factory
             'settings' => [
                 'allow_chat' => true,
                 'record_stream' => true,
-                'quality_options' => ['480p', '720p', '1080p']
-            ]
+                'quality_options' => ['480p', '720p', '1080p'],
+            ],
         ];
     }
 

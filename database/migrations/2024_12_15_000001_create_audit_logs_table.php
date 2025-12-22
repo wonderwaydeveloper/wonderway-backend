@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     public function up(): void
     {
         Schema::create('audit_logs', function (Blueprint $table) {
@@ -19,10 +18,10 @@ return new class extends Migration
             $table->string('session_id', 100)->nullable()->index();
             $table->enum('risk_level', ['low', 'medium', 'high'])->default('low')->index();
             $table->timestamps();
-            
+
             // Foreign key constraint
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
-            
+
             // Composite indexes for performance
             $table->index(['user_id', 'timestamp']);
             $table->index(['action', 'timestamp']);

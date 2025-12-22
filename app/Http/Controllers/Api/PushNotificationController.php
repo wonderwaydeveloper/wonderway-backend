@@ -21,7 +21,7 @@ class PushNotificationController extends Controller
         $request->validate([
             'token' => 'required|string',
             'device_type' => 'required|in:android,ios,web',
-            'device_name' => 'nullable|string|max:100'
+            'device_name' => 'nullable|string|max:100',
         ]);
 
         try {
@@ -32,18 +32,18 @@ class PushNotificationController extends Controller
                 'device_type' => $request->device_type,
                 'device_name' => $request->device_name,
                 'active' => true,
-                'last_used_at' => now()
+                'last_used_at' => now(),
             ]);
 
             return response()->json([
                 'message' => 'دستگاه با موفقیت ثبت شد',
-                'device_id' => $device->id
+                'device_id' => $device->id,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'خطا در ثبت دستگاه',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -60,7 +60,7 @@ class PushNotificationController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'خطا در غیرفعال کردن دستگاه',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -69,7 +69,7 @@ class PushNotificationController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:100',
-            'body' => 'required|string|max:200'
+            'body' => 'required|string|max:200',
         ]);
 
         try {
@@ -86,19 +86,21 @@ class PushNotificationController extends Controller
                     $request->title,
                     $request->body
                 );
-                if ($result) $successCount++;
+                if ($result) {
+                    $successCount++;
+                }
             }
 
             return response()->json([
                 'message' => 'اعلان تست ارسال شد',
                 'sent_to' => $successCount,
-                'total_devices' => $devices->count()
+                'total_devices' => $devices->count(),
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'خطا در ارسال اعلان تست',
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ], 500);
         }
     }

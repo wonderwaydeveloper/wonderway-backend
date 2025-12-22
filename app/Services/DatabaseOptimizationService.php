@@ -2,15 +2,15 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseOptimizationService
 {
     public function optimizeTimeline($userId, $limit = 20)
     {
         $cacheKey = "timeline:optimized:{$userId}:page:" . request('page', 1);
-        
+
         return Cache::remember($cacheKey, 300, function () use ($userId, $limit) {
             return DB::select("
                 SELECT p.*, u.name, u.username, u.avatar,
@@ -31,7 +31,7 @@ class DatabaseOptimizationService
     public function getPopularPosts($hours = 24, $limit = 50)
     {
         $cacheKey = "posts:popular:{$hours}h";
-        
+
         return Cache::remember($cacheKey, 600, function () use ($hours, $limit) {
             return DB::select("
                 SELECT p.*, u.name, u.username, u.avatar,
@@ -49,7 +49,7 @@ class DatabaseOptimizationService
     public function getUserStats($userId)
     {
         $cacheKey = "user:stats:{$userId}";
-        
+
         return Cache::remember($cacheKey, 3600, function () use ($userId) {
             return DB::selectOne("
                 SELECT 
@@ -66,7 +66,7 @@ class DatabaseOptimizationService
         $patterns = [
             "timeline:optimized:{$userId}:*",
             "user:stats:{$userId}",
-            "posts:user:{$userId}:*"
+            "posts:user:{$userId}:*",
         ];
 
         foreach ($patterns as $pattern) {

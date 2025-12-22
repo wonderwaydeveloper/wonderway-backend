@@ -15,21 +15,21 @@ class OnlineStatusTest extends TestCase
     public function test_user_can_update_online_status()
     {
         Event::fake();
-        
+
         $user = User::factory()->create();
 
         $this->actingAs($user, 'sanctum')
             ->postJson('/api/realtime/status', [
-                'status' => 'online'
+                'status' => 'online',
             ])
             ->assertStatus(200)
             ->assertJson(['status' => 'updated']);
 
         Event::assertDispatched(UserOnlineStatus::class);
-        
+
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
-            'is_online' => true
+            'is_online' => true,
         ]);
     }
 
@@ -39,13 +39,13 @@ class OnlineStatusTest extends TestCase
 
         $this->actingAs($user, 'sanctum')
             ->postJson('/api/realtime/status', [
-                'status' => 'offline'
+                'status' => 'offline',
             ])
             ->assertStatus(200);
 
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
-            'is_online' => false
+            'is_online' => false,
         ]);
     }
 
@@ -53,12 +53,12 @@ class OnlineStatusTest extends TestCase
     {
         $onlineUser = User::factory()->create([
             'is_online' => true,
-            'last_seen_at' => now()
+            'last_seen_at' => now(),
         ]);
-        
+
         $offlineUser = User::factory()->create([
             'is_online' => false,
-            'last_seen_at' => now()->subHours(1)
+            'last_seen_at' => now()->subHours(1),
         ]);
 
         $user = User::factory()->create();
@@ -74,13 +74,13 @@ class OnlineStatusTest extends TestCase
     public function test_online_status_event_structure()
     {
         $user = User::factory()->create();
-        
+
         $event = new UserOnlineStatus($user->id, 'online');
-        
+
         $channels = $event->broadcastOn();
         $this->assertCount(1, $channels);
         $this->assertInstanceOf(\Illuminate\Broadcasting\PresenceChannel::class, $channels[0]);
-        
+
         $broadcastData = $event->broadcastWith();
         $this->assertArrayHasKey('user_id', $broadcastData);
         $this->assertArrayHasKey('status', $broadcastData);
@@ -93,7 +93,7 @@ class OnlineStatusTest extends TestCase
 
         $this->actingAs($user, 'sanctum')
             ->postJson('/api/realtime/status', [
-                'status' => 'invalid_status'
+                'status' => 'invalid_status',
             ])
             ->assertStatus(422);
     }

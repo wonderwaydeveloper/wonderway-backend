@@ -25,7 +25,7 @@ class TwoFactorController extends Controller
 
         $user = $request->user();
 
-        if (!Hash::check($request->password, $user->password)) {
+        if (! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'password' => ['Incorrect password'],
             ]);
@@ -63,7 +63,7 @@ class TwoFactorController extends Controller
 
         $user = $request->user();
 
-        if (!$user->two_factor_secret) {
+        if (! $user->two_factor_secret) {
             return response()->json([
                 'message' => '2FA not initialized',
             ], 400);
@@ -72,7 +72,7 @@ class TwoFactorController extends Controller
         $secret = decrypt($user->two_factor_secret);
         $valid = $this->twoFactorService->verifyCode($secret, $request->code);
 
-        if (!$valid) {
+        if (! $valid) {
             throw ValidationException::withMessages([
                 'code' => ['Invalid verification code'],
             ]);
@@ -99,7 +99,7 @@ class TwoFactorController extends Controller
 
         $user = $request->user();
 
-        if (!Hash::check($request->password, $user->password)) {
+        if (! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'password' => ['Incorrect password'],
             ]);
@@ -120,7 +120,7 @@ class TwoFactorController extends Controller
     {
         $user = $request->user();
 
-        if (!$user->two_factor_enabled) {
+        if (! $user->two_factor_enabled) {
             return response()->json([
                 'message' => '2FA is not enabled',
             ], 400);

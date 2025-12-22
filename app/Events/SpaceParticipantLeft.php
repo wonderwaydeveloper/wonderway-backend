@@ -4,7 +4,6 @@ namespace App\Events;
 
 use App\Models\Space;
 use App\Models\User;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
@@ -13,7 +12,9 @@ use Illuminate\Queue\SerializesModels;
 
 class SpaceParticipantLeft implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     public $space;
     public $user;
@@ -33,7 +34,7 @@ class SpaceParticipantLeft implements ShouldBroadcast
     {
         return [
             'user' => $this->user->only(['id', 'name', 'username', 'avatar']),
-            'participants_count' => $this->space->current_participants
+            'participants_count' => $this->space->current_participants,
         ];
     }
 }

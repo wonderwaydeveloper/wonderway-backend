@@ -18,13 +18,13 @@ class CreatePostCommandHandler
         $postId = new PostId(Str::uuid()->toString());
         $userId = new UserId($command->getUserId());
         $content = new PostContent($command->getContent());
-        
+
         $postEntity = new PostEntity(
             $postId,
             $userId,
             $content,
             Carbon::now(),
-            !$command->isScheduled()
+            ! $command->isScheduled()
         );
 
         // Save to database

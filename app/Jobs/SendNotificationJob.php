@@ -11,7 +11,10 @@ use Illuminate\Queue\SerializesModels;
 
 class SendNotificationJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     public function __construct(
         public int $userId,
@@ -19,7 +22,8 @@ class SendNotificationJob implements ShouldQueue
         public string $type,
         public int $notifiableId,
         public string $notifiableType
-    ) {}
+    ) {
+    }
 
     public function handle(): void
     {

@@ -58,7 +58,7 @@ class MessageTest extends TestCase
     {
         $user = User::factory()->create();
         $otherUser = User::factory()->create();
-        
+
         $conversation = Conversation::create([
             'user_one_id' => $user->id,
             'user_two_id' => $otherUser->id,
@@ -71,8 +71,8 @@ class MessageTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'user_one_id', 'user_two_id']
-                ]
+                    '*' => ['id', 'user_one_id', 'user_two_id'],
+                ],
             ]);
     }
 
@@ -80,7 +80,7 @@ class MessageTest extends TestCase
     {
         $user = User::factory()->create();
         $otherUser = User::factory()->create();
-        
+
         $conversation = Conversation::create([
             'user_one_id' => $user->id,
             'user_two_id' => $otherUser->id,
@@ -99,8 +99,8 @@ class MessageTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'content', 'sender_id']
-                ]
+                    '*' => ['id', 'content', 'sender_id'],
+                ],
             ]);
     }
 
@@ -108,7 +108,7 @@ class MessageTest extends TestCase
     {
         $user = User::factory()->create();
         $sender = User::factory()->create();
-        
+
         $conversation = Conversation::create([
             'user_one_id' => $user->id,
             'user_two_id' => $sender->id,
@@ -132,7 +132,7 @@ class MessageTest extends TestCase
     {
         $user = User::factory()->create();
         $otherUser = User::factory()->create();
-        
+
         $conversation = Conversation::create([
             'user_one_id' => $user->id,
             'user_two_id' => $otherUser->id,
@@ -155,7 +155,7 @@ class MessageTest extends TestCase
     {
         $user = User::factory()->create();
         $sender = User::factory()->create();
-        
+
         $conversation = Conversation::create([
             'user_one_id' => $user->id,
             'user_two_id' => $sender->id,

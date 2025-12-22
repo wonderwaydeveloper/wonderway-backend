@@ -18,7 +18,7 @@ class SpamDetectionTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/posts', [
-                'content' => 'This is spam content with fake offers click here for free money'
+                'content' => 'This is spam content with fake offers click here for free money',
             ]);
 
         $response->assertStatus(422)
@@ -31,7 +31,7 @@ class SpamDetectionTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/posts', [
-                'content' => 'This is a normal post about my day'
+                'content' => 'This is a normal post about my day',
             ]);
 
         $response->assertStatus(201);
@@ -43,7 +43,7 @@ class SpamDetectionTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/posts', [
-                'content' => 'Check out https://site1.com and https://site2.com and https://site3.com'
+                'content' => 'Check out https://site1.com and https://site2.com and https://site3.com',
             ]);
 
         $response->assertStatus(422)
@@ -56,7 +56,7 @@ class SpamDetectionTest extends TestCase
         $user = User::factory()->create();
         $post = Post::factory()->create([
             'user_id' => $user->id,
-            'content' => 'spam fake scam click here'
+            'content' => 'spam fake scam click here',
         ]);
 
         $result = $spamService->checkPost($post);
@@ -72,7 +72,7 @@ class SpamDetectionTest extends TestCase
         $newUser = User::factory()->create();
         $post = Post::factory()->create([
             'user_id' => $newUser->id,
-            'content' => 'Normal content'
+            'content' => 'Normal content',
         ]);
 
         $result = $spamService->checkPost($post);
@@ -89,7 +89,7 @@ class SpamDetectionTest extends TestCase
         $flaggedUser = User::factory()->create();
         $post = Post::factory()->create([
             'user_id' => $flaggedUser->id,
-            'content' => 'Normal content'
+            'content' => 'Normal content',
         ]);
 
         $result = $spamService->checkPost($post);

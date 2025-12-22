@@ -12,12 +12,12 @@ class DatabaseEncryptionService
         'user_profiles' => ['address', 'national_id'],
         'payments' => ['card_number', 'account_number'],
         'messages' => ['content'],
-        'audit_logs' => ['sensitive_data']
+        'audit_logs' => ['sensitive_data'],
     ];
 
     public function encryptField(string $table, string $field, $value): ?string
     {
-        if (!$this->shouldEncrypt($table, $field) || empty($value)) {
+        if (! $this->shouldEncrypt($table, $field) || empty($value)) {
             return $value;
         }
 
@@ -27,15 +27,16 @@ class DatabaseEncryptionService
             Log::error("Encryption failed for {$table}.{$field}", [
                 'error' => $e->getMessage(),
                 'table' => $table,
-                'field' => $field
+                'field' => $field,
             ]);
+
             throw $e;
         }
     }
 
     public function decryptField(string $table, string $field, $value): ?string
     {
-        if (!$this->shouldEncrypt($table, $field) || empty($value)) {
+        if (! $this->shouldEncrypt($table, $field) || empty($value)) {
             return $value;
         }
 
@@ -45,8 +46,9 @@ class DatabaseEncryptionService
             Log::error("Decryption failed for {$table}.{$field}", [
                 'error' => $e->getMessage(),
                 'table' => $table,
-                'field' => $field
+                'field' => $field,
             ]);
+
             return null;
         }
     }
@@ -58,6 +60,7 @@ class DatabaseEncryptionService
                 $data[$field] = $this->encryptField($table, $field, $value);
             }
         }
+
         return $data;
     }
 
@@ -68,12 +71,13 @@ class DatabaseEncryptionService
                 $data[$field] = $this->decryptField($table, $field, $value);
             }
         }
+
         return $data;
     }
 
     private function shouldEncrypt(string $table, string $field): bool
     {
-        return isset($this->encryptedFields[$table]) && 
+        return isset($this->encryptedFields[$table]) &&
                in_array($field, $this->encryptedFields[$table]);
     }
 
@@ -81,7 +85,7 @@ class DatabaseEncryptionService
     {
         // Implementation for key rotation
         Log::info("Starting encryption rotation for {$table}.{$field}");
-        
+
         // This would typically involve:
         // 1. Generate new encryption key
         // 2. Re-encrypt all data with new key

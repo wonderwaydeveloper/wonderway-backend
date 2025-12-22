@@ -27,20 +27,20 @@ class SecurityAlert extends Notification implements ShouldQueue
     {
         $subject = $this->getSubject();
         $message = new MailMessage();
-        
+
         $message->subject($subject)
                 ->greeting('Security Alert')
                 ->line($this->getDescription())
                 ->line('Alert Details:');
-        
+
         foreach ($this->getAlertDetails() as $key => $value) {
             $message->line("• {$key}: {$value}");
         }
-        
+
         $message->line('Please investigate this security event immediately.')
                 ->action('View Security Dashboard', url('/admin/security'))
                 ->line('This is an automated security alert from WonderWay.');
-        
+
         return $message;
     }
 
@@ -52,14 +52,14 @@ class SecurityAlert extends Notification implements ShouldQueue
             'description' => $this->getDescription(),
             'details' => $this->getAlertDetails(),
             'severity' => $this->getSeverity(),
-            'timestamp' => now()->toISOString()
+            'timestamp' => now()->toISOString(),
         ];
     }
 
     private function getSubject(): string
     {
         $type = $this->alertData['type'] ?? 'security_event';
-        
+
         return match($type) {
             'security_threshold_exceeded' => 'Security Threshold Exceeded',
             'brute_force_attack' => 'Brute Force Attack Detected',
@@ -73,18 +73,18 @@ class SecurityAlert extends Notification implements ShouldQueue
     private function getDescription(): string
     {
         $type = $this->alertData['type'] ?? 'security_event';
-        
+
         return match($type) {
-            'security_threshold_exceeded' => 
+            'security_threshold_exceeded' =>
                 "Security threshold exceeded for {$this->alertData['event_type']}. " .
                 "Count: {$this->alertData['count']}, Threshold: {$this->alertData['threshold']}",
-            'brute_force_attack' => 
+            'brute_force_attack' =>
                 'Multiple failed login attempts detected from the same source.',
-            'suspicious_activity' => 
+            'suspicious_activity' =>
                 'Unusual user behavior patterns have been detected.',
-            'data_breach' => 
+            'data_breach' =>
                 'Unauthorized access to sensitive data has been detected.',
-            'system_compromise' => 
+            'system_compromise' =>
                 'Potential system compromise indicators have been found.',
             default => 'A security event requires your attention.'
         };
@@ -93,27 +93,27 @@ class SecurityAlert extends Notification implements ShouldQueue
     private function getAlertDetails(): array
     {
         $details = [];
-        
+
         if (isset($this->alertData['source_ip'])) {
             $details['Source IP'] = $this->alertData['source_ip'];
         }
-        
+
         if (isset($this->alertData['user_id'])) {
             $details['User ID'] = $this->alertData['user_id'];
         }
-        
+
         if (isset($this->alertData['timestamp'])) {
             $details['Timestamp'] = $this->alertData['timestamp'];
         }
-        
+
         if (isset($this->alertData['count'])) {
             $details['Event Count'] = $this->alertData['count'];
         }
-        
+
         if (isset($this->alertData['event_type'])) {
             $details['Event Type'] = $this->alertData['event_type'];
         }
-        
+
         return $details;
     }
 

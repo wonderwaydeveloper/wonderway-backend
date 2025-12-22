@@ -26,7 +26,7 @@ class PhoneAuthController extends Controller
         ]);
 
         $code = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
-        
+
         PhoneVerificationCode::create([
             'phone' => $request->phone,
             'code' => $code,
@@ -53,7 +53,7 @@ class PhoneAuthController extends Controller
             ->latest()
             ->first();
 
-        if (!$verification || $verification->isExpired()) {
+        if (! $verification || $verification->isExpired()) {
             throw ValidationException::withMessages([
                 'code' => ['Invalid or expired verification code'],
             ]);
@@ -84,7 +84,7 @@ class PhoneAuthController extends Controller
             ->latest()
             ->first();
 
-        if (!$verification) {
+        if (! $verification) {
             throw ValidationException::withMessages([
                 'phone' => ['Phone number not verified'],
             ]);
@@ -118,7 +118,7 @@ class PhoneAuthController extends Controller
 
         $user = User::where('phone', $request->phone)->first();
 
-        if (!$user || !Hash::check($request->password, $user->password)) {
+        if (! $user || ! Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
                 'phone' => ['The provided credentials are incorrect.'],
             ]);

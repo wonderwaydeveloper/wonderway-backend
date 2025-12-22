@@ -7,25 +7,25 @@ use Illuminate\Support\Facades\Redis;
 
 class QueueManager
 {
-    const HIGH_PRIORITY = 'high';
-    const DEFAULT_PRIORITY = 'default';
-    const LOW_PRIORITY = 'low';
+    public const HIGH_PRIORITY = 'high';
+    public const DEFAULT_PRIORITY = 'default';
+    public const LOW_PRIORITY = 'low';
 
     public function dispatch($job, string $priority = self::DEFAULT_PRIORITY, int $delay = 0)
     {
         $queue = $this->getQueueName($priority);
-        
+
         if ($delay > 0) {
             return Queue::later(now()->addSeconds($delay), $job, '', $queue);
         }
-        
+
         return Queue::push($job, '', $queue);
     }
 
     public function getQueueStats(): array
     {
         $redis = Redis::connection();
-        
+
         return [
             'high' => $this->getQueueSize('high'),
             'default' => $this->getQueueSize('default'),
@@ -40,6 +40,7 @@ class QueueManager
         try {
             $redis = Redis::connection();
             $queueName = config('queue.connections.redis.queue') . ':' . $priority;
+
             return $redis->llen($queueName);
         } catch (\Exception $e) {
             return 0;
@@ -60,6 +61,7 @@ class QueueManager
         try {
             $redis = Redis::connection();
             $key = 'queue:processed:' . now()->format('Y-m-d');
+
             return (int) $redis->get($key);
         } catch (\Exception $e) {
             return 0;
@@ -99,13 +101,13 @@ class QueueManager
             try {
                 $payload = json_decode($job->payload, true);
                 Queue::push($payload['data']['command'], '', $this->getQueueName(self::DEFAULT_PRIORITY));
-                
+
                 \DB::table('failed_jobs')->where('id', $job->id)->delete();
                 $retried++;
             } catch (\Exception $e) {
                 \Log::error('Failed to retry job', [
                     'job_id' => $job->id,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
                 ]);
             }
         }

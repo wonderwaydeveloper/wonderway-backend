@@ -9,7 +9,8 @@ class SendLikeNotification
 {
     public function __construct(
         private NotificationService $notificationService
-    ) {}
+    ) {
+    }
 
     public function handle(PostLiked $event): void
     {

@@ -4,8 +4,8 @@ namespace Tests\Feature;
 
 use App\Models\Space;
 use App\Models\SpaceParticipant;
-use App\Models\UserList;
 use App\Models\User;
+use App\Models\UserList;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -23,18 +23,18 @@ class SpacesAndListsTest extends TestCase
                 'title' => 'Test Space',
                 'description' => 'A test audio room',
                 'privacy' => 'public',
-                'max_participants' => 20
+                'max_participants' => 20,
             ]);
 
         $response->assertStatus(201)
             ->assertJsonStructure([
-                'id', 'title', 'description', 'status', 'host'
+                'id', 'title', 'description', 'status', 'host',
             ]);
 
         $this->assertDatabaseHas('spaces', [
             'host_id' => $user->id,
             'title' => 'Test Space',
-            'status' => 'live'
+            'status' => 'live',
         ]);
     }
 
@@ -42,9 +42,9 @@ class SpacesAndListsTest extends TestCase
     {
         $host = User::factory()->create();
         $user = User::factory()->create();
-        
+
         $space = Space::factory()->live()->public()->create([
-            'host_id' => $host->id
+            'host_id' => $host->id,
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -55,7 +55,7 @@ class SpacesAndListsTest extends TestCase
         $this->assertDatabaseHas('space_participants', [
             'space_id' => $space->id,
             'user_id' => $user->id,
-            'status' => 'joined'
+            'status' => 'joined',
         ]);
     }
 
@@ -63,11 +63,11 @@ class SpacesAndListsTest extends TestCase
     {
         $user = User::factory()->create();
         $space = Space::factory()->create(['status' => 'live']);
-        
+
         SpaceParticipant::create([
             'space_id' => $space->id,
             'user_id' => $user->id,
-            'status' => 'joined'
+            'status' => 'joined',
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -78,7 +78,7 @@ class SpacesAndListsTest extends TestCase
         $this->assertDatabaseHas('space_participants', [
             'space_id' => $space->id,
             'user_id' => $user->id,
-            'status' => 'left'
+            'status' => 'left',
         ]);
     }
 
@@ -87,7 +87,7 @@ class SpacesAndListsTest extends TestCase
         $host = User::factory()->create();
         $space = Space::factory()->create([
             'host_id' => $host->id,
-            'status' => 'live'
+            'status' => 'live',
         ]);
 
         $response = $this->actingAs($host, 'sanctum')
@@ -97,7 +97,7 @@ class SpacesAndListsTest extends TestCase
 
         $this->assertDatabaseHas('spaces', [
             'id' => $space->id,
-            'status' => 'ended'
+            'status' => 'ended',
         ]);
     }
 
@@ -110,17 +110,17 @@ class SpacesAndListsTest extends TestCase
             ->postJson('/api/lists', [
                 'name' => 'My Test List',
                 'description' => 'A list for testing',
-                'privacy' => 'public'
+                'privacy' => 'public',
             ]);
 
         $response->assertStatus(201)
             ->assertJsonStructure([
-                'id', 'name', 'description', 'privacy'
+                'id', 'name', 'description', 'privacy',
             ]);
 
         $this->assertDatabaseHas('lists', [
             'user_id' => $user->id,
-            'name' => 'My Test List'
+            'name' => 'My Test List',
         ]);
     }
 
@@ -132,14 +132,14 @@ class SpacesAndListsTest extends TestCase
 
         $response = $this->actingAs($owner, 'sanctum')
             ->postJson("/api/lists/{$list->id}/members", [
-                'user_id' => $member->id
+                'user_id' => $member->id,
             ]);
 
         $response->assertStatus(200);
 
         $this->assertDatabaseHas('list_members', [
             'list_id' => $list->id,
-            'user_id' => $member->id
+            'user_id' => $member->id,
         ]);
     }
 
@@ -149,7 +149,7 @@ class SpacesAndListsTest extends TestCase
         $subscriber = User::factory()->create();
         $list = UserList::factory()->create([
             'user_id' => $owner->id,
-            'privacy' => 'public'
+            'privacy' => 'public',
         ]);
 
         $response = $this->actingAs($subscriber, 'sanctum')
@@ -159,7 +159,7 @@ class SpacesAndListsTest extends TestCase
 
         $this->assertDatabaseHas('list_subscribers', [
             'list_id' => $list->id,
-            'user_id' => $subscriber->id
+            'user_id' => $subscriber->id,
         ]);
     }
 
@@ -169,7 +169,7 @@ class SpacesAndListsTest extends TestCase
         $user = User::factory()->create();
         $list = UserList::factory()->create([
             'user_id' => $owner->id,
-            'privacy' => 'private'
+            'privacy' => 'private',
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
@@ -184,7 +184,7 @@ class SpacesAndListsTest extends TestCase
         $member = User::factory()->create();
         $list = UserList::factory()->create([
             'user_id' => $owner->id,
-            'privacy' => 'public'
+            'privacy' => 'public',
         ]);
 
         $list->members()->attach($member->id);
@@ -194,7 +194,7 @@ class SpacesAndListsTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'data' => []
+                'data' => [],
             ]);
     }
 
@@ -209,7 +209,7 @@ class SpacesAndListsTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonStructure([
-                'data' => []
+                'data' => [],
             ]);
     }
 

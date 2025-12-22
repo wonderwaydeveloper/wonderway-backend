@@ -9,14 +9,17 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class GenerateThumbnailJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
     public $tries = 3;
     public $timeout = 120;
@@ -36,8 +39,9 @@ class GenerateThumbnailJob implements ShouldQueue
     public function handle(CDNService $cdnService = null): void
     {
         // Legacy support for existing posts
-        if ($this->post && !$this->imagePath) {
+        if ($this->post && ! $this->imagePath) {
             $this->handleLegacyPost($cdnService);
+
             return;
         }
 
@@ -49,20 +53,20 @@ class GenerateThumbnailJob implements ShouldQueue
 
     private function handleLegacyPost($cdnService)
     {
-        if (!$this->post->image || !$cdnService) {
+        if (! $this->post->image || ! $cdnService) {
             return;
         }
 
         try {
             $thumbnailUrl = $cdnService->generateThumbnail($this->post->image);
-            
+
             $this->post->update([
-                'thumbnail' => $thumbnailUrl
+                'thumbnail' => $thumbnailUrl,
             ]);
         } catch (\Exception $e) {
             Log::error('Legacy thumbnail generation failed', [
                 'post_id' => $this->post->id,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
         }
     }
@@ -70,8 +74,9 @@ class GenerateThumbnailJob implements ShouldQueue
     private function handleNewThumbnail()
     {
         try {
-            if (!Storage::disk('public')->exists($this->imagePath)) {
+            if (! Storage::disk('public')->exists($this->imagePath)) {
                 Log::warning('Image not found for thumbnail generation', ['path' => $this->imagePath]);
+
                 return;
             }
 
@@ -86,26 +91,26 @@ class GenerateThumbnailJob implements ShouldQueue
                 $manager = new ImageManager(new Driver());
                 $thumbnail = $manager->read($imageContent);
                 $thumbnail->cover($dimensions['width'], $dimensions['height']);
-                
+
                 $thumbnailPath = $this->getThumbnailPath($this->imagePath, $size);
                 $thumbnailContent = $thumbnail->toJpeg(80)->toString();
-                
+
                 Storage::disk('public')->put($thumbnailPath, $thumbnailContent);
             }
 
             Log::info('Thumbnails generated successfully', [
                 'original_path' => $this->imagePath,
                 'type' => $this->type,
-                'thumbnails_count' => count($thumbnails)
+                'thumbnails_count' => count($thumbnails),
             ]);
 
         } catch (\Exception $e) {
             Log::error('Thumbnail generation failed', [
                 'path' => $this->imagePath,
                 'type' => $this->type,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
-            
+
             throw $e;
         }
     }
@@ -135,7 +140,7 @@ class GenerateThumbnailJob implements ShouldQueue
         $pathInfo = pathinfo($originalPath);
         $directory = str_replace('/media/', '/media/thumbnails/', $pathInfo['dirname']);
         $filename = $pathInfo['filename'] . "_{$size}." . $pathInfo['extension'];
-        
+
         return $directory . '/' . $filename;
     }
 
@@ -146,7 +151,7 @@ class GenerateThumbnailJob implements ShouldQueue
             'type' => $this->type,
             'post_id' => $this->post?->id,
             'error' => $exception->getMessage(),
-            'attempts' => $this->attempts()
+            'attempts' => $this->attempts(),
         ]);
     }
 }

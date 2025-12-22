@@ -15,16 +15,16 @@ class SetLocale
     public function handle(Request $request, \Closure $next): Response
     {
         $locale = $this->determineLocale($request);
-        
+
         App::setLocale($locale);
         Session::put('locale', $locale);
-        
+
         // Set RTL direction for RTL languages
         $rtlLanguages = ['fa', 'ar', 'he', 'ur'];
         $direction = in_array($locale, $rtlLanguages) ? 'rtl' : 'ltr';
-        
+
         config(['app.direction' => $direction]);
-        
+
         return $next($request);
     }
 
@@ -65,16 +65,16 @@ class SetLocale
 
     private function parseAcceptLanguage(?string $acceptLanguage): ?string
     {
-        if (!$acceptLanguage) {
+        if (! $acceptLanguage) {
             return null;
         }
 
         $languages = explode(',', $acceptLanguage);
-        
+
         foreach ($languages as $language) {
             $locale = trim(explode(';', $language)[0]);
             $locale = substr($locale, 0, 2); // Get language code only
-            
+
             if ($this->isValidLocale($locale)) {
                 return $locale;
             }

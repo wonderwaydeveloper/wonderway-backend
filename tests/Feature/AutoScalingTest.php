@@ -22,7 +22,7 @@ class AutoScalingTest extends TestCase
             ->assertJsonStructure([
                 'metrics',
                 'recommendations',
-                'timestamp'
+                'timestamp',
             ]);
     }
 
@@ -41,7 +41,7 @@ class AutoScalingTest extends TestCase
                 'queue_size',
                 'response_time',
                 'error_rate',
-                'throughput'
+                'throughput',
             ]);
     }
 
@@ -71,14 +71,14 @@ class AutoScalingTest extends TestCase
                 'predicted_cpu',
                 'predicted_memory',
                 'predicted_throughput',
-                'confidence'
+                'confidence',
             ]);
     }
 
     public function test_auto_scaling_service_analyzes_metrics_correctly()
     {
         $service = new AutoScalingService();
-        
+
         $highCpuMetrics = [
             'cpu_usage' => 90,
             'memory_usage' => 50,
@@ -87,7 +87,7 @@ class AutoScalingTest extends TestCase
         ];
 
         $recommendations = $service->analyzeMetrics($highCpuMetrics);
-        
+
         $this->assertNotEmpty($recommendations);
         $this->assertEquals('scale_up', $recommendations[0]['type']);
         $this->assertEquals('High CPU usage', $recommendations[0]['reason']);

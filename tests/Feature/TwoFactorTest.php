@@ -16,7 +16,7 @@ class TwoFactorTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/auth/2fa/enable', [
-                'password' => 'password'
+                'password' => 'password',
             ]);
 
         $response->assertStatus(200)
@@ -28,12 +28,12 @@ class TwoFactorTest extends TestCase
     public function test_user_can_verify_2fa(): void
     {
         $user = User::factory()->create([
-            'two_factor_secret' => encrypt('TESTSECRET123456')
+            'two_factor_secret' => encrypt('TESTSECRET123456'),
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/auth/2fa/verify', [
-                'code' => '123456' // Mock code
+                'code' => '123456', // Mock code
             ]);
 
         // This will fail in real test, but structure is correct
@@ -44,12 +44,12 @@ class TwoFactorTest extends TestCase
     {
         $user = User::factory()->create([
             'two_factor_enabled' => true,
-            'two_factor_secret' => encrypt('TESTSECRET123456')
+            'two_factor_secret' => encrypt('TESTSECRET123456'),
         ]);
 
         $response = $this->actingAs($user, 'sanctum')
             ->postJson('/api/auth/2fa/disable', [
-                'password' => 'password'
+                'password' => 'password',
             ]);
 
         $response->assertStatus(200);
@@ -73,7 +73,7 @@ class TwoFactorTest extends TestCase
     public function test_guest_cannot_access_2fa(): void
     {
         $response = $this->postJson('/api/auth/2fa/enable', [
-            'password' => 'password'
+            'password' => 'password',
         ]);
 
         $response->assertStatus(401);

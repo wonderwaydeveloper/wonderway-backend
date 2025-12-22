@@ -15,7 +15,7 @@ class UnauthorizedActionException extends Exception
     {
         return response()->json([
             'error' => 'Unauthorized action',
-            'message' => $this->getMessage()
+            'message' => $this->getMessage(),
         ], $this->getCode());
     }
 }

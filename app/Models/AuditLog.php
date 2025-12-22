@@ -15,12 +15,12 @@ class AuditLog extends Model
         'data',
         'timestamp',
         'session_id',
-        'risk_level'
+        'risk_level',
     ];
 
     protected $casts = [
         'data' => 'array',
-        'timestamp' => 'datetime'
+        'timestamp' => 'datetime',
     ];
 
     public function user(): BelongsTo

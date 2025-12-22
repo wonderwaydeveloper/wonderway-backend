@@ -4,14 +4,13 @@ namespace App\Services;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class BotDetectionService
 {
     private array $botUserAgents = [
         'bot', 'crawler', 'spider', 'scraper', 'curl', 'wget',
-        'python-requests', 'scrapy', 'selenium', 'phantomjs'
+        'python-requests', 'scrapy', 'selenium', 'phantomjs',
     ];
 
     private array $suspiciousPatterns = [
@@ -19,7 +18,7 @@ class BotDetectionService
         'no_javascript' => true,
         'no_cookies' => true,
         'suspicious_headers' => true,
-        'behavioral_analysis' => true
+        'behavioral_analysis' => true,
     ];
 
     public function detectBot(Request $request): array
@@ -53,7 +52,7 @@ class BotDetectionService
         }
 
         // JavaScript Challenge Result
-        if (!$this->passedJavaScriptChallenge($request)) {
+        if (! $this->passedJavaScriptChallenge($request)) {
             $score += 15;
             $indicators[] = 'no_javascript';
         }
@@ -68,14 +67,14 @@ class BotDetectionService
             'is_bot' => $score >= 70,
             'confidence' => min($score, 100),
             'indicators' => $indicators,
-            'action' => $this->determineAction($score)
+            'action' => $this->determineAction($score),
         ];
     }
 
     public function challengeBot(Request $request): array
     {
         $challengeType = $this->selectChallengeType($request);
-        
+
         switch ($challengeType) {
             case 'javascript':
                 return $this->createJavaScriptChallenge();
@@ -90,10 +89,12 @@ class BotDetectionService
 
     private function isBotUserAgent(?string $userAgent): bool
     {
-        if (!$userAgent) return true;
+        if (! $userAgent) {
+            return true;
+        }
 
         $userAgent = strtolower($userAgent);
-        
+
         foreach ($this->botUserAgents as $botPattern) {
             if (strpos($userAgent, $botPattern) !== false) {
                 return true;
@@ -103,15 +104,16 @@ class BotDetectionService
         // Check for missing common browser indicators
         $browserIndicators = ['mozilla', 'webkit', 'chrome', 'firefox', 'safari'];
         $hasIndicator = false;
-        
+
         foreach ($browserIndicators as $indicator) {
             if (strpos($userAgent, $indicator) !== false) {
                 $hasIndicator = true;
+
                 break;
             }
         }
 
-        return !$hasIndicator;
+        return ! $hasIndicator;
     }
 
     private function hasRapidRequests(string $ip): bool
@@ -119,14 +121,14 @@ class BotDetectionService
         $key = "bot_requests:{$ip}";
         $requests = Cache::get($key, []);
         $now = time();
-        
+
         // Remove old requests (older than 10 seconds)
-        $requests = array_filter($requests, fn($time) => $now - $time < 10);
-        
+        $requests = array_filter($requests, fn ($time) => $now - $time < 10);
+
         // Add current request
         $requests[] = $now;
         Cache::put($key, $requests, now()->addMinutes(10));
-        
+
         // Check if more than 10 requests in 10 seconds
         return count($requests) > 10;
     }
@@ -134,11 +136,11 @@ class BotDetectionService
     private function hasSuspiciousHeaders(Request $request): bool
     {
         $headers = $request->headers->all();
-        
+
         // Missing common headers
         $requiredHeaders = ['accept', 'accept-language', 'accept-encoding'];
         foreach ($requiredHeaders as $header) {
-            if (!isset($headers[$header])) {
+            if (! isset($headers[$header])) {
                 return true;
             }
         }
@@ -167,19 +169,19 @@ class BotDetectionService
         $behavior = Cache::get($key, [
             'pages_visited' => [],
             'time_spent' => [],
-            'interactions' => 0
+            'interactions' => 0,
         ]);
 
         // Update behavior data
         $behavior['pages_visited'][] = $request->path();
         $behavior['time_spent'][] = time();
-        
+
         Cache::put($key, $behavior, now()->addHour());
 
         // Analyze patterns
         $uniquePages = count(array_unique($behavior['pages_visited']));
         $totalRequests = count($behavior['pages_visited']);
-        
+
         // Too many requests to same page
         if ($totalRequests > 20 && $uniquePages < 3) {
             return true;
@@ -187,12 +189,12 @@ class BotDetectionService
 
         // No time spent on pages (too fast)
         if (count($behavior['time_spent']) > 5) {
-            $avgTime = array_sum(array_map(function($i) use ($behavior) {
-                return isset($behavior['time_spent'][$i + 1]) 
-                    ? $behavior['time_spent'][$i + 1] - $behavior['time_spent'][$i] 
+            $avgTime = array_sum(array_map(function ($i) use ($behavior) {
+                return isset($behavior['time_spent'][$i + 1])
+                    ? $behavior['time_spent'][$i + 1] - $behavior['time_spent'][$i]
                     : 0;
             }, range(0, count($behavior['time_spent']) - 2))) / (count($behavior['time_spent']) - 1);
-            
+
             if ($avgTime < 2) { // Less than 2 seconds per page
                 return true;
             }
@@ -203,13 +205,14 @@ class BotDetectionService
 
     private function passedJavaScriptChallenge(Request $request): bool
     {
-        return $request->hasHeader('X-JS-Challenge') && 
+        return $request->hasHeader('X-JS-Challenge') &&
                $request->header('X-JS-Challenge') === 'passed';
     }
 
     private function hasKnownBotFingerprint(Request $request): bool
     {
         $fingerprint = $this->generateFingerprint($request);
+
         return Cache::has("known_bot:{$fingerprint}");
     }
 
@@ -220,15 +223,22 @@ class BotDetectionService
             $request->header('accept', ''),
             $request->header('accept-language', ''),
             $request->header('accept-encoding', ''),
-            $request->ip()
+            $request->ip(),
         ]));
     }
 
     private function determineAction(int $score): string
     {
-        if ($score >= 90) return 'block';
-        if ($score >= 70) return 'challenge';
-        if ($score >= 50) return 'monitor';
+        if ($score >= 90) {
+            return 'block';
+        }
+        if ($score >= 70) {
+            return 'challenge';
+        }
+        if ($score >= 50) {
+            return 'monitor';
+        }
+
         return 'allow';
     }
 
@@ -238,11 +248,11 @@ class BotDetectionService
         if ($this->hasRapidRequests($request->ip())) {
             return 'rate_limit';
         }
-        
-        if (!$this->passedJavaScriptChallenge($request)) {
+
+        if (! $this->passedJavaScriptChallenge($request)) {
             return 'javascript';
         }
-        
+
         return 'captcha';
     }
 
@@ -250,7 +260,7 @@ class BotDetectionService
     {
         $challenge = base64_encode(random_bytes(16));
         $solution = hash('sha256', $challenge);
-        
+
         return [
             'type' => 'javascript',
             'challenge' => $challenge,
@@ -266,7 +276,7 @@ class BotDetectionService
                     },
                     body: JSON.stringify({solution: solution})
                 });
-            "
+            ",
         ];
     }
 
@@ -275,7 +285,7 @@ class BotDetectionService
         return [
             'type' => 'captcha',
             'challenge_url' => '/api/captcha/generate',
-            'verify_url' => '/api/captcha/verify'
+            'verify_url' => '/api/captcha/verify',
         ];
     }
 
@@ -284,7 +294,7 @@ class BotDetectionService
         return [
             'type' => 'rate_limit',
             'message' => 'Please wait before making another request',
-            'retry_after' => 30
+            'retry_after' => 30,
         ];
     }
 
@@ -293,7 +303,7 @@ class BotDetectionService
         return [
             'type' => 'basic',
             'message' => 'Please verify you are human',
-            'action' => 'refresh_page'
+            'action' => 'refresh_page',
         ];
     }
 
@@ -301,11 +311,11 @@ class BotDetectionService
     {
         $fingerprint = $this->generateFingerprint($request);
         Cache::put("known_bot:{$fingerprint}", true, now()->addDays(7));
-        
+
         Log::channel('security')->info('Bot detected and marked', [
             'ip' => $request->ip(),
             'user_agent' => $request->userAgent(),
-            'fingerprint' => $fingerprint
+            'fingerprint' => $fingerprint,
         ]);
     }
 }

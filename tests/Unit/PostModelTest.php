@@ -2,7 +2,6 @@
 
 namespace Tests\Unit;
 
-use App\Models\Hashtag;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -25,7 +24,7 @@ class PostModelTest extends TestCase
     {
         $post = Post::factory()->create();
         $user = User::factory()->create();
-        
+
         $post->likes()->create(['user_id' => $user->id]);
 
         $this->assertCount(1, $post->likes);
@@ -68,7 +67,7 @@ class PostModelTest extends TestCase
     public function test_sync_hashtags_method(): void
     {
         $post = Post::factory()->create([
-            'content' => 'Test post with #laravel and #php hashtags'
+            'content' => 'Test post with #laravel and #php hashtags',
         ]);
 
         $post->syncHashtags();

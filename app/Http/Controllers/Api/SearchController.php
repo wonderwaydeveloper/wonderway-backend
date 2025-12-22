@@ -48,8 +48,8 @@ class SearchController extends Controller
         ]);
 
         $filters = $request->only([
-            'user_id', 'has_media', 'date_from', 'date_to', 
-            'min_likes', 'hashtags', 'sort'
+            'user_id', 'has_media', 'date_from', 'date_to',
+            'min_likes', 'hashtags', 'sort',
         ]);
 
         $results = $this->searchService->searchPosts(
@@ -88,7 +88,7 @@ class SearchController extends Controller
         ]);
 
         $filters = $request->only([
-            'verified', 'min_followers', 'location', 'sort'
+            'verified', 'min_followers', 'location', 'sort',
         ]);
 
         $results = $this->searchService->searchUsers(

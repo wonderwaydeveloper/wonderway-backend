@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class () extends Migration {
     public function up(): void
     {
         Schema::create('streams', function (Blueprint $table) {
@@ -26,7 +25,7 @@ return new class extends Migration
             $table->bigInteger('recording_size')->nullable(); // in bytes
             $table->json('settings')->nullable();
             $table->timestamps();
-            
+
             $table->index(['status', 'created_at']);
             $table->index(['user_id', 'status']);
             $table->index(['category', 'status']);

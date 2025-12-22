@@ -19,7 +19,7 @@ class LiveStreamPolicy
 
     public function view(User $user, LiveStream $stream): bool
     {
-        if (!$stream->is_private) {
+        if (! $stream->is_private) {
             return true;
         }
 

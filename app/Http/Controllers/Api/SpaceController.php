@@ -28,7 +28,7 @@ class SpaceController extends Controller
             'description' => 'nullable|string|max:500',
             'privacy' => 'required|in:public,followers,invited',
             'max_participants' => 'nullable|integer|min:2|max:50',
-            'scheduled_at' => 'nullable|date|after:now'
+            'scheduled_at' => 'nullable|date|after:now',
         ]);
 
         $space = Space::create([
@@ -42,8 +42,8 @@ class SpaceController extends Controller
             'started_at' => $request->scheduled_at ? null : now(),
             'settings' => [
                 'recording_enabled' => $request->boolean('recording_enabled', false),
-                'chat_enabled' => $request->boolean('chat_enabled', true)
-            ]
+                'chat_enabled' => $request->boolean('chat_enabled', true),
+            ],
         ]);
 
         // Add host as participant
@@ -52,7 +52,7 @@ class SpaceController extends Controller
             'user_id' => $request->user()->id,
             'role' => 'host',
             'status' => 'joined',
-            'joined_at' => now()
+            'joined_at' => now(),
         ]);
 
         $space->increment('current_participants');
@@ -65,7 +65,7 @@ class SpaceController extends Controller
     {
         $space->load([
             'host:id,name,username,avatar',
-            'participants.user:id,name,username,avatar'
+            'participants.user:id,name,username,avatar',
         ])->loadCount('activeParticipants');
 
         return response()->json($space);
@@ -75,7 +75,7 @@ class SpaceController extends Controller
     {
         $userId = $request->user()->id;
 
-        if (!$space->canJoin($userId)) {
+        if (! $space->canJoin($userId)) {
             return response()->json(['message' => 'Cannot join this space'], 403);
         }
 
@@ -88,7 +88,7 @@ class SpaceController extends Controller
             [
                 'status' => 'joined',
                 'joined_at' => now(),
-                'left_at' => null
+                'left_at' => null,
             ]
         );
 
@@ -107,13 +107,13 @@ class SpaceController extends Controller
             ->where('user_id', $request->user()->id)
             ->first();
 
-        if (!$participant) {
+        if (! $participant) {
             return response()->json(['message' => 'Not in this space'], 404);
         }
 
         $participant->update([
             'status' => 'left',
-            'left_at' => now()
+            'left_at' => now(),
         ]);
 
         $space->decrement('current_participants');
@@ -128,7 +128,7 @@ class SpaceController extends Controller
         $this->authorize('update', $space);
 
         $request->validate([
-            'role' => 'required|in:co_host,speaker,listener'
+            'role' => 'required|in:co_host,speaker,listener',
         ]);
 
         $participant->update(['role' => $request->role]);
@@ -144,7 +144,7 @@ class SpaceController extends Controller
 
         $space->update([
             'status' => 'ended',
-            'ended_at' => now()
+            'ended_at' => now(),
         ]);
 
         broadcast(new \App\Events\SpaceEnded($space));

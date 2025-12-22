@@ -14,14 +14,15 @@ class NotificationRepository implements NotificationRepositoryInterface
     {
         $notification = Notification::create($data);
         $this->clearUserNotificationCache($notification->user_id);
+
         return $notification;
     }
-    
+
     public function findById(int $id): ?Notification
     {
         return Notification::find($id);
     }
-    
+
     public function getUserNotifications(int $userId): LengthAwarePaginator
     {
         return Notification::where('user_id', $userId)
@@ -30,14 +31,14 @@ class NotificationRepository implements NotificationRepositoryInterface
                     $morphTo->morphWith([
                         'App\Models\Post' => ['user:id,name,username,avatar'],
                         'App\Models\User' => ['id', 'name', 'username', 'avatar'],
-                        'App\Models\Comment' => ['user:id,name,username,avatar', 'post:id,content']
+                        'App\Models\Comment' => ['user:id,name,username,avatar', 'post:id,content'],
                     ]);
-                }
+                },
             ])
             ->latest()
             ->paginate(20);
     }
-    
+
     public function getUnreadNotifications(int $userId): Collection
     {
         return Cache::remember("notifications:unread:{$userId}", 60, function () use ($userId) {
@@ -47,36 +48,39 @@ class NotificationRepository implements NotificationRepositoryInterface
                     'notifiable' => function ($morphTo) {
                         $morphTo->morphWith([
                             'App\Models\Post' => ['user:id,name,username,avatar'],
-                            'App\Models\User' => ['id', 'name', 'username', 'avatar']
+                            'App\Models\User' => ['id', 'name', 'username', 'avatar'],
                         ]);
-                    }
+                    },
                 ])
                 ->latest()
                 ->limit(50)
                 ->get();
         });
     }
-    
+
     public function markAsRead(int $notificationId): bool
     {
         $notification = Notification::find($notificationId);
         if ($notification) {
             $result = $notification->update(['read_at' => now()]);
             $this->clearUserNotificationCache($notification->user_id);
+
             return $result;
         }
+
         return false;
     }
-    
+
     public function markAllAsRead(int $userId): bool
     {
         $result = Notification::where('user_id', $userId)
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
         $this->clearUserNotificationCache($userId);
+
         return $result > 0;
     }
-    
+
     public function getUnreadCount(int $userId): int
     {
         return Cache::remember("notifications:count:{$userId}", 60, function () use ($userId) {
@@ -85,7 +89,7 @@ class NotificationRepository implements NotificationRepositoryInterface
                 ->count();
         });
     }
-    
+
     public function getRecentNotifications(int $userId, int $limit = 10): Collection
     {
         return Notification::where('user_id', $userId)
@@ -93,28 +97,28 @@ class NotificationRepository implements NotificationRepositoryInterface
                 'notifiable' => function ($morphTo) {
                     $morphTo->morphWith([
                         'App\Models\Post' => ['user:id,name,username,avatar'],
-                        'App\Models\User' => ['id', 'name', 'username', 'avatar']
+                        'App\Models\User' => ['id', 'name', 'username', 'avatar'],
                     ]);
-                }
+                },
             ])
             ->latest()
             ->limit($limit)
             ->get();
     }
-    
+
     public function deleteOldNotifications(int $userId, int $daysOld = 30): int
     {
         $deleted = Notification::where('user_id', $userId)
             ->where('created_at', '<', now()->subDays($daysOld))
             ->delete();
-        
+
         if ($deleted > 0) {
             $this->clearUserNotificationCache($userId);
         }
-        
+
         return $deleted;
     }
-    
+
     public function getNotificationsByType(int $userId, string $type): Collection
     {
         return Notification::where('user_id', $userId)
@@ -124,7 +128,7 @@ class NotificationRepository implements NotificationRepositoryInterface
             ->limit(20)
             ->get();
     }
-    
+
     private function clearUserNotificationCache(int $userId): void
     {
         Cache::forget("notifications:unread:{$userId}");

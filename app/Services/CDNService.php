@@ -21,14 +21,14 @@ class CDNService
     {
         // Optimize image
         $optimized = $this->optimizeImage($file);
-        
+
         // Generate unique filename
         $filename = $this->generateFilename($file->getClientOriginalExtension());
         $path = "{$directory}/{$filename}";
-        
+
         // Upload to storage
         Storage::disk($this->disk)->put($path, $optimized);
-        
+
         // Return CDN URL
         return $this->getCDNUrl($path);
     }
@@ -37,9 +37,9 @@ class CDNService
     {
         $filename = $this->generateFilename($file->getClientOriginalExtension());
         $path = "{$directory}/{$filename}";
-        
+
         Storage::disk($this->disk)->putFileAs($directory, $file, $filename);
-        
+
         return $this->getCDNUrl($path);
     }
 
@@ -50,8 +50,9 @@ class CDNService
         } catch (\Exception $e) {
             \Log::error('CDN file deletion failed', [
                 'path' => $path,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return false;
         }
     }
@@ -61,14 +62,14 @@ class CDNService
         if ($this->disk === 's3') {
             return $this->cdnUrl . '/' . $path;
         }
-        
+
         return Storage::disk($this->disk)->url($path);
     }
 
     private function optimizeImage(UploadedFile $file): string
     {
         $image = Image::make($file);
-        
+
         // Resize if too large
         if ($image->width() > 1200 || $image->height() > 1200) {
             $image->resize(1200, 1200, function ($constraint) {
@@ -76,10 +77,10 @@ class CDNService
                 $constraint->upsize();
             });
         }
-        
+
         // Convert to WebP for better compression
         $image->encode('webp', 85);
-        
+
         return $image->stream()->getContents();
     }
 
@@ -93,18 +94,19 @@ class CDNService
         try {
             $originalImage = Storage::disk($this->disk)->get($imagePath);
             $image = Image::make($originalImage);
-            
+
             $thumbnail = $image->fit($width, $height)->encode('webp', 80);
-            
+
             $thumbnailPath = str_replace('.', '_thumb.', $imagePath);
             Storage::disk($this->disk)->put($thumbnailPath, $thumbnail->stream()->getContents());
-            
+
             return $this->getCDNUrl($thumbnailPath);
         } catch (\Exception $e) {
             \Log::error('Thumbnail generation failed', [
                 'path' => $imagePath,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ]);
+
             return $this->getCDNUrl($imagePath);
         }
     }

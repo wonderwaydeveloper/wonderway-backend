@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Mention;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class MentionController extends Controller
@@ -15,11 +15,11 @@ class MentionController extends Controller
     public function searchUsers(Request $request)
     {
         $query = $request->get('q', '');
-        
+
         if (strlen($query) < 2) {
             return response()->json([
                 'success' => true,
-                'data' => []
+                'data' => [],
             ]);
         }
 
@@ -31,7 +31,7 @@ class MentionController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $users
+            'data' => $users,
         ]);
     }
 
@@ -44,7 +44,7 @@ class MentionController extends Controller
             ->with(['mentionable' => function ($morphTo) {
                 $morphTo->morphWith([
                     'App\Models\Post' => ['user:id,username,name,avatar'],
-                    'App\Models\Comment' => ['user:id,username,name,avatar', 'post:id,content']
+                    'App\Models\Comment' => ['user:id,username,name,avatar', 'post:id,content'],
                 ]);
             }])
             ->latest()
@@ -52,7 +52,7 @@ class MentionController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $mentions
+            'data' => $mentions,
         ]);
     }
 
@@ -62,7 +62,7 @@ class MentionController extends Controller
     public function getMentions(Request $request, $type, $id)
     {
         $model = $type === 'post' ? 'App\Models\Post' : 'App\Models\Comment';
-        
+
         $mentions = Mention::where('mentionable_type', $model)
             ->where('mentionable_id', $id)
             ->with('user:id,username,name,avatar')
@@ -70,7 +70,7 @@ class MentionController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $mentions
+            'data' => $mentions,
         ]);
     }
 }

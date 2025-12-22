@@ -22,8 +22,8 @@ class NotificationPreferenceTest extends TestCase
                 'preferences' => [
                     'email' => ['likes', 'comments', 'follows', 'mentions', 'reposts', 'messages'],
                     'push' => ['likes', 'comments', 'follows', 'mentions', 'reposts', 'messages'],
-                    'in_app' => ['likes', 'comments', 'follows', 'mentions', 'reposts', 'messages']
-                ]
+                    'in_app' => ['likes', 'comments', 'follows', 'mentions', 'reposts', 'messages'],
+                ],
             ]);
     }
 
@@ -38,7 +38,7 @@ class NotificationPreferenceTest extends TestCase
                 'follows' => true,
                 'mentions' => true,
                 'reposts' => false,
-                'messages' => true
+                'messages' => true,
             ],
             'push' => [
                 'likes' => true,
@@ -46,7 +46,7 @@ class NotificationPreferenceTest extends TestCase
                 'follows' => true,
                 'mentions' => true,
                 'reposts' => true,
-                'messages' => true
+                'messages' => true,
             ],
             'in_app' => [
                 'likes' => true,
@@ -54,13 +54,13 @@ class NotificationPreferenceTest extends TestCase
                 'follows' => true,
                 'mentions' => true,
                 'reposts' => true,
-                'messages' => true
-            ]
+                'messages' => true,
+            ],
         ];
 
         $response = $this->actingAs($user, 'sanctum')
             ->putJson('/api/notifications/preferences', [
-                'preferences' => $preferences
+                'preferences' => $preferences,
             ]);
 
         $response->assertStatus(200);
@@ -75,14 +75,14 @@ class NotificationPreferenceTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')
             ->putJson('/api/notifications/preferences/email', [
-                'enabled' => false
+                'enabled' => false,
             ]);
 
         $response->assertStatus(200);
 
         $user->refresh();
         $preferences = $user->notification_preferences;
-        
+
         $this->assertFalse($preferences['email']['likes']);
         $this->assertFalse($preferences['email']['comments']);
         $this->assertFalse($preferences['email']['follows']);
@@ -94,14 +94,14 @@ class NotificationPreferenceTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')
             ->putJson('/api/notifications/preferences/push/likes', [
-                'enabled' => false
+                'enabled' => false,
             ]);
 
         $response->assertStatus(200);
 
         $user->refresh();
         $preferences = $user->notification_preferences;
-        
+
         $this->assertFalse($preferences['push']['likes']);
     }
 
@@ -111,7 +111,7 @@ class NotificationPreferenceTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')
             ->putJson('/api/notifications/preferences/invalid_type', [
-                'enabled' => false
+                'enabled' => false,
             ]);
 
         $response->assertStatus(400);
@@ -123,7 +123,7 @@ class NotificationPreferenceTest extends TestCase
 
         $response = $this->actingAs($user, 'sanctum')
             ->putJson('/api/notifications/preferences/email/invalid_category', [
-                'enabled' => false
+                'enabled' => false,
             ]);
 
         $response->assertStatus(400);

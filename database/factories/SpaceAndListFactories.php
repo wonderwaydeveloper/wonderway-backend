@@ -23,8 +23,8 @@ class SpaceFactory extends Factory
             'scheduled_at' => $this->faker->optional()->dateTimeBetween('now', '+1 week'),
             'settings' => [
                 'recording_enabled' => $this->faker->boolean(),
-                'chat_enabled' => $this->faker->boolean(80)
-            ]
+                'chat_enabled' => $this->faker->boolean(80),
+            ],
         ];
     }
 
@@ -32,14 +32,14 @@ class SpaceFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => 'live',
-            'started_at' => now()->subMinutes($this->faker->numberBetween(1, 120))
+            'started_at' => now()->subMinutes($this->faker->numberBetween(1, 120)),
         ]);
     }
 
     public function public(): static
     {
         return $this->state(fn (array $attributes) => [
-            'privacy' => 'public'
+            'privacy' => 'public',
         ]);
     }
 }
@@ -56,14 +56,14 @@ class UserListFactory extends Factory
             'description' => $this->faker->optional()->paragraph(),
             'privacy' => $this->faker->randomElement(['public', 'private']),
             'members_count' => $this->faker->numberBetween(0, 100),
-            'subscribers_count' => $this->faker->numberBetween(0, 500)
+            'subscribers_count' => $this->faker->numberBetween(0, 500),
         ];
     }
 
     public function public(): static
     {
         return $this->state(fn (array $attributes) => [
-            'privacy' => 'public'
+            'privacy' => 'public',
         ]);
     }
 }

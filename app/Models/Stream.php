@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Stream extends Model
 {
@@ -25,7 +25,7 @@ class Stream extends Model
         'peak_viewers',
         'recording_path',
         'recording_size',
-        'settings'
+        'settings',
     ];
 
     protected $casts = [
@@ -33,11 +33,11 @@ class Stream extends Model
         'scheduled_at' => 'datetime',
         'started_at' => 'datetime',
         'ended_at' => 'datetime',
-        'is_private' => 'boolean'
+        'is_private' => 'boolean',
     ];
 
     protected $hidden = [
-        'stream_key'
+        'stream_key',
     ];
 
     public function user(): BelongsTo
@@ -77,7 +77,7 @@ class Stream extends Model
 
     public function getDurationFormattedAttribute(): string
     {
-        if (!$this->duration) {
+        if (! $this->duration) {
             return '00:00:00';
         }
 
@@ -96,11 +96,11 @@ class Stream extends Model
     public function getThumbnailAttribute(): ?string
     {
         $thumbnailPath = "thumbnails/{$this->stream_key}.jpg";
-        
+
         if (file_exists(storage_path("app/public/{$thumbnailPath}"))) {
             return asset("storage/{$thumbnailPath}");
         }
-        
+
         return null;
     }
 }

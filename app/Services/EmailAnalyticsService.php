@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class EmailAnalyticsService
 {
@@ -47,10 +47,10 @@ class EmailAnalyticsService
     public function getEmailMetrics(int $days = 30): array
     {
         $cacheKey = "email_metrics_{$days}_days";
-        
+
         return Cache::remember($cacheKey, 3600, function () use ($days) {
             $startDate = now()->subDays($days);
-            
+
             $metrics = DB::table('email_analytics')
                 ->where('sent_at', '>=', $startDate)
                 ->selectRaw('
@@ -78,7 +78,7 @@ class EmailAnalyticsService
             return [
                 'overview' => $metrics,
                 'by_type' => $byType,
-                'period' => $days . ' days'
+                'period' => $days . ' days',
             ];
         });
     }
@@ -126,6 +126,7 @@ class EmailAnalyticsService
     public function generateClickTrackingUrl(string $emailId, string $originalUrl): string
     {
         $encodedUrl = base64_encode($originalUrl);
+
         return url("/api/email/track/click/{$emailId}?url={$encodedUrl}");
     }
 }

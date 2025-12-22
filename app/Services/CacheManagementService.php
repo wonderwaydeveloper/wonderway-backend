@@ -11,10 +11,10 @@ class CacheManagementService
     {
         // Warm up trending hashtags
         $this->cacheTrendingHashtags();
-        
+
         // Warm up popular posts
         $this->cachePopularPosts();
-        
+
         // Warm up user suggestions
         $this->cacheUserSuggestions();
     }
@@ -28,6 +28,7 @@ class CacheManagementService
             ->get();
 
         Cache::put('hashtags:trending', $trending, 1800); // 30 minutes
+
         return $trending;
     }
 
@@ -42,6 +43,7 @@ class CacheManagementService
             ->get();
 
         Cache::put('posts:popular:24h', $popular, 600); // 10 minutes
+
         return $popular;
     }
 
@@ -55,6 +57,7 @@ class CacheManagementService
             ->get();
 
         Cache::put('users:suggestions', $suggestions, 3600); // 1 hour
+
         return $suggestions;
     }
 
@@ -64,7 +67,7 @@ class CacheManagementService
             "timeline:user:{$userId}:*",
             "user:stats:{$userId}",
             "user:profile:{$userId}",
-            "posts:user:{$userId}:*"
+            "posts:user:{$userId}:*",
         ];
 
         foreach ($keys as $pattern) {
@@ -88,7 +91,7 @@ class CacheManagementService
     {
         if (config('cache.default') === 'redis') {
             $keys = Redis::keys($pattern);
-            if (!empty($keys)) {
+            if (! empty($keys)) {
                 Redis::del($keys);
             }
         }

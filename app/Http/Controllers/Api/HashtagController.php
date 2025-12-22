@@ -47,7 +47,7 @@ class HashtagController extends Controller
     public function show(Hashtag $hashtag)
     {
         $cacheKey = "hashtag:{$hashtag->id}:posts:page:" . request('page', 1);
-        
+
         $posts = Cache::remember($cacheKey, 1800, function () use ($hashtag) {
             return $hashtag->posts()
                 ->published()
@@ -55,7 +55,7 @@ class HashtagController extends Controller
                 ->with([
                     'user:id,name,username,avatar',
                     'hashtags:id,name,slug',
-                    'quotedPost.user:id,name,username,avatar'
+                    'quotedPost.user:id,name,username,avatar',
                 ])
                 ->withCount('likes', 'comments', 'quotes')
                 ->latest('published_at')
@@ -71,8 +71,8 @@ class HashtagController extends Controller
             'trending_info' => [
                 'velocity' => $velocity,
                 'is_trending' => $velocity > 0,
-                'trend_direction' => $velocity > 0 ? 'up' : ($velocity < 0 ? 'down' : 'stable')
-            ]
+                'trend_direction' => $velocity > 0 ? 'up' : ($velocity < 0 ? 'down' : 'stable'),
+            ],
         ]);
     }
 
@@ -89,12 +89,12 @@ class HashtagController extends Controller
     public function search(Request $request)
     {
         $request->validate([
-            'q' => 'required|string|min:1|max:50'
+            'q' => 'required|string|min:1|max:50',
         ]);
 
         $query = $request->input('q');
         $cacheKey = "hashtag:search:" . md5($query);
-        
+
         $hashtags = Cache::remember($cacheKey, 900, function () use ($query) {
             return Hashtag::where('name', 'like', "%{$query}%")
                 ->orWhere('slug', 'like', "%{$query}%")
@@ -119,7 +119,7 @@ class HashtagController extends Controller
     {
         $userId = $request->user()->id;
         $cacheKey = "hashtag:suggestions:{$userId}";
-        
+
         $suggestions = Cache::remember($cacheKey, 3600, function () use ($userId) {
             // Get hashtags from user's recent posts
             $userHashtags = \DB::table('hashtag_post')

@@ -1,10 +1,10 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\PhoneAuthController;
-use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\FollowController;
+use App\Http\Controllers\Api\PhoneAuthController;
+use App\Http\Controllers\Api\PostController;
 use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -19,7 +19,7 @@ Route::get('/health', function () {
         'status' => 'healthy',
         'timestamp' => now()->toISOString(),
         'version' => '3.0.0',
-        'environment' => app()->environment()
+        'environment' => app()->environment(),
     ]);
 });
 

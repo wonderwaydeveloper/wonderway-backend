@@ -13,25 +13,25 @@ class DataEncryptionService
     public function encryptSensitiveData(array $data): array
     {
         $sensitiveFields = ['phone', 'email', 'two_factor_secret', 'backup_codes'];
-        
+
         foreach ($sensitiveFields as $field) {
-            if (isset($data[$field]) && !empty($data[$field])) {
+            if (isset($data[$field]) && ! empty($data[$field])) {
                 $data[$field] = Crypt::encryptString($data[$field]);
             }
         }
-        
+
         return $data;
     }
-    
+
     /**
      * Decrypt sensitive data when retrieving
      */
     public function decryptSensitiveData(array $data): array
     {
         $sensitiveFields = ['phone', 'email', 'two_factor_secret', 'backup_codes'];
-        
+
         foreach ($sensitiveFields as $field) {
-            if (isset($data[$field]) && !empty($data[$field])) {
+            if (isset($data[$field]) && ! empty($data[$field])) {
                 try {
                     $data[$field] = Crypt::decryptString($data[$field]);
                 } catch (\Exception $e) {
@@ -41,10 +41,10 @@ class DataEncryptionService
                 }
             }
         }
-        
+
         return $data;
     }
-    
+
     /**
      * Hash passwords with enhanced security
      */
@@ -54,7 +54,7 @@ class DataEncryptionService
             'rounds' => 12,
         ]);
     }
-    
+
     /**
      * Verify password hash
      */
@@ -62,7 +62,7 @@ class DataEncryptionService
     {
         return Hash::check($password, $hash);
     }
-    
+
     /**
      * Generate secure token
      */
@@ -70,18 +70,18 @@ class DataEncryptionService
     {
         return bin2hex(random_bytes($length));
     }
-    
+
     /**
      * Mask sensitive data for logging
      */
     public function maskSensitiveData(string $data, int $visibleChars = 4): string
     {
         $length = strlen($data);
-        
+
         if ($length <= $visibleChars) {
             return str_repeat('*', $length);
         }
-        
+
         return substr($data, 0, $visibleChars) . str_repeat('*', $length - $visibleChars);
     }
 }

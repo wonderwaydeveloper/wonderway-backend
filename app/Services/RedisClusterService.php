@@ -2,21 +2,21 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 
 class RedisClusterService
 {
     public function getClusterInfo(): array
     {
         try {
-            if (!config('database.redis.options.cluster')) {
+            if (! config('database.redis.options.cluster')) {
                 return ['status' => 'disabled', 'nodes' => []];
             }
 
             $redis = Redis::connection();
             $info = $redis->command('CLUSTER', ['INFO']);
-            
+
             return [
                 'status' => 'active',
                 'cluster_state' => $this->parseClusterInfo($info),
@@ -24,6 +24,7 @@ class RedisClusterService
             ];
         } catch (\Exception $e) {
             Log::error('Redis cluster info failed', ['error' => $e->getMessage()]);
+
             return ['status' => 'error', 'error' => $e->getMessage()];
         }
     }
@@ -33,7 +34,7 @@ class RedisClusterService
         try {
             $redis = Redis::connection();
             $nodes = $redis->command('CLUSTER', ['NODES']);
-            
+
             return $this->parseClusterNodes($nodes);
         } catch (\Exception $e) {
             return [];
@@ -49,7 +50,7 @@ class RedisClusterService
             try {
                 $redis = new \Redis();
                 $redis->connect($node['host'], $node['port'], 1);
-                
+
                 if (isset($node['password'])) {
                     $redis->auth($node['password']);
                 }
@@ -100,8 +101,10 @@ class RedisClusterService
         $parsed = [];
 
         foreach ($lines as $line) {
-            if (empty($line)) continue;
-            
+            if (empty($line)) {
+                continue;
+            }
+
             $parts = explode(' ', $line);
             if (count($parts) >= 8) {
                 $parsed[] = [

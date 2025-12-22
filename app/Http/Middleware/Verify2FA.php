@@ -12,7 +12,7 @@ class Verify2FA
         $user = $request->user();
 
         if ($user && $user->two_factor_enabled) {
-            if (!$request->session()->get('2fa_verified')) {
+            if (! $request->session()->get('2fa_verified')) {
                 return response()->json([
                     'message' => '2FA verification required',
                     'requires_2fa' => true,

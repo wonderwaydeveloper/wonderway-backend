@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Services\AuthService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,7 +26,8 @@ class AuthController extends Controller
 {
     public function __construct(
         private AuthService $authService
-    ) {}
+    ) {
+    }
 
     /**
      * @OA\Post(
@@ -62,7 +63,7 @@ class AuthController extends Controller
     public function register(RegisterRequest $request): JsonResponse
     {
         $result = $this->authService->register($request->validated());
-        
+
         return response()->json($result, 201);
     }
 
@@ -97,12 +98,12 @@ class AuthController extends Controller
     public function login(LoginRequest $request): JsonResponse
     {
         $result = $this->authService->login($request->validated());
-        
+
         // Handle 2FA response
         if (isset($result['status'])) {
             return response()->json($result, $result['status']);
         }
-        
+
         return response()->json($result);
     }
 
@@ -121,7 +122,7 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
         $result = $this->authService->logout($request->user());
-        
+
         return response()->json($result);
     }
 
@@ -141,7 +142,7 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         $user = $this->authService->getCurrentUser($request->user());
-        
+
         return response()->json($user);
     }
 }

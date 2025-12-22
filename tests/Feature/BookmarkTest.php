@@ -58,8 +58,8 @@ class BookmarkTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'post_id', 'user_id']
-                ]
+                    '*' => ['id', 'post_id', 'user_id'],
+                ],
             ]);
     }
 

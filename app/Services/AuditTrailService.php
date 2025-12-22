@@ -25,12 +25,12 @@ class AuditTrailService
         'data.export',
         'data.delete',
         'data.read',
-        'data.write'
+        'data.write',
     ];
 
     public function log(string $action, array $data = [], ?Request $request = null): void
     {
-        if (!in_array($action, $this->auditableActions)) {
+        if (! in_array($action, $this->auditableActions)) {
             return;
         }
 
@@ -43,13 +43,13 @@ class AuditTrailService
                 'data' => $this->sanitizeData($data),
                 'timestamp' => now(),
                 'session_id' => session()->getId(),
-                'risk_level' => $this->calculateRiskLevel($action, $data)
+                'risk_level' => $this->calculateRiskLevel($action, $data),
             ]);
         } catch (\Exception $e) {
             Log::error('Audit logging failed', [
                 'action' => $action,
                 'error' => $e->getMessage(),
-                'data' => $data
+                'data' => $data,
             ]);
         }
     }
@@ -58,7 +58,7 @@ class AuditTrailService
     {
         $this->log("security.{$event}", array_merge($context, [
             'severity' => $this->getSecuritySeverity($event),
-            'requires_investigation' => $this->requiresInvestigation($event)
+            'requires_investigation' => $this->requiresInvestigation($event),
         ]));
 
         if ($this->requiresInvestigation($event)) {
@@ -71,7 +71,7 @@ class AuditTrailService
         $this->log("data.{$operation}", [
             'table' => $table,
             'identifiers' => $identifiers,
-            'sensitive' => $this->isSensitiveTable($table)
+            'sensitive' => $this->isSensitiveTable($table),
         ]);
     }
 
@@ -90,15 +90,15 @@ class AuditTrailService
     public function exportAuditData(array $filters = []): string
     {
         $this->log('data.export', ['filters' => $filters]);
-        
+
         $query = AuditLog::query();
-        
+
         foreach ($filters as $field => $value) {
             $query->where($field, $value);
         }
-        
+
         $data = $query->get();
-        
+
         // Generate CSV or JSON export
         return $this->generateExport($data);
     }
@@ -106,13 +106,13 @@ class AuditTrailService
     private function sanitizeData(array $data): array
     {
         $sensitive = ['password', 'token', 'secret', 'key', 'card_number'];
-        
+
         foreach ($data as $key => $value) {
             if (is_string($key) && $this->containsSensitiveField($key, $sensitive)) {
                 $data[$key] = '[REDACTED]';
             }
         }
-        
+
         return $data;
     }
 
@@ -123,6 +123,7 @@ class AuditTrailService
                 return true;
             }
         }
+
         return false;
     }
 
@@ -130,15 +131,15 @@ class AuditTrailService
     {
         $highRiskActions = ['user.delete', 'admin.user_ban', 'data.export'];
         $mediumRiskActions = ['user.password_change', 'post.delete'];
-        
+
         if (in_array($action, $highRiskActions)) {
             return 'high';
         }
-        
+
         if (in_array($action, $mediumRiskActions)) {
             return 'medium';
         }
-        
+
         return 'low';
     }
 
@@ -146,15 +147,15 @@ class AuditTrailService
     {
         $critical = ['brute_force', 'sql_injection', 'xss_attempt'];
         $high = ['suspicious_login', 'rate_limit_exceeded'];
-        
+
         if (in_array($event, $critical)) {
             return 'critical';
         }
-        
+
         if (in_array($event, $high)) {
             return 'high';
         }
-        
+
         return 'medium';
     }
 

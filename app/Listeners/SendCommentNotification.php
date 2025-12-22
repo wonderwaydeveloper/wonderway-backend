@@ -9,7 +9,8 @@ class SendCommentNotification
 {
     public function __construct(
         private NotificationService $notificationService
-    ) {}
+    ) {
+    }
 
     public function handle(CommentCreated $event): void
     {

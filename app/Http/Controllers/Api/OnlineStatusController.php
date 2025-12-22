@@ -11,17 +11,17 @@ class OnlineStatusController extends Controller
     public function updateStatus(Request $request)
     {
         $request->validate([
-            'status' => 'required|in:online,offline,away'
+            'status' => 'required|in:online,offline,away',
         ]);
 
         $user = $request->user();
-        
+
         // Update user's status
         $isOnline = $request->status === 'online';
-        
+
         $user->update([
             'last_seen_at' => now(),
-            'is_online' => $isOnline
+            'is_online' => $isOnline,
         ]);
 
         // Broadcast status change

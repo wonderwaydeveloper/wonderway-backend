@@ -64,7 +64,7 @@ class UpdateProfileRequest extends FormRequest
         if ($this->has('name')) {
             $this->merge(['name' => trim($this->input('name'))]);
         }
-        
+
         if ($this->has('bio')) {
             $this->merge(['bio' => trim($this->input('bio'))]);
         }

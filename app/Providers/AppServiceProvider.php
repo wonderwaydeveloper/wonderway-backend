@@ -25,7 +25,7 @@ class AppServiceProvider extends ServiceProvider
             if ($app->environment('testing')) {
                 return new \App\Services\NotificationService(null, null);
             }
-            
+
             return new \App\Services\NotificationService(
                 $app->make(\App\Services\EmailService::class),
                 $app->make(\App\Services\PushNotificationService::class)
@@ -44,7 +44,7 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(CommentCreated::class, SendCommentNotification::class);
 
         \App\Models\Post::observe(\App\Observers\PostObserver::class);
-        
+
         // Register Policies
         \Illuminate\Support\Facades\Gate::policy(\App\Models\Moment::class, \App\Policies\MomentPolicy::class);
         \Illuminate\Support\Facades\Gate::policy(\App\Models\LiveStream::class, \App\Policies\LiveStreamPolicy::class);

@@ -15,7 +15,7 @@ class NotificationTest extends TestCase
     {
         $user = User::factory()->create();
         $fromUser = User::factory()->create();
-        
+
         Notification::create([
             'user_id' => $user->id,
             'from_user_id' => $fromUser->id,
@@ -30,8 +30,8 @@ class NotificationTest extends TestCase
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    '*' => ['id', 'type', 'user_id', 'from_user_id']
-                ]
+                    '*' => ['id', 'type', 'user_id', 'from_user_id'],
+                ],
             ]);
     }
 
@@ -39,7 +39,7 @@ class NotificationTest extends TestCase
     {
         $user = User::factory()->create();
         $fromUser = User::factory()->create();
-        
+
         Notification::create([
             'user_id' => $user->id,
             'from_user_id' => $fromUser->id,
@@ -59,7 +59,7 @@ class NotificationTest extends TestCase
     {
         $user = User::factory()->create();
         $fromUser = User::factory()->create();
-        
+
         $notification = Notification::create([
             'user_id' => $user->id,
             'from_user_id' => $fromUser->id,
@@ -80,7 +80,7 @@ class NotificationTest extends TestCase
         $user = User::factory()->create();
         $otherUser = User::factory()->create();
         $fromUser = User::factory()->create();
-        
+
         $notification = Notification::create([
             'user_id' => $otherUser->id,
             'from_user_id' => $fromUser->id,
@@ -99,7 +99,7 @@ class NotificationTest extends TestCase
     {
         $user = User::factory()->create();
         $fromUser = User::factory()->create();
-        
+
         Notification::create([
             'user_id' => $user->id,
             'from_user_id' => $fromUser->id,
@@ -127,7 +127,7 @@ class NotificationTest extends TestCase
     {
         $user = User::factory()->create();
         $fromUser = User::factory()->create();
-        
+
         Notification::create([
             'user_id' => $user->id,
             'from_user_id' => $fromUser->id,

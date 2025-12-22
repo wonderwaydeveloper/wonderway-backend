@@ -15,7 +15,7 @@ class UserRepository implements UserRepositoryInterface
     {
         return User::create($data);
     }
-    
+
     public function findById(int $id): ?User
     {
         return Cache::remember("user:{$id}", 600, function () use ($id) {
@@ -23,12 +23,12 @@ class UserRepository implements UserRepositoryInterface
                 ->find($id);
         });
     }
-    
+
     public function findByEmail(string $email): ?User
     {
         return User::where('email', $email)->first();
     }
-    
+
     public function findByUsername(string $username): ?User
     {
         return Cache::remember("user:username:{$username}", 600, function () use ($username) {
@@ -37,20 +37,22 @@ class UserRepository implements UserRepositoryInterface
                 ->first();
         });
     }
-    
+
     public function update(User $user, array $data): User
     {
         $user->update($data);
         $this->clearUserCache($user);
+
         return $user->fresh();
     }
-    
+
     public function delete(User $user): bool
     {
         $this->clearUserCache($user);
+
         return $user->delete();
     }
-    
+
     public function getUserWithCounts(int $id): ?User
     {
         return Cache::remember("user:counts:{$id}", 300, function () use ($id) {
@@ -59,11 +61,11 @@ class UserRepository implements UserRepositoryInterface
                     $query->published();
                 },
                 'followers',
-                'following'
+                'following',
             ])->find($id);
         });
     }
-    
+
     public function getUserPosts(int $userId): LengthAwarePaginator
     {
         return User::findOrFail($userId)
@@ -71,50 +73,50 @@ class UserRepository implements UserRepositoryInterface
             ->published()
             ->with([
                 'user:id,name,username,avatar',
-                'hashtags:id,name,slug'
+                'hashtags:id,name,slug',
             ])
             ->withCount(['likes', 'comments', 'quotes'])
             ->whereNull('thread_id')
             ->latest('published_at')
             ->paginate(20);
     }
-    
+
     public function searchUsers(string $query, int $limit = 20): Collection
     {
         return User::where(function ($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%")
-                  ->orWhere('username', 'like', "%{$query}%");
-            })
+            $q->where('name', 'like', "%{$query}%")
+              ->orWhere('username', 'like', "%{$query}%");
+        })
             ->active()
             ->select(['id', 'name', 'username', 'avatar', 'bio', 'is_private'])
             ->limit($limit)
             ->get();
     }
-    
+
     public function getFollowers(int $userId, int $limit = 20): Collection
     {
         return User::whereIn('id', function ($query) use ($userId) {
-                $query->select('follower_id')
-                    ->from('follows')
-                    ->where('following_id', $userId);
-            })
+            $query->select('follower_id')
+                ->from('follows')
+                ->where('following_id', $userId);
+        })
             ->select(['id', 'name', 'username', 'avatar', 'bio'])
             ->limit($limit)
             ->get();
     }
-    
+
     public function getFollowing(int $userId, int $limit = 20): Collection
     {
         return User::whereIn('id', function ($query) use ($userId) {
-                $query->select('following_id')
-                    ->from('follows')
-                    ->where('follower_id', $userId);
-            })
+            $query->select('following_id')
+                ->from('follows')
+                ->where('follower_id', $userId);
+        })
             ->select(['id', 'name', 'username', 'avatar', 'bio'])
             ->limit($limit)
             ->get();
     }
-    
+
     public function getSuggestedUsers(int $userId, int $limit = 10): Collection
     {
         $followingIds = DB::table('follows')
@@ -122,7 +124,7 @@ class UserRepository implements UserRepositoryInterface
             ->pluck('following_id')
             ->push($userId)
             ->toArray();
-            
+
         return User::whereNotIn('id', $followingIds)
             ->select(['id', 'name', 'username', 'avatar', 'bio'])
             ->withCount('followers')
@@ -130,7 +132,7 @@ class UserRepository implements UserRepositoryInterface
             ->limit($limit)
             ->get();
     }
-    
+
     public function getMentionableUsers(string $query, int $limit = 10): Collection
     {
         return User::where('username', 'like', "{$query}%")
@@ -138,7 +140,7 @@ class UserRepository implements UserRepositoryInterface
             ->limit($limit)
             ->get();
     }
-    
+
     private function clearUserCache(User $user): void
     {
         Cache::forget("user:{$user->id}");

@@ -10,12 +10,14 @@ use Illuminate\Queue\SerializesModels;
 
 class PostReposted
 {
-    use Dispatchable, SerializesModels;
+    use Dispatchable;
+    use SerializesModels;
 
     public function __construct(
         public Post $post,
         public User $user,
         public Repost $repost,
         public bool $isQuote
-    ) {}
+    ) {
+    }
 }

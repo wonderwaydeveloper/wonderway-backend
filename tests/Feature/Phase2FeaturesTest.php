@@ -31,7 +31,7 @@ class Phase2FeaturesTest extends TestCase
         Redis::flushall();
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function can_create_stream()
     {
         $streamData = [
@@ -57,7 +57,7 @@ class Phase2FeaturesTest extends TestCase
         $this->assertEquals($stream->id, $redisData['id']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function can_start_and_end_stream()
     {
         $stream = Stream::factory()->create(['user_id' => $this->user->id]);
@@ -83,7 +83,7 @@ class Phase2FeaturesTest extends TestCase
         $this->assertGreaterThanOrEqual(0, $stream->duration);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function can_join_and_leave_stream()
     {
         $stream = Stream::factory()->create([
@@ -111,7 +111,7 @@ class Phase2FeaturesTest extends TestCase
         $this->assertTrue($left);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function can_get_stream_stats()
     {
         $stream = Stream::factory()->create([
@@ -134,7 +134,7 @@ class Phase2FeaturesTest extends TestCase
         $this->assertGreaterThanOrEqual(0, $stats['duration']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function can_get_live_streams()
     {
         // Create multiple streams
@@ -152,7 +152,7 @@ class Phase2FeaturesTest extends TestCase
         }
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function streaming_api_endpoints_work()
     {
         $this->actingAs($this->user);
@@ -189,7 +189,7 @@ class Phase2FeaturesTest extends TestCase
                 ]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function locale_middleware_sets_correct_locale()
     {
         // Test Persian locale by making actual request
@@ -215,7 +215,7 @@ class Phase2FeaturesTest extends TestCase
         $this->assertTrue(true); // Middleware is registered and working
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function localization_service_works_correctly()
     {
         // Test supported locales
@@ -238,7 +238,7 @@ class Phase2FeaturesTest extends TestCase
         $this->assertEquals('فارسی', $this->localizationService->getLocaleName('fa', true));
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function translation_files_exist_and_work()
     {
         // Test Persian translations
@@ -260,7 +260,7 @@ class Phase2FeaturesTest extends TestCase
         $this->assertEquals('Post', __('messages.post'));
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function date_and_number_formatting_works()
     {
         $date = new \DateTime('2024-01-15');
@@ -277,7 +277,7 @@ class Phase2FeaturesTest extends TestCase
         $this->assertStringContainsString('١', $arabicNumber); // Arabic numeral
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function time_ago_formatting_works()
     {
         $date = new \DateTime('-2 hours');
@@ -295,7 +295,7 @@ class Phase2FeaturesTest extends TestCase
         $this->assertStringContainsString('hours', $englishTimeAgo);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function locale_config_returns_correct_data()
     {
         $config = $this->localizationService->getLocaleConfig('fa');
@@ -309,7 +309,7 @@ class Phase2FeaturesTest extends TestCase
         $this->assertArrayHasKey('calendar_type', $config);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function can_export_and_validate_translations()
     {
         $translations = $this->localizationService->exportTranslations('fa');
@@ -321,7 +321,7 @@ class Phase2FeaturesTest extends TestCase
         $this->assertIsArray($issues);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function streaming_authentication_works()
     {
         $stream = Stream::factory()->create(['user_id' => $this->user->id]);
@@ -334,7 +334,7 @@ class Phase2FeaturesTest extends TestCase
         $this->assertFalse($authenticated);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function stream_model_attributes_work()
     {
         $stream = Stream::factory()->create([
@@ -347,7 +347,7 @@ class Phase2FeaturesTest extends TestCase
         $this->assertIsArray($stream->stream_urls);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function redis_integration_works()
     {
         $key = 'test_key';
@@ -363,7 +363,7 @@ class Phase2FeaturesTest extends TestCase
         $this->assertEmpty($empty);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function streaming_configuration_is_loaded()
     {
         $this->assertNotNull(config('streaming.rtmp_url'));

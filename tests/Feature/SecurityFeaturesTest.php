@@ -43,7 +43,7 @@ class SecurityFeaturesTest extends TestCase
         }
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function waf_blocks_sql_injection_attempts()
     {
         $response = $this->post('/api/test', [
@@ -54,7 +54,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertEquals(403, $response->status());
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function waf_blocks_xss_attempts()
     {
         $response = $this->post('/api/test', [
@@ -65,7 +65,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertEquals(403, $response->status());
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function brute_force_protection_works()
     {
         // Simulate multiple failed login attempts
@@ -80,7 +80,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertContains($response->status(), [423, 429]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function api_rate_limiting_works()
     {
         $this->actingAs($this->user);
@@ -94,7 +94,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertContains($response->status(), [200, 429]);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function bot_detection_identifies_suspicious_user_agents()
     {
         $request = Request::create('/test', 'GET');
@@ -107,7 +107,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertContains('bot_user_agent', $result['indicators']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function bot_detection_identifies_rapid_requests()
     {
         $request = Request::create('/test', 'GET');
@@ -124,7 +124,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertContains('rapid_requests', $result['indicators']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function secrets_management_stores_and_retrieves_secrets()
     {
         $key = 'test_secret';
@@ -137,7 +137,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertEquals($value, $retrieved);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function secrets_management_handles_expiration()
     {
         $key = 'expiring_secret';
@@ -159,7 +159,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertNull($expired);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function secrets_management_can_rotate_secrets()
     {
         $key = 'rotatable_secret';
@@ -172,7 +172,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertTrue($rotated);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function secrets_management_lists_secrets()
     {
         $this->secretsService->storeSecret('secret1', 'value1', 'api_keys');
@@ -186,7 +186,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertCount(2, $apiKeySecrets);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function audit_trail_logs_security_events()
     {
         $this->actingAs($this->user);
@@ -201,7 +201,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertEquals('user.login', $trail[0]['action']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function audit_trail_logs_data_access()
     {
         $this->actingAs($this->user);
@@ -213,7 +213,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertEquals('data.read', $trail[0]['action']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function security_monitoring_logs_events()
     {
         $this->securityService->logSecurityEvent('authentication.failed', [
@@ -225,7 +225,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertTrue(true); // Placeholder assertion
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function database_encryption_service_works()
     {
         $encryptionService = app(\App\Services\DatabaseEncryptionService::class);
@@ -239,7 +239,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertEquals($plaintext, $decrypted);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function database_encryption_handles_arrays()
     {
         $encryptionService = app(\App\Services\DatabaseEncryptionService::class);
@@ -258,7 +258,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertEquals($data, $decrypted);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function security_headers_are_applied()
     {
         $response = $this->get('/');
@@ -270,7 +270,7 @@ class SecurityFeaturesTest extends TestCase
         $response->assertHeader('Content-Security-Policy');
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function api_key_generation_and_validation_works()
     {
         $apiKey = $this->secretsService->generateApiKey('test_app', ['read', 'write']);
@@ -284,7 +284,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertEquals(['read', 'write'], $keyData['permissions']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function database_credentials_management_works()
     {
         $database = 'test_db';
@@ -300,7 +300,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertEquals($password, $credentials['password']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function secrets_audit_works()
     {
         $this->secretsService->storeSecret('audited_secret', 'value', 'api_keys');
@@ -312,7 +312,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertEquals(2, $auditData[0]['access_count']);
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function expired_secrets_cleanup_works()
     {
         // Create expired secret
@@ -329,7 +329,7 @@ class SecurityFeaturesTest extends TestCase
         $this->assertNotNull($this->secretsService->getSecret('permanent'));
     }
 
-    /** @test */
+    #[\PHPUnit\Framework\Attributes\Test]
     public function security_middleware_chain_works()
     {
         // Test that multiple security middleware work together

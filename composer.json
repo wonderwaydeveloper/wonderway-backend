@@ -1,9 +1,9 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "wonderway/backend",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
-    "keywords": ["laravel", "framework"],
+    "description": "WonderWay - Advanced Social Media Platform Backend",
+    "keywords": ["laravel", "social-media", "api", "real-time", "streaming"],
     "license": "MIT",
     "require": {
         "php": "^8.2",
@@ -43,6 +43,18 @@
         }
     },
     "scripts": {
+        "cs-check": [
+            "vendor/bin/php-cs-fixer fix --dry-run --diff --verbose"
+        ],
+        "cs-fix": [
+            "vendor/bin/php-cs-fixer fix --verbose"
+        ],
+        "test-coverage": [
+            "@php artisan test --coverage"
+        ],
+        "fresh": [
+            "@php artisan migrate:fresh --seed"
+        ],
         "setup": [
             "composer install",
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",

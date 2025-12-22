@@ -20,8 +20,8 @@ class AuthenticationTest extends TestCase
                 'name' => 'Test User',
                 'email' => 'test@example.com',
                 'username' => 'testuser',
-                'password' => 'password123',
-                'password_confirmation' => 'password123',
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
                 'date_of_birth' => '2000-01-01',
             ]);
 
@@ -40,8 +40,8 @@ class AuthenticationTest extends TestCase
                 'name' => 'Test User',
                 'email' => 'test@example.com',
                 'username' => 'testuser2',
-                'password' => 'password123',
-                'password_confirmation' => 'password123',
+                'password' => 'Password123!',
+                'password_confirmation' => 'Password123!',
                 'date_of_birth' => '2000-01-01',
             ]);
 
@@ -52,7 +52,7 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create([
             'email' => 'test@example.com',
-            'password' => bcrypt('password123'),
+            'password' => bcrypt('Password123!'),
         ]);
 
         $response = $this->withoutMiddleware([
@@ -61,7 +61,7 @@ class AuthenticationTest extends TestCase
             ])
             ->postJson('/api/login', [
                 'email' => 'test@example.com',
-                'password' => 'password123',
+                'password' => 'Password123!',
             ]);
 
         $response->assertStatus(200)

@@ -68,9 +68,12 @@ class PostService
      */
     public function createPost(array $data, User $user, ?UploadedFile $image = null, ?UploadedFile $video = null): Post
     {
+        // Sanitize content
+        $sanitizedContent = $this->sanitizeContent($data['content']);
+        
         $postData = [
             'user_id' => $user->id,
-            'content' => $data['content'],
+            'content' => $sanitizedContent,
             'reply_settings' => $data['reply_settings'] ?? 'everyone',
             'quoted_post_id' => $data['quoted_post_id'] ?? null,
             'gif_url' => $data['gif_url'] ?? null,
@@ -314,5 +317,23 @@ class PostService
         if (! $isDraft && ! app()->environment('testing')) {
             dispatch(new ProcessPostJob($post))->onQueue('high');
         }
+    }
+
+    /**
+     * Sanitize content to prevent XSS and other attacks
+     */
+    private function sanitizeContent(string $content): string
+    {
+        // Remove potentially dangerous HTML tags and scripts
+        $content = strip_tags($content);
+        
+        // Remove null bytes
+        $content = str_replace(chr(0), '', $content);
+        
+        // Normalize whitespace
+        $content = preg_replace('/\s+/', ' ', $content);
+        
+        // Trim and return
+        return trim($content);
     }
 }

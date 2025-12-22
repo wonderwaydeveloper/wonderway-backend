@@ -17,7 +17,7 @@ class RegisterRequest extends FormRequest
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users|regex:/^[a-zA-Z0-9_]+$/',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
+            'password' => 'required|string|min:8|confirmed|regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/',
             'date_of_birth' => 'required|date|before:today',
         ];
     }
@@ -35,6 +35,7 @@ class RegisterRequest extends FormRequest
             'email.unique' => 'این ایمیل قبلاً ثبت شده است',
             'password.required' => 'رمز عبور الزامی است',
             'password.min' => 'رمز عبور باید حداقل 8 کاراکتر باشد',
+            'password.regex' => 'رمز عبور باید شامل حروف کوچک، بزرگ، عدد و کاراکتر خاص باشد',
             'password.confirmed' => 'تأیید رمز عبور مطابقت ندارد',
             'date_of_birth.required' => 'تاریخ تولد الزامی است',
             'date_of_birth.date' => 'فرمت تاریخ تولد صحیح نیست',

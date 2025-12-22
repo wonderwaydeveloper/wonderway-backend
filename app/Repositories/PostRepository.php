@@ -120,8 +120,11 @@ class PostRepository implements PostRepositoryInterface
 
     public function searchPosts(string $query, int $limit = 20): Collection
     {
+        // Sanitize search query to prevent SQL injection
+        $sanitizedQuery = $this->sanitizeSearchQuery($query);
+        
         return Post::published()
-            ->where('content', 'LIKE', "%{$query}%")
+            ->where('content', 'LIKE', "%{$sanitizedQuery}%")
             ->with([
                 'user:id,name,username,avatar',
                 'hashtags:id,name,slug',
@@ -148,5 +151,22 @@ class PostRepository implements PostRepositoryInterface
     {
         Cache::forget("timeline:{$userId}:20");
         Cache::forget("following:{$userId}");
+    }
+
+    /**
+     * Sanitize search query to prevent SQL injection
+     */
+    private function sanitizeSearchQuery(string $query): string
+    {
+        // Remove dangerous characters
+        $query = preg_replace('/[%_\\]/', '\\$0', $query);
+        
+        // Remove null bytes
+        $query = str_replace(chr(0), '', $query);
+        
+        // Limit length
+        $query = substr($query, 0, 100);
+        
+        return trim($query);
     }
 }

@@ -47,8 +47,16 @@ class AuthService
     public function login(array $credentials): array
     {
         $user = User::where('email', $credentials['email'])->first();
+        
+        // Use hash_equals to prevent timing attacks
+        $validCredentials = $user && Hash::check($credentials['password'], $user->password);
+        
+        // Always perform hash check even if user doesn't exist to prevent timing attacks
+        if (!$user) {
+            Hash::check('dummy-password', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+        }
 
-        if (! $user || ! Hash::check($credentials['password'], $user->password)) {
+        if (!$validCredentials) {
             throw ValidationException::withMessages([
                 'email' => ['اطلاعات ورود صحیح نیست'],
             ]);

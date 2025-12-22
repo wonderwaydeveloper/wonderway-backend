@@ -101,6 +101,35 @@ Route::middleware(['auth:sanctum', 'spam.detection'])->group(function () {
     Route::get('/drafts', [PostController::class, 'drafts']);
     Route::post('/posts/{post}/publish', [PostController::class, 'publish']);
 
+    // Video routes
+    Route::get('/videos/{video}/status', [App\Http\Controllers\Api\VideoController::class, 'status']);
+
+    // Community Notes routes
+    Route::prefix('posts/{post}/community-notes')->group(function () {
+        Route::get('/', [App\Http\Controllers\Api\CommunityNoteController::class, 'index']);
+        Route::post('/', [App\Http\Controllers\Api\CommunityNoteController::class, 'store']);
+    });
+    Route::post('/community-notes/{note}/vote', [App\Http\Controllers\Api\CommunityNoteController::class, 'vote']);
+    Route::get('/community-notes/pending', [App\Http\Controllers\Api\CommunityNoteController::class, 'pending']);
+
+    // Analytics routes
+    Route::prefix('analytics')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\Api\AnalyticsController::class, 'dashboard']);
+        Route::get('/user', [App\Http\Controllers\Api\AnalyticsController::class, 'userAnalytics']);
+        Route::get('/posts/{post}', [App\Http\Controllers\Api\AnalyticsController::class, 'postAnalytics']);
+    });
+    
+    // Public analytics tracking (no auth required)
+    Route::post('/analytics/track', [App\Http\Controllers\Api\AnalyticsController::class, 'trackEvent'])->withoutMiddleware(['auth:sanctum']);
+
+    // Performance Optimization routes
+    Route::prefix('performance')->group(function () {
+        Route::get('/dashboard', [App\Http\Controllers\Api\PerformanceOptimizationController::class, 'dashboard']);
+        Route::post('/cache/warmup', [App\Http\Controllers\Api\PerformanceOptimizationController::class, 'warmupCache']);
+        Route::delete('/cache/clear', [App\Http\Controllers\Api\PerformanceOptimizationController::class, 'clearCache']);
+        Route::get('/timeline/optimize', [App\Http\Controllers\Api\PerformanceOptimizationController::class, 'optimizeTimeline']);
+    });
+
     Route::post('/threads', [App\Http\Controllers\Api\ThreadController::class, 'create']);
     Route::get('/threads/{post}', [App\Http\Controllers\Api\ThreadController::class, 'show']);
     Route::post('/threads/{post}/add', [App\Http\Controllers\Api\ThreadController::class, 'addToThread']);

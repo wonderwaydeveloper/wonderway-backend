@@ -19,6 +19,7 @@ class Post extends Model
         'user_id',
         'content',
         'image',
+        'video',
         'gif_url',
         'likes_count',
         'comments_count',
@@ -239,5 +240,35 @@ class Post extends Model
             'is_edited' => true,
             'last_edited_at' => now(),
         ]);
+    }
+
+    public function video()
+    {
+        return $this->hasOne(Video::class);
+    }
+
+    public function hasVideo(): bool
+    {
+        return $this->video()->exists();
+    }
+
+    public function hasMedia(): bool
+    {
+        return !empty($this->image) || !empty($this->gif_url) || $this->hasVideo();
+    }
+
+    public function communityNotes()
+    {
+        return $this->hasMany(CommunityNote::class);
+    }
+
+    public function approvedCommunityNotes()
+    {
+        return $this->hasMany(CommunityNote::class)->approved();
+    }
+
+    public function hasCommunityNotes(): bool
+    {
+        return $this->approvedCommunityNotes()->exists();
     }
 }

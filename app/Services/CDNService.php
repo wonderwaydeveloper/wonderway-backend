@@ -44,13 +44,22 @@ class CDNService
         $uploaded = Storage::disk('s3')->put($path, $file->getContent(), 'public');
         
         if ($uploaded) {
-            // Queue video processing
-            dispatch(new \App\Jobs\ProcessVideoJob($path));
+            // Create video record first, then queue processing
+            $video = \App\Models\Video::create([
+                'post_id' => null, // Will be set later if needed
+                'original_path' => $path,
+                'file_size' => $file->getSize(),
+                'encoding_status' => 'pending'
+            ]);
+            
+            // Queue video processing with Video model
+            dispatch(new \App\Jobs\ProcessVideoJob($video));
             
             return [
                 'path' => $path,
                 'url' => $this->getCDNUrl($path, 'videos'),
                 'processing' => true,
+                'video_id' => $video->id,
             ];
         }
         

@@ -64,7 +64,8 @@ class PostController extends Controller
             $post = $this->postService->createPost(
                 $request->validated(),
                 $request->user(),
-                $request->file('image')
+                $request->file('image'),
+                $request->file('video')
             );
 
             return response()->json($post, 201);

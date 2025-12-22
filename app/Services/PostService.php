@@ -31,11 +31,13 @@ class PostService
      * @param PostRepositoryInterface $postRepository Post repository for data access
      * @param SpamDetectionService $spamDetectionService Service for spam detection
      * @param DatabaseOptimizationService $databaseOptimizationService Service for database optimization
+     * @param CacheOptimizationService $cacheService Service for cache optimization
      */
     public function __construct(
         private PostRepositoryInterface $postRepository,
         private SpamDetectionService $spamDetectionService,
-        private DatabaseOptimizationService $databaseOptimizationService
+        private DatabaseOptimizationService $databaseOptimizationService,
+        private CacheOptimizationService $cacheService
     ) {
     }
 
@@ -60,10 +62,11 @@ class PostService
      * @param array $data Post data including content, settings, etc.
      * @param User $user User creating the post
      * @param UploadedFile|null $image Optional image attachment
+     * @param UploadedFile|null $video Optional video attachment
      * @return Post Created post with relations
      * @throws \Exception When post is detected as spam
      */
-    public function createPost(array $data, User $user, ?UploadedFile $image = null): Post
+    public function createPost(array $data, User $user, ?UploadedFile $image = null, ?UploadedFile $video = null): Post
     {
         $postData = [
             'user_id' => $user->id,
@@ -78,12 +81,23 @@ class PostService
             $postData['image'] = $image->store('posts', 'public');
         }
 
+        // Handle video upload
+        if ($video) {
+            // Video will be processed asynchronously
+            $postData['video'] = 'processing';
+        }
+
         // Handle draft status
         $isDraft = $data['is_draft'] ?? false;
         $postData['is_draft'] = $isDraft;
         $postData['published_at'] = $isDraft ? null : now();
 
         $post = $this->postRepository->create($postData);
+
+        // Handle video upload after post creation
+        if ($video) {
+            app(\App\Services\VideoUploadService::class)->uploadVideo($video, $post);
+        }
 
         // Process hashtags and mentions
         $this->processPostContent($post);
@@ -171,11 +185,13 @@ class PostService
      */
     public function getUserTimeline(User $user, int $limit = 20): array
     {
-        $posts = $this->databaseOptimizationService->optimizeTimeline($user->id, $limit);
+        // Use optimized cached timeline
+        $posts = $this->cacheService->getOptimizedTimeline($user->id, $limit);
 
         return [
             'data' => $posts,
             'optimized' => true,
+            'cached' => true,
         ];
     }
 

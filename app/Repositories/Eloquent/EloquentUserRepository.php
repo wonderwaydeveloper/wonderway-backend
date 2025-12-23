@@ -3,15 +3,18 @@
 namespace App\Repositories\Eloquent;
 
 use App\Contracts\Repositories\UserRepositoryInterface;
-use App\DTOs\UserRegistrationDTO;
-use App\DTOs\UserUpdateDTO;
 use App\Models\User;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class EloquentUserRepository implements UserRepositoryInterface
 {
-    public function find(int $id): ?User
+    public function create(array $data): User
+    {
+        return User::create($data);
+    }
+
+    public function findById(int $id): ?User
     {
         return User::find($id);
     }
@@ -26,45 +29,46 @@ class EloquentUserRepository implements UserRepositoryInterface
         return User::where('username', $username)->first();
     }
 
-    public function create(UserRegistrationDTO $dto): User
+    public function update(User $user, array $data): User
     {
-        return User::create($dto->toArray());
-    }
-
-    public function update(int $id, UserUpdateDTO $dto): User
-    {
-        $user = User::findOrFail($id);
-        $user->update($dto->toArray());
+        $user->update($data);
         return $user->fresh();
     }
 
-    public function delete(int $id): bool
+    public function delete(User $user): bool
     {
-        return User::destroy($id) > 0;
+        return $user->delete();
     }
 
-    public function getFollowers(int $userId): LengthAwarePaginator
+    public function getUserWithCounts(int $id): ?User
     {
-        return User::whereHas('following', function ($query) use ($userId) {
-            $query->where('following_id', $userId);
-        })->paginate(20);
+        return User::withCount(['posts', 'followers', 'following'])->find($id);
     }
 
-    public function getFollowing(int $userId): LengthAwarePaginator
+    public function getUserPosts(int $userId): LengthAwarePaginator
     {
-        return User::whereHas('followers', function ($query) use ($userId) {
-            $query->where('follower_id', $userId);
-        })->paginate(20);
+        return User::findOrFail($userId)->posts()->paginate(20);
     }
 
-    public function search(string $query): LengthAwarePaginator
+    public function searchUsers(string $query, int $limit = 20): Collection
     {
         return User::where('name', 'like', "%{$query}%")
             ->orWhere('username', 'like', "%{$query}%")
-            ->paginate(20);
+            ->limit($limit)
+            ->get();
     }
 
-    public function getSuggestions(int $userId, int $limit = 10): Collection
+    public function getFollowers(int $userId, int $limit = 20): Collection
+    {
+        return User::findOrFail($userId)->followers()->limit($limit)->get();
+    }
+
+    public function getFollowing(int $userId, int $limit = 20): Collection
+    {
+        return User::findOrFail($userId)->following()->limit($limit)->get();
+    }
+
+    public function getSuggestedUsers(int $userId, int $limit = 10): Collection
     {
         return User::where('id', '!=', $userId)
             ->whereNotIn('id', function ($query) use ($userId) {
@@ -73,6 +77,13 @@ class EloquentUserRepository implements UserRepositoryInterface
                     ->where('follower_id', $userId);
             })
             ->inRandomOrder()
+            ->limit($limit)
+            ->get();
+    }
+
+    public function getMentionableUsers(string $query, int $limit = 10): Collection
+    {
+        return User::where('username', 'like', "%{$query}%")
             ->limit($limit)
             ->get();
     }

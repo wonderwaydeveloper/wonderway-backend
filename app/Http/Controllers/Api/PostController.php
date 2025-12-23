@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Actions\Post\{UpdatePostAction, DeletePostAction, LikePostAction};
-use App\DTOs\PostDTO;
+use App\DTOs\{PostDTO, QuotePostDTO};
 use App\Http\Controllers\Controller;
 use App\Http\Requests\{StorePostRequest, UpdatePostRequest};
 use App\Http\Resources\PostResource;
@@ -122,11 +122,13 @@ class PostController extends Controller
             'content' => 'required|string|max:280'
         ]);
         
-        $quotePost = $this->postService->createQuotePost(
+        $quoteDTO = QuotePostDTO::fromRequest(
             $request->only(['content']),
-            auth()->user(),
-            $post
+            auth()->user()->id,
+            $post->id
         );
+        
+        $quotePost = $this->postService->createQuotePost($quoteDTO);
         
         return response()->json(new PostResource($quotePost), 201);
     }

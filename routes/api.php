@@ -310,6 +310,9 @@ Route::middleware(['auth:sanctum', 'spam.detection'])->group(function () {
     // Monitoring routes (add admin middleware in production)
     Route::prefix('monitoring')->group(function () {
         Route::get('/dashboard', [App\Http\Controllers\Api\MonitoringController::class, 'dashboard']);
+        Route::get('/metrics', [App\Http\Controllers\Api\MonitoringController::class, 'metrics']);
+        Route::get('/errors', [App\Http\Controllers\Api\MonitoringController::class, 'errors']);
+        Route::get('/performance', [App\Http\Controllers\Api\MonitoringController::class, 'performance']);
         Route::get('/database', [App\Http\Controllers\Api\MonitoringController::class, 'database']);
         Route::get('/cache', [App\Http\Controllers\Api\MonitoringController::class, 'cache']);
         Route::get('/queue', [App\Http\Controllers\Api\MonitoringController::class, 'queue']);

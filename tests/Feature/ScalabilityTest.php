@@ -53,10 +53,9 @@ class ScalabilityTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertJsonStructure([
-            'database',
-            'cache',
-            'queue',
-            'system',
+            'system_metrics',
+            'error_stats',
+            'status'
         ]);
     }
 

@@ -60,5 +60,18 @@ class CleanArchitectureServiceProvider extends ServiceProvider
         $this->app->bind(HashtagRepositoryInterface::class, EloquentHashtagRepository::class);
         $this->app->bind(MessageRepositoryInterface::class, EloquentMessageRepository::class);
         $this->app->bind(FollowRepositoryInterface::class, EloquentFollowRepository::class);
+        
+        // Event Sourcing
+        $this->app->singleton(\App\EventSourcing\EventStore::class);
+        $this->app->singleton(\App\Domain\Post\Services\PostDomainService::class);
+        
+        // Command Bus
+        $this->app->singleton(\App\CQRS\CommandBus::class, function ($app) {
+            $bus = new \App\CQRS\CommandBus($app);
+            $bus->register(\App\CQRS\Commands\CreatePostCommand::class, \App\CQRS\Handlers\CreatePostCommandHandler::class);
+            $bus->register(\App\CQRS\Commands\UpdatePostCommand::class, \App\CQRS\Handlers\UpdatePostCommandHandler::class);
+            $bus->register(\App\CQRS\Commands\LikePostCommand::class, \App\CQRS\Handlers\LikePostCommandHandler::class);
+            return $bus;
+        });
     }
 }

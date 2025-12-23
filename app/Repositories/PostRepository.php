@@ -2,7 +2,7 @@
 
 namespace App\Repositories;
 
-use App\Contracts\PostRepositoryInterface;
+use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Models\Post;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;

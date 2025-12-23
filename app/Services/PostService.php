@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Contracts\Services\PostServiceInterface;
-use App\Contracts\PostRepositoryInterface;
+use App\Contracts\Repositories\PostRepositoryInterface;
 use App\DTOs\PostDTO;
 use App\Events\PostInteraction;
 use App\Events\PostPublished;

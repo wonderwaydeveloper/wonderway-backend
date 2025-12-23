@@ -2,9 +2,9 @@
 
 namespace App\Providers;
 
-use App\Contracts\NotificationRepositoryInterface;
-use App\Contracts\PostRepositoryInterface;
-use App\Contracts\UserRepositoryInterface;
+use App\Contracts\Repositories\NotificationRepositoryInterface;
+use App\Contracts\Repositories\PostRepositoryInterface;
+use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Repositories\NotificationRepository;
 use App\Repositories\PostRepository;
 use App\Repositories\UserRepository;
@@ -24,7 +24,7 @@ class RepositoryServiceProvider extends ServiceProvider
         
         // Service bindings
         $this->app->bind(
-            \App\Contracts\PostServiceInterface::class,
+            \App\Contracts\Services\PostServiceInterface::class,
             \App\Services\PostService::class
         );
     }

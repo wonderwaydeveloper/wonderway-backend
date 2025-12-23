@@ -17,7 +17,7 @@ use App\Services\NotificationService;
 use App\Services\AuthService;
 
 // Repository Interfaces  
-use App\Contracts\PostRepositoryInterface;
+use App\Contracts\Repositories\PostRepositoryInterface;
 use App\Contracts\Repositories\UserRepositoryInterface;
 use App\Contracts\Repositories\CommentRepositoryInterface;
 use App\Contracts\Repositories\HashtagRepositoryInterface;

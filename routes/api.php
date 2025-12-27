@@ -13,7 +13,6 @@ use App\Http\Controllers\Api\FollowController;
 use App\Http\Controllers\Api\FollowRequestController;
 use App\Http\Controllers\Api\GifController;
 use App\Http\Controllers\Api\GraphQLController;
-use App\Http\Controllers\Api\GroupChatController;
 use App\Http\Controllers\Api\HashtagController;
 use App\Http\Controllers\Api\ListController;
 use App\Http\Controllers\Api\MediaController;
@@ -40,8 +39,7 @@ use App\Http\Controllers\Api\ScheduledPostController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\SocialAuthController;
 use App\Http\Controllers\Api\SpaceController;
-use App\Http\Controllers\Api\StoryController;
-use App\Http\Controllers\Api\StreamingController;
+
 use App\Http\Controllers\Api\SubscriptionController;
 use App\Http\Controllers\Api\SuggestionController;
 use App\Http\Controllers\Api\ThreadController;
@@ -176,24 +174,10 @@ Route::middleware(['auth:sanctum', 'spam.detection'])->group(function () {
     Route::get('/posts/{post}/quotes', [PostController::class, 'quotes']);
     Route::get('/my-reposts', [RepostController::class, 'myReposts']);
 
-    Route::get('/stories', [StoryController::class, 'index']);
-    Route::post('/stories', [StoryController::class, 'store']);
-    Route::delete('/stories/{story}', [StoryController::class, 'destroy']);
-    Route::post('/stories/{story}/view', [StoryController::class, 'view']);
 
     Route::get('/posts/{post}/comments', [CommentController::class, 'index']);
     Route::post('/posts/{post}/comments', [CommentController::class, 'store']);
 
-    // Streaming routes
-    Route::prefix('streams')->group(function () {
-        Route::get('/', [StreamingController::class, 'live']);
-        Route::post('/', [StreamingController::class, 'create']);
-        Route::post('/{stream}/start', [StreamingController::class, 'startById']);
-        Route::post('/{stream}/end', [StreamingController::class, 'endById']);
-        Route::post('/{stream}/join', [StreamingController::class, 'joinById']);
-        Route::post('/{stream}/leave', [StreamingController::class, 'leaveById']);
-        Route::get('/{stream}/stats', [StreamingController::class, 'statsById']);
-    });
 
     Route::post('/posts/{post}/comments', [CommentController::class, 'store'])
         ->middleware('check.reply.permission');
@@ -223,15 +207,6 @@ Route::middleware(['auth:sanctum', 'spam.detection'])->group(function () {
     Route::post('/devices/register', [DeviceController::class, 'register']);
     Route::delete('/devices/{token}', [DeviceController::class, 'unregister']);
 
-    Route::prefix('groups')->group(function () {
-        Route::post('/', [GroupChatController::class, 'create']);
-        Route::get('/my-groups', [GroupChatController::class, 'myGroups']);
-        Route::post('/{group}/members', [GroupChatController::class, 'addMember']);
-        Route::delete('/{group}/members/{userId}', [GroupChatController::class, 'removeMember']);
-        Route::put('/{group}', [GroupChatController::class, 'update']);
-        Route::post('/{group}/messages', [GroupChatController::class, 'sendMessage']);
-        Route::get('/{group}/messages', [GroupChatController::class, 'messages']);
-    });
 
     Route::prefix('messages')->group(function () {
         Route::get('/conversations', [MessageController::class, 'conversations']);
@@ -421,19 +396,6 @@ Route::middleware(['auth:sanctum', 'spam.detection'])->group(function () {
         Route::post('/track', [ABTestController::class, 'track']);
     });
 
-    // Streaming Routes (Consolidated)
-    Route::prefix('streaming')->group(function () {
-        Route::post('/create', [StreamingController::class, 'create']);
-        Route::post('/start', [StreamingController::class, 'start']);
-        Route::post('/end', [StreamingController::class, 'end']);
-        Route::get('/live', [StreamingController::class, 'live']);
-        Route::get('/my-streams', [StreamingController::class, 'myStreams']);
-        Route::get('/{stream}', [StreamingController::class, 'show']);
-        Route::delete('/{stream}', [StreamingController::class, 'delete']);
-        Route::post('/{streamKey}/join', [StreamingController::class, 'join']);
-        Route::post('/{streamKey}/leave', [StreamingController::class, 'leave']);
-        Route::get('/{streamKey}/stats', [StreamingController::class, 'stats']);
-    });
 
     // Remove duplicate Live Streaming Routes (use streaming above instead)
 
@@ -484,10 +446,3 @@ Route::middleware(['auth:sanctum', 'spam.detection'])->group(function () {
     });
 });
 
-// Streaming Webhooks (No Auth Required)
-Route::prefix('streaming')->group(function () {
-    Route::post('/auth', [StreamingController::class, 'auth']);
-    Route::post('/publish-done', [StreamingController::class, 'publishDone']);
-    Route::post('/play', [StreamingController::class, 'play']);
-    Route::post('/play-done', [StreamingController::class, 'playDone']);
-});

@@ -238,11 +238,6 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Moment::class);
     }
 
-    public function liveStreams()
-    {
-        return $this->hasMany(LiveStream::class);
-    }
-
     public function conversionMetrics()
     {
         return $this->hasMany(ConversionMetric::class);

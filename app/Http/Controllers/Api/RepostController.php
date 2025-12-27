@@ -20,7 +20,7 @@ class RepostController extends Controller
         if ($existing) {
             $existing->delete();
 
-            return response()->json(['message' => 'بازنشر لغو شد', 'reposted' => false]);
+            return response()->json(['message' => 'Repost cancelled', 'reposted' => false]);
         }
 
         $repost = $user->reposts()->create([
@@ -31,7 +31,7 @@ class RepostController extends Controller
         $isQuote = ! empty($request->quote);
         event(new \App\Events\PostReposted($post, $user, $repost, $isQuote));
 
-        return response()->json(['message' => 'بازنشر شد', 'reposted' => true, 'repost' => $repost], 201);
+        return response()->json(['message' => 'Reposted successfully', 'reposted' => true, 'repost' => $repost], 201);
     }
 
     public function myReposts(Request $request)

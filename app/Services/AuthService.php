@@ -36,7 +36,7 @@ class AuthService implements AuthServiceInterface
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
-            'message' => 'کاربر با موفقیت ثبت شد',
+            'message' => 'User registered successfully',
             'user' => $user,
             'token' => $token,
         ];
@@ -59,14 +59,14 @@ class AuthService implements AuthServiceInterface
 
         if (!$validCredentials) {
             throw new ValidationException([
-                'email' => ['اطلاعات ورود صحیح نیست'],
+                'email' => ['Invalid login credentials'],
             ]);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
-            'message' => 'ورود موفقیتآمیز بود',
+            'message' => 'Login successful',
             'user' => $user,
             'token' => $token,
         ];
@@ -145,7 +145,7 @@ class AuthService implements AuthServiceInterface
         if (! $twoFactorCode) {
             return [
                 'requires_2fa' => true,
-                'message' => 'کد تأیید دو مرحلهای مورد نیاز است',
+                'message' => 'Two-factor authentication code required',
                 'status' => 403,
             ];
         }
@@ -155,14 +155,14 @@ class AuthService implements AuthServiceInterface
 
         if (! $google2fa->verifyKey($secret, $twoFactorCode)) {
             throw new ValidationException([
-                'two_factor_code' => ['کد تأیید دو مرحلهای نامعتبر است'],
+                'two_factor_code' => ['Invalid two-factor authentication code'],
             ]);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
-            'message' => 'ورود موفقیتآمیز بود',
+            'message' => 'Login successful',
             'user' => $user,
             'token' => $token,
         ];

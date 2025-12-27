@@ -23,20 +23,20 @@ class LoginRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'email.required' => 'ایمیل الزامی است',
-            'email.email' => 'فرمت ایمیل صحیح نیست',
-            'password.required' => 'رمز عبور الزامی است',
-            'two_factor_code.size' => 'کد تأیید دو مرحلهای باید 6 رقم باشد',
-            'two_factor_code.regex' => 'کد تأیید دو مرحلهای فقط باید شامل اعداد باشد',
+            'email.required' => 'Email is required',
+            'email.email' => 'Email format is invalid',
+            'password.required' => 'Password is required',
+            'two_factor_code.size' => 'Two-factor code must be 6 digits',
+            'two_factor_code.regex' => 'Two-factor code must contain only numbers',
         ];
     }
 
     public function attributes(): array
     {
         return [
-            'email' => 'ایمیل',
-            'password' => 'رمز عبور',
-            'two_factor_code' => 'کد تأیید دو مرحلهای',
+            'email' => 'Email',
+            'password' => 'Password',
+            'two_factor_code' => 'Two-factor code',
         ];
     }
 

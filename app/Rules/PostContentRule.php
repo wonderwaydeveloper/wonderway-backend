@@ -10,29 +10,29 @@ class PostContentRule implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (strlen(trim($value)) < 1) {
-            $fail('پست نمیتواند خالی باشد.');
+            $fail('Post cannot be empty.');
             return;
         }
 
         if (strlen($value) > 280) {
-            $fail('پست نمیتواند بیشتر از 280 کاراکتر باشد.');
+            $fail('Post cannot exceed 280 characters.');
             return;
         }
 
         $linkCount = preg_match_all('/https?:\/\/[^\s]+/', $value);
         if ($linkCount > 2) {
-            $fail('پست نمیتواند بیشتر از 2 لینک داشته باشد.');
+            $fail('Post cannot contain more than 2 links.');
             return;
         }
 
         $mentionCount = preg_match_all('/@[a-zA-Z0-9_]+/', $value);
         if ($mentionCount > 5) {
-            $fail('پست نمیتواند بیشتر از 5 منشن داشته باشد.');
+            $fail('Post cannot contain more than 5 mentions.');
             return;
         }
 
         if ($this->containsSpamPatterns($value)) {
-            $fail('محتوای پست مشکوک به اسپم است.');
+            $fail('Post content is suspected to be spam.');
             return;
         }
     }

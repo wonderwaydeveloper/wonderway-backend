@@ -64,7 +64,7 @@ class MessageController extends Controller
         $currentUser = $request->user();
 
         if ($currentUser->id === $user->id) {
-            return response()->json(['message' => 'نمیتوانید به خودتان پیام بدهید'], 400);
+            return response()->json(['message' => 'Cannot send message to yourself'], 400);
         }
 
         $conversation = Conversation::between($currentUser->id, $user->id);
@@ -125,12 +125,12 @@ class MessageController extends Controller
     public function markAsRead(Message $message)
     {
         if ($message->sender_id === auth()->id()) {
-            return response()->json(['message' => 'این پیام از شماست'], 400);
+            return response()->json(['message' => 'This message is from you'], 400);
         }
 
         $message->markAsRead();
 
-        return response()->json(['message' => 'علامت خوانده شد']);
+        return response()->json(['message' => 'Marked as read']);
     }
 
     public function unreadCount(Request $request)

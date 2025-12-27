@@ -280,26 +280,26 @@ class NotificationService implements NotificationServiceInterface
     private function getNotificationTitle($type)
     {
         $titles = [
-            'like' => 'پسند جدید',
-            'comment' => 'نظر جدید',
-            'follow' => 'دنبال کننده جدید',
-            'mention' => 'منشن جدید',
-            'repost' => 'بازنشر جدید',
+            'like' => 'New Like',
+            'comment' => 'New Comment',
+            'follow' => 'New Follower',
+            'mention' => 'New Mention',
+            'repost' => 'New Repost',
         ];
 
-        return $titles[$type] ?? 'اعلان جدید';
+        return $titles[$type] ?? 'New Notification';
     }
 
     private function getNotificationMessage($type)
     {
         $messages = [
-            'like' => 'پست شما را پسند کرد',
-            'comment' => 'روی پست شما نظر داد',
-            'follow' => 'شما را دنبال کرد',
-            'mention' => 'شما را منشن کرد',
-            'repost' => 'پست شما را بازنشر کرد',
+            'like' => 'liked your post',
+            'comment' => 'commented on your post',
+            'follow' => 'followed you',
+            'mention' => 'mentioned you',
+            'repost' => 'reposted your post',
         ];
 
-        return $messages[$type] ?? 'اعلان جدید';
+        return $messages[$type] ?? 'New notification';
     }
 }

@@ -23,7 +23,7 @@ class WelcomeEmail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'خوش آمدید به WonderWay',
+            subject: 'Welcome to WonderWay',
         );
     }
 

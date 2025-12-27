@@ -35,13 +35,13 @@ class NotificationController extends Controller
     {
         $this->authorize('update', $notification);
         $this->markAsReadAction->execute($notification);
-        return response()->json(['message' => 'علامت خوانده شد']);
+        return response()->json(['message' => 'Marked as read']);
     }
 
     public function markAllAsRead(Request $request): JsonResponse
     {
         $this->notificationService->markAllAsRead($request->user()->id);
-        return response()->json(['message' => 'همه علامت خوانده شد']);
+        return response()->json(['message' => 'All marked as read']);
     }
 
     public function unread(Request $request): JsonResponse
